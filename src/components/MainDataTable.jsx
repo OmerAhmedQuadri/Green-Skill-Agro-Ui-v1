@@ -11,38 +11,39 @@ import {
   Lock,
   Filter
 } from 'lucide-react';
-import { FLEET_DATA, INVENTORY_STOCK, PURCHASE_ORDERS, STORE_CREDIT_DATA } from '../data/mockData';
+import { useManagerContext } from '../context/ManagerContext';
 
 export const MainDataTable = ({ activeTab, onOverrideCredit, onViewPoDetails, searchQuery }) => {
+  const { fleet, inventory, orders, stores } = useManagerContext();
   const [tableSearch, setTableSearch] = useState('');
   const query = (searchQuery || tableSearch).toLowerCase();
 
-  const filteredFleet = FLEET_DATA.filter(item => 
-    item.vehicleId.toLowerCase().includes(query) ||
-    item.registration.toLowerCase().includes(query) ||
-    item.assignedSeller.toLowerCase().includes(query) ||
-    item.route.toLowerCase().includes(query)
+  const filteredFleet = (fleet || []).filter(item => 
+    item.vehicleId?.toLowerCase().includes(query) ||
+    item.registration?.toLowerCase().includes(query) ||
+    item.assignedSeller?.toLowerCase().includes(query) ||
+    item.route?.toLowerCase().includes(query)
   );
 
-  const filteredInventory = INVENTORY_STOCK.filter(item => 
-    item.sku.toLowerCase().includes(query) ||
-    item.productName.toLowerCase().includes(query) ||
-    item.category.toLowerCase().includes(query) ||
-    item.lotNumber.toLowerCase().includes(query)
+  const filteredInventory = (inventory || []).filter(item => 
+    item.sku?.toLowerCase().includes(query) ||
+    item.productName?.toLowerCase().includes(query) ||
+    item.category?.toLowerCase().includes(query) ||
+    item.lotNumber?.toLowerCase().includes(query)
   );
 
-  const filteredOrders = PURCHASE_ORDERS.filter(item => 
-    item.poNumber.toLowerCase().includes(query) ||
-    item.vendorName.toLowerCase().includes(query) ||
-    item.itemsSummary.toLowerCase().includes(query) ||
-    item.stateName.toLowerCase().includes(query)
+  const filteredOrders = (orders || []).filter(item => 
+    item.poNumber?.toLowerCase().includes(query) ||
+    item.vendorName?.toLowerCase().includes(query) ||
+    item.itemsSummary?.toLowerCase().includes(query) ||
+    item.stateName?.toLowerCase().includes(query)
   );
 
-  const filteredStores = STORE_CREDIT_DATA.filter(item => 
-    item.storeId.toLowerCase().includes(query) ||
-    item.storeName.toLowerCase().includes(query) ||
-    item.ownerName.toLowerCase().includes(query) ||
-    item.assignedSeller.toLowerCase().includes(query)
+  const filteredStores = (stores || []).filter(item => 
+    item.storeId?.toLowerCase().includes(query) ||
+    item.storeName?.toLowerCase().includes(query) ||
+    item.ownerName?.toLowerCase().includes(query) ||
+    item.assignedSeller?.toLowerCase().includes(query)
   );
 
   return (
@@ -133,16 +134,16 @@ export const MainDataTable = ({ activeTab, onOverrideCredit, onViewPoDetails, se
                     <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>{row.distanceKm} km &bull; {row.activeHours}</div>
                   </td>
                   <td>
-                    <strong style={{ color: 'var(--color-forest-dark)' }}>SAR {row.stockValue.toLocaleString()}</strong>
+                    <strong style={{ color: 'var(--color-forest-dark)' }}>SAR {row.stockValue?.toLocaleString()}</strong>
                   </td>
                   <td>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <strong>SAR {row.cashInHand.toLocaleString()}</strong>
+                      <strong>SAR {row.cashInHand?.toLocaleString()}</strong>
                       {row.cashBreach && <span className="badge badge-danger">Breach</span>}
                     </div>
                   </td>
                   <td>
-                    <strong style={{ color: '#166534' }}>SAR {row.todaySales.toLocaleString()}</strong>
+                    <strong style={{ color: '#166534' }}>SAR {row.todaySales?.toLocaleString()}</strong>
                   </td>
                   <td>
                     {row.auditDueFlag ? (
@@ -244,7 +245,7 @@ export const MainDataTable = ({ activeTab, onOverrideCredit, onViewPoDetails, se
                   </td>
                   <td>{row.itemsSummary}</td>
                   <td>
-                    <strong style={{ color: 'var(--color-forest-dark)' }}>SAR {row.totalValue.toLocaleString()}</strong>
+                    <strong style={{ color: 'var(--color-forest-dark)' }}>SAR {row.totalValue?.toLocaleString()}</strong>
                   </td>
                   <td>
                     <span className={`badge ${row.stateIndex === 6 ? 'badge-info' : row.stateIndex === 1 ? 'badge-warning' : 'badge-success'}`}>
@@ -295,8 +296,8 @@ export const MainDataTable = ({ activeTab, onOverrideCredit, onViewPoDetails, se
                   <td>{row.creditCycle}</td>
                   <td>
                     <strong style={{ color: row.blocked ? '#991b1b' : 'var(--text-main)' }}>
-                      SAR {row.outstandingBalance.toLocaleString()}
-                    </strong> / SAR {row.creditLimit.toLocaleString()}
+                      SAR {row.outstandingBalance?.toLocaleString()}
+                    </strong> / SAR {row.creditLimit?.toLocaleString()}
                   </td>
                   <td>
                     {row.daysOverdue > 0 ? (

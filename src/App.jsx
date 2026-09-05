@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useManagerContext } from './context/ManagerContext';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { MetricsOverview } from './components/MetricsOverview';
@@ -9,6 +10,12 @@ import { WriteOffModal } from './components/Modals/WriteOffModal';
 import { DispatchModal } from './components/Modals/DispatchModal';
 import { OverrideModal } from './components/Modals/OverrideModal';
 import { PhotoViewerModal } from './components/Modals/PhotoViewerModal';
+
+import { ProductSetupModal } from './components/Modals/ProductSetupModal';
+import { CreatePoModal } from './components/Modals/CreatePoModal';
+import { SkuConversionModal } from './components/Modals/SkuConversionModal';
+import { VehicleAuditModal } from './components/Modals/VehicleAuditModal';
+import { VehicleLoadoutModal } from './components/Modals/VehicleLoadoutModal';
 
 import { 
   CheckCircle2, 
@@ -21,11 +28,29 @@ import {
   Lock, 
   Plus, 
   FileSpreadsheet,
-  Users
+  Users,
+  PackagePlus,
+  FilePlus,
+  RefreshCw as RepeatIcon,
+  ClipboardCheck,
+  Truck
 } from 'lucide-react';
-import { METRICS } from './data/mockData';
 
 export function App() {
+  const { 
+    refreshData, 
+    approveWriteOff, 
+    releaseDispatch, 
+    overrideCredit, 
+    verifyCash, 
+    approveStore, 
+    createProduct, 
+    createPurchaseOrder, 
+    convertSku, 
+    submitVehicleAudit, 
+    issueVehicleLoadout 
+  } = useManagerContext();
+
   const [activeTab, setActiveTab] = useState('overview');
   const [searchQuery, setSearchQuery] = useState('');
   const [toastMessage, setToastMessage] = useState(null);
@@ -36,33 +61,81 @@ export function App() {
   const [dispatchModal, setDispatchModal] = useState({ open: false, item: null });
   const [overrideModal, setOverrideModal] = useState({ open: false, item: null });
 
+  // Workflow Modal states
+  const [productSetupModal, setProductSetupModal] = useState(false);
+  const [createPoModal, setCreatePoModal] = useState(false);
+  const [skuConversionModal, setSkuConversionModal] = useState(false);
+  const [vehicleAuditModal, setVehicleAuditModal] = useState(false);
+  const [vehicleLoadoutModal, setVehicleLoadoutModal] = useState(false);
+
   const showToast = (msg) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  // Actions
-  const handleApproveWriteOff = (item, notes) => {
+  // Approval Actions (Connected to Context & API Service Layer)
+  const handleApproveWriteOff = async (item, notes) => {
     setWriteOffModal({ open: false, item: null });
+    await approveWriteOff(item, notes);
     showToast(`Approved Stock Write-off ${item.id} (${item.quantity}). Write-off ledger updated.`);
   };
 
-  const handleProcessDispatch = (item, transporter, driver) => {
+  const handleProcessDispatch = async (item, transporter, driver) => {
     setDispatchModal({ open: false, item: null });
+    await releaseDispatch(item, transporter, driver);
     showToast(`Dispatch ${item.id} released via ${transporter} (Driver: ${driver}). Order status set to In-Transit.`);
   };
 
-  const handleConfirmOverride = (item, reason) => {
+  const handleConfirmOverride = async (item, reason) => {
     setOverrideModal({ open: false, item: null });
+    await overrideCredit(item, reason);
     showToast(`Manager credit block override granted for ${item.storeName}. Audit log recorded.`);
   };
 
-  const handleVerifyCash = (item) => {
+  const handleVerifyCash = async (item) => {
+    await verifyCash(item);
     showToast(`Cash Handover ${item.id} (${item.declaredAmount.toLocaleString()} SAR) verified & released.`);
   };
 
-  const handleApproveStore = (item) => {
+  const handleApproveStore = async (item) => {
+    await approveStore(item);
     showToast(`Store ${item.storeName} approved for field sales under ${item.proposedCycle}.`);
+  };
+
+  // Workflow Handlers (Connected to Context & API Service Layer)
+  const handleCreateProduct = async (data) => {
+    setProductSetupModal(false);
+    await createProduct(data);
+    showToast(`Workflow A: Created Product "${data.productName}" -> SKU ${data.sku} generated.`);
+  };
+
+  const handleCreatePo = async (data) => {
+    setCreatePoModal(false);
+    await createPurchaseOrder(data);
+    showToast(`Workflow C/O: Purchase Order ${data.poNumber} saved as Draft and sent to Admin for approval.`);
+  };
+
+  const handleSkuConversion = async (data) => {
+    setSkuConversionModal(false);
+    await convertSku(data);
+    showToast(`Workflow D: Converted ${data.sourceQty} units of ${data.sourceSku} to ${data.targetQty} units of ${data.targetSku}. ${data.lossQty} kg loss logged.`);
+  };
+
+  const handleVehicleAudit = async (data) => {
+    setVehicleAuditModal(false);
+    await submitVehicleAudit(data);
+    showToast(`Workflow N: Saved Physical Audit for ${data.vehicleId}. Variance: ${data.variance} units logged.`);
+  };
+
+  const handleVehicleLoadout = async (data) => {
+    setVehicleLoadoutModal(false);
+    await issueVehicleLoadout(data);
+    showToast(`Workflow F: Issued ${data.quantity} units of ${data.sku} to ${data.vehicle}. Awaiting seller confirmation.`);
+  };
+
+  const handleSyncData = async () => {
+    await refreshData();
+    showToast('Data synced live from API endpoint.');
   };
 
   return (
@@ -116,9 +189,17 @@ export function App() {
             </div>
 
             <div className="topbar-actions">
-              <button className="btn-secondary" onClick={() => showToast('Data synced live from Central Server.')}>
+              <button className="btn-secondary" onClick={handleSyncData}>
                 <RefreshCw size={14} />
                 <span>Sync Live Data</span>
+              </button>
+              <button className="btn-secondary" onClick={() => setProductSetupModal(true)}>
+                <PackagePlus size={14} />
+                <span>+ Setup Product / SKU</span>
+              </button>
+              <button className="btn-secondary" onClick={() => setCreatePoModal(true)}>
+                <FilePlus size={14} />
+                <span>+ Raise Draft PO</span>
               </button>
               <button className="btn-primary" onClick={() => showToast('Exporting Manager Operational Report (PDF/Excel)...')}>
                 <Download size={14} />
@@ -165,7 +246,7 @@ export function App() {
                     <AlertTriangle size={16} className="shrink-0 mt-0.5" />
                     <div>
                       <strong>2 Cash Ceiling Breaches</strong>
-                      <div style={{ fontSize: '11px', marginTop: '2px' }}>Sellers Omar & Faisal exceeded cash limits (SAR 14,500 & SAR 18,900).</div>
+                      <div style={{ fontSize: '11px', marginTop: '2px' }}>Sellers Omar & Faisal exceeded cash limits.</div>
                     </div>
                   </div>
 
@@ -173,7 +254,7 @@ export function App() {
                     <Clock size={16} className="shrink-0 mt-0.5" />
                     <div>
                       <strong>1 Overdue Vehicle Audit</strong>
-                      <div style={{ fontSize: '11px', marginTop: '2px' }}>Van #VH-02 (Khalid) past 35-day audit window. Physical count required.</div>
+                      <div style={{ fontSize: '11px', marginTop: '2px' }}>Van #VH-02 (Khalid) past 35-day audit window.</div>
                     </div>
                   </div>
 
@@ -181,7 +262,7 @@ export function App() {
                     <Clock size={16} className="shrink-0 mt-0.5" />
                     <div>
                       <strong>3 Expiry FEFO Clearance Flags</strong>
-                      <div style={{ fontSize: '11px', marginTop: '2px' }}>Okra Parbhani Kranti 5KG batch expires in 25 days. FEFO priority active.</div>
+                      <div style={{ fontSize: '11px', marginTop: '2px' }}>Okra Parbhani Kranti expires in 25 days.</div>
                     </div>
                   </div>
 
@@ -189,36 +270,41 @@ export function App() {
                     <Lock size={16} className="shrink-0 mt-0.5" />
                     <div>
                       <strong>4 Stores Credit Blocked</strong>
-                      <div style={{ fontSize: '11px', marginTop: '2px' }}>Overdue balances past credit cycle window. Manager override required for sales.</div>
+                      <div style={{ fontSize: '11px', marginTop: '2px' }}>Overdue balances past credit cycle.</div>
                     </div>
                   </div>
                 </div>
 
-                {/* 2. Manager Quick Actions */}
+                {/* 2. Manager Quick Actions (Workflows A to O) */}
                 <div className="side-panel-card">
                   <div className="side-panel-title">
                     <Send size={15} />
-                    <span>Manager Quick Actions</span>
+                    <span>Manager Workflows</span>
                   </div>
 
-                  <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => showToast('Opening Dispatch Order Creator...')}>
-                    <Plus size={14} />
-                    <span>Raise Warehouse Dispatch</span>
+                  <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setVehicleLoadoutModal(true)}>
+                    <Truck size={14} />
+                    <span>Workflow F: Issue Vehicle Loadout</span>
                   </button>
 
-                  <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setActiveTab('inventory')}>
-                    <Clock size={14} />
-                    <span>Review Expiry FEFO List</span>
+                  <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setVehicleAuditModal(true)}>
+                    <ClipboardCheck size={14} />
+                    <span>Workflow N: Audit Vehicle Stock</span>
                   </button>
 
-                  <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setActiveTab('attendance')}>
-                    <Users size={14} />
-                    <span>Audit Field Attendance Selfies</span>
+                  <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setSkuConversionModal(true)}>
+                    <RepeatIcon size={14} />
+                    <span>Workflow D: Convert SKU / Repackage</span>
                   </button>
 
-                  <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => showToast('Generating Reorder Forecast Report...')}>
-                    <FileSpreadsheet size={14} />
-                    <span>Run Demand Forecast</span>
+                  <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setCreatePoModal(true)}>
+                    <FilePlus size={14} />
+                    <span>Workflow C/O: Draft Purchase Order</span>
+                  </button>
+
+                  <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setProductSetupModal(true)}>
+                    <PackagePlus size={14} />
+                    <span>Workflow A: Setup Product / SKU</span>
                   </button>
                 </div>
               </div>
@@ -235,7 +321,43 @@ export function App() {
         </main>
       </div>
 
-      {/* Modals */}
+      {/* Workflow Modals */}
+      {productSetupModal && (
+        <ProductSetupModal
+          onClose={() => setProductSetupModal(false)}
+          onConfirm={handleCreateProduct}
+        />
+      )}
+
+      {createPoModal && (
+        <CreatePoModal
+          onClose={() => setCreatePoModal(false)}
+          onConfirm={handleCreatePo}
+        />
+      )}
+
+      {skuConversionModal && (
+        <SkuConversionModal
+          onClose={() => setSkuConversionModal(false)}
+          onConfirm={handleSkuConversion}
+        />
+      )}
+
+      {vehicleAuditModal && (
+        <VehicleAuditModal
+          onClose={() => setVehicleAuditModal(false)}
+          onConfirm={handleVehicleAudit}
+        />
+      )}
+
+      {vehicleLoadoutModal && (
+        <VehicleLoadoutModal
+          onClose={() => setVehicleLoadoutModal(false)}
+          onConfirm={handleVehicleLoadout}
+        />
+      )}
+
+      {/* Action Approval Modals */}
       {photoModal.open && (
         <PhotoViewerModal
           photoUrl={photoModal.url}
