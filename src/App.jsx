@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { useManagerContext } from './context/ManagerContext';
+
+// Manager Components
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 import { MetricsOverview } from './components/MetricsOverview';
 import { ApprovalQueue } from './components/ApprovalQueue';
 import { MainDataTable } from './components/MainDataTable';
 
+// Manager Modals
 import { WriteOffModal } from './components/Modals/WriteOffModal';
 import { DispatchModal } from './components/Modals/DispatchModal';
 import { OverrideModal } from './components/Modals/OverrideModal';
@@ -17,6 +20,16 @@ import { SkuConversionModal } from './components/Modals/SkuConversionModal';
 import { VehicleAuditModal } from './components/Modals/VehicleAuditModal';
 import { VehicleLoadoutModal } from './components/Modals/VehicleLoadoutModal';
 
+// Seller Components
+import { SellerHeader } from './components/Seller/SellerHeader';
+import { SellerNav } from './components/Seller/SellerNav';
+import { SellerHome } from './components/Seller/SellerHome';
+import { SellerNewSale } from './components/Seller/SellerNewSale';
+import { SellerVehicleStock } from './components/Seller/SellerVehicleStock';
+import { SellerStorePortfolio } from './components/Seller/SellerStorePortfolio';
+import { SellerCashHandover } from './components/Seller/SellerCashHandover';
+import { SellerAttendance } from './components/Seller/SellerAttendance';
+
 import { 
   CheckCircle2, 
   Download, 
@@ -26,14 +39,12 @@ import {
   Clock, 
   Send, 
   Lock, 
-  Plus, 
-  FileSpreadsheet,
-  Users,
   PackagePlus,
   FilePlus,
-  RefreshCw as RepeatIcon,
+  RepeatIcon,
   ClipboardCheck,
-  Truck
+  Truck,
+  ArrowRightLeft
 } from 'lucide-react';
 
 export function App() {
@@ -51,7 +62,12 @@ export function App() {
     issueVehicleLoadout 
   } = useManagerContext();
 
-  const [activeTab, setActiveTab] = useState('overview');
+  // Role State: 'manager' | 'seller'
+  const [currentRole, setCurrentRole] = useState('seller'); // Defaulting to Seller to showcase field sales experience immediately!
+
+  // Navigation Tabs
+  const [activeTab, setActiveTab] = useState('overview'); // Manager tabs
+  const [sellerTab, setSellerTab] = useState('home'); // Seller tabs
   const [searchQuery, setSearchQuery] = useState('');
   const [toastMessage, setToastMessage] = useState(null);
 
@@ -73,7 +89,7 @@ export function App() {
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  // Approval Actions (Connected to Context & API Service Layer)
+  // Approval Actions
   const handleApproveWriteOff = async (item, notes) => {
     setWriteOffModal({ open: false, item: null });
     await approveWriteOff(item, notes);
@@ -102,7 +118,7 @@ export function App() {
     showToast(`Store ${item.storeName} approved for field sales under ${item.proposedCycle}.`);
   };
 
-  // Workflow Handlers (Connected to Context & API Service Layer)
+  // Workflow Handlers
   const handleCreateProduct = async (data) => {
     setProductSetupModal(false);
     await createProduct(data);
@@ -133,9 +149,9 @@ export function App() {
     showToast(`Workflow F: Issued ${data.quantity} units of ${data.sku} to ${data.vehicle}. Awaiting seller confirmation.`);
   };
 
-  const handleSyncData = async () => {
-    await refreshData();
-    showToast('Data synced live from API endpoint.');
+  const handleCompleteSale = (saleData) => {
+    showToast(`Sale Completed! Delivery document issued for ${saleData.storeName} (SAR ${saleData.totalAmount.toLocaleString()}).`);
+    setSellerTab('home');
   };
 
   return (
@@ -163,163 +179,181 @@ export function App() {
         </div>
       )}
 
-      {/* Enterprise Header */}
-      <Header onSearch={setSearchQuery} searchQuery={searchQuery} />
+      {/* RENDER BASED ON CURRENT ACTIVE ROLE */}
+      {currentRole === 'seller' ? (
+        /* SELLER FIELD EXPERIENCE */
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+          <SellerHeader onSwitchRole={() => setCurrentRole('manager')} />
+          <SellerNav activeTab={sellerTab} setActiveTab={setSellerTab} />
+          
+          <main className="erp-content">
+            {sellerTab === 'home' && <SellerHome onNavigate={setSellerTab} />}
+            {sellerTab === 'new-sale' && <SellerNewSale onCompleteSale={handleCompleteSale} />}
+            {sellerTab === 'van-stock' && <SellerVehicleStock />}
+            {sellerTab === 'stores' && <SellerStorePortfolio onNavigate={setSellerTab} />}
+            {sellerTab === 'cash' && <SellerCashHandover />}
+            {sellerTab === 'attendance' && <SellerAttendance />}
+          </main>
+        </div>
+      ) : (
+        /* MANAGER DESKTOP EXPERIENCE */
+        <>
+          <Header 
+            onSearch={setSearchQuery} 
+            searchQuery={searchQuery} 
+            onSwitchRole={() => setCurrentRole('seller')} 
+          />
 
-      {/* App Main Layout */}
-      <div className="app-main-layout">
-        {/* Navigation Sidebar */}
-        <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
+          <div className="app-main-layout">
+            <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
 
-        {/* Central Content Area */}
-        <main className="erp-content">
-          {/* Top Banner Header */}
-          <div className="dashboard-topbar">
-            <div>
-              <div className="topbar-title">
-                <span>Manager Operational Control Center</span>
-                <span className="badge badge-success">
-                  <ShieldCheck size={12} />
-                  Phase 1 Scope
-                </span>
+            <main className="erp-content">
+              <div className="dashboard-topbar">
+                <div>
+                  <div className="topbar-title">
+                    <span>Manager Operational Control Center</span>
+                    <span className="badge badge-success">
+                      <ShieldCheck size={12} />
+                      Phase 1 Scope
+                    </span>
+                  </div>
+                  <div className="topbar-subtitle">
+                    Riyadh Central Distribution Center (WH-01) &bull; Kingdom of Saudi Arabia Wholesale Operations
+                  </div>
+                </div>
+
+                <div className="topbar-actions">
+                  <button 
+                    className="btn-secondary" 
+                    style={{ backgroundColor: '#1b4332', color: '#fff', borderColor: '#1b4332' }}
+                    onClick={() => setCurrentRole('seller')}
+                  >
+                    <ArrowRightLeft size={14} />
+                    <span>Switch to Field Seller View</span>
+                  </button>
+
+                  <button className="btn-secondary" onClick={() => setProductSetupModal(true)}>
+                    <PackagePlus size={14} />
+                    <span>+ Setup Product / SKU</span>
+                  </button>
+                  <button className="btn-secondary" onClick={() => setCreatePoModal(true)}>
+                    <FilePlus size={14} />
+                    <span>+ Raise Draft PO</span>
+                  </button>
+                  <button className="btn-primary" onClick={() => showToast('Exporting Manager Operational Report (PDF/Excel)...')}>
+                    <Download size={14} />
+                    <span>Export Report</span>
+                  </button>
+                </div>
               </div>
-              <div className="topbar-subtitle">
-                Riyadh Central Distribution Center (WH-01) &bull; Kingdom of Saudi Arabia Wholesale Operations
-              </div>
-            </div>
 
-            <div className="topbar-actions">
-              <button className="btn-secondary" onClick={handleSyncData}>
-                <RefreshCw size={14} />
-                <span>Sync Live Data</span>
-              </button>
-              <button className="btn-secondary" onClick={() => setProductSetupModal(true)}>
-                <PackagePlus size={14} />
-                <span>+ Setup Product / SKU</span>
-              </button>
-              <button className="btn-secondary" onClick={() => setCreatePoModal(true)}>
-                <FilePlus size={14} />
-                <span>+ Raise Draft PO</span>
-              </button>
-              <button className="btn-primary" onClick={() => showToast('Exporting Manager Operational Report (PDF/Excel)...')}>
-                <Download size={14} />
-                <span>Export Report</span>
-              </button>
-            </div>
-          </div>
+              <MetricsOverview />
 
-          {/* Metric Summary Cards */}
-          <MetricsOverview />
+              {activeTab === 'overview' ? (
+                <div className="dashboard-split-layout">
+                  <div className="main-column">
+                    <ApprovalQueue
+                      onViewPhoto={(url, title) => setPhotoModal({ open: true, url, title })}
+                      onApproveWriteOff={(item) => setWriteOffModal({ open: true, item })}
+                      onHandleDispatch={(item) => setDispatchModal({ open: true, item })}
+                      onVerifyCash={handleVerifyCash}
+                      onOverrideCredit={(item) => setOverrideModal({ open: true, item })}
+                      onApproveStore={handleApproveStore}
+                    />
 
-          {/* BALANCED 2-COLUMN DASHBOARD SPLIT */}
-          {activeTab === 'overview' ? (
-            <div className="dashboard-split-layout">
-              {/* LEFT PRIMARY COLUMN: Approval Queue & Live Table */}
-              <div className="main-column">
-                <ApprovalQueue
-                  onViewPhoto={(url, title) => setPhotoModal({ open: true, url, title })}
-                  onApproveWriteOff={(item) => setWriteOffModal({ open: true, item })}
-                  onHandleDispatch={(item) => setDispatchModal({ open: true, item })}
-                  onVerifyCash={handleVerifyCash}
-                  onOverrideCredit={(item) => setOverrideModal({ open: true, item })}
-                  onApproveStore={handleApproveStore}
-                />
+                    <MainDataTable
+                      activeTab="overview"
+                      searchQuery={searchQuery}
+                      onOverrideCredit={(item) => setOverrideModal({ open: true, item })}
+                      onViewPoDetails={(po) => showToast(`Viewing details for PO ${po.poNumber}`)}
+                    />
+                  </div>
 
+                  <div className="side-column">
+                    <div className="side-panel-card">
+                      <div className="side-panel-title">
+                        <AlertTriangle size={15} className="text-amber-700" />
+                        <span>Operational Alerts Watch</span>
+                      </div>
+
+                      <div className="side-alert-item alert-danger">
+                        <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+                        <div>
+                          <strong>2 Cash Ceiling Breaches</strong>
+                          <div style={{ fontSize: '11px', marginTop: '2px' }}>Sellers Omar & Faisal exceeded cash limits.</div>
+                        </div>
+                      </div>
+
+                      <div className="side-alert-item alert-warning">
+                        <Clock size={16} className="shrink-0 mt-0.5" />
+                        <div>
+                          <strong>1 Overdue Vehicle Audit</strong>
+                          <div style={{ fontSize: '11px', marginTop: '2px' }}>Van #VH-02 (Khalid) past 35-day audit window.</div>
+                        </div>
+                      </div>
+
+                      <div className="side-alert-item alert-warning">
+                        <Clock size={16} className="shrink-0 mt-0.5" />
+                        <div>
+                          <strong>3 Expiry FEFO Clearance Flags</strong>
+                          <div style={{ fontSize: '11px', marginTop: '2px' }}>Okra Parbhani Kranti expires in 25 days.</div>
+                        </div>
+                      </div>
+
+                      <div className="side-alert-item alert-info">
+                        <Lock size={16} className="shrink-0 mt-0.5" />
+                        <div>
+                          <strong>4 Stores Credit Blocked</strong>
+                          <div style={{ fontSize: '11px', marginTop: '2px' }}>Overdue balances past credit cycle.</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="side-panel-card">
+                      <div className="side-panel-title">
+                        <Send size={15} />
+                        <span>Manager Workflows</span>
+                      </div>
+
+                      <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setVehicleLoadoutModal(true)}>
+                        <Truck size={14} />
+                        <span>Workflow F: Issue Vehicle Loadout</span>
+                      </button>
+
+                      <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setVehicleAuditModal(true)}>
+                        <ClipboardCheck size={14} />
+                        <span>Workflow N: Audit Vehicle Stock</span>
+                      </button>
+
+                      <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setSkuConversionModal(true)}>
+                        <RepeatIcon size={14} />
+                        <span>Workflow D: Convert SKU / Repackage</span>
+                      </button>
+
+                      <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setCreatePoModal(true)}>
+                        <FilePlus size={14} />
+                        <span>Workflow C/O: Draft Purchase Order</span>
+                      </button>
+
+                      <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setProductSetupModal(true)}>
+                        <PackagePlus size={14} />
+                        <span>Workflow A: Setup Product / SKU</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ) : (
                 <MainDataTable
-                  activeTab="overview"
+                  activeTab={activeTab}
                   searchQuery={searchQuery}
                   onOverrideCredit={(item) => setOverrideModal({ open: true, item })}
-                  onViewPoDetails={(po) => showToast(`Viewing details for PO ${po.poNumber}`)}
+                  onViewPoDetails={(po) => showToast(`Viewing details for Purchase Order ${po.poNumber} (${po.vendorName})`)}
                 />
-              </div>
-
-              {/* RIGHT SIDEBAR COLUMN: Operational Alerts & Quick Actions */}
-              <div className="side-column">
-                {/* 1. Live Operational Alerts Panel */}
-                <div className="side-panel-card">
-                  <div className="side-panel-title">
-                    <AlertTriangle size={15} className="text-amber-700" />
-                    <span>Operational Alerts Watch</span>
-                  </div>
-
-                  <div className="side-alert-item alert-danger">
-                    <AlertTriangle size={16} className="shrink-0 mt-0.5" />
-                    <div>
-                      <strong>2 Cash Ceiling Breaches</strong>
-                      <div style={{ fontSize: '11px', marginTop: '2px' }}>Sellers Omar & Faisal exceeded cash limits.</div>
-                    </div>
-                  </div>
-
-                  <div className="side-alert-item alert-warning">
-                    <Clock size={16} className="shrink-0 mt-0.5" />
-                    <div>
-                      <strong>1 Overdue Vehicle Audit</strong>
-                      <div style={{ fontSize: '11px', marginTop: '2px' }}>Van #VH-02 (Khalid) past 35-day audit window.</div>
-                    </div>
-                  </div>
-
-                  <div className="side-alert-item alert-warning">
-                    <Clock size={16} className="shrink-0 mt-0.5" />
-                    <div>
-                      <strong>3 Expiry FEFO Clearance Flags</strong>
-                      <div style={{ fontSize: '11px', marginTop: '2px' }}>Okra Parbhani Kranti expires in 25 days.</div>
-                    </div>
-                  </div>
-
-                  <div className="side-alert-item alert-info">
-                    <Lock size={16} className="shrink-0 mt-0.5" />
-                    <div>
-                      <strong>4 Stores Credit Blocked</strong>
-                      <div style={{ fontSize: '11px', marginTop: '2px' }}>Overdue balances past credit cycle.</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* 2. Manager Quick Actions (Workflows A to O) */}
-                <div className="side-panel-card">
-                  <div className="side-panel-title">
-                    <Send size={15} />
-                    <span>Manager Workflows</span>
-                  </div>
-
-                  <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setVehicleLoadoutModal(true)}>
-                    <Truck size={14} />
-                    <span>Workflow F: Issue Vehicle Loadout</span>
-                  </button>
-
-                  <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setVehicleAuditModal(true)}>
-                    <ClipboardCheck size={14} />
-                    <span>Workflow N: Audit Vehicle Stock</span>
-                  </button>
-
-                  <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setSkuConversionModal(true)}>
-                    <RepeatIcon size={14} />
-                    <span>Workflow D: Convert SKU / Repackage</span>
-                  </button>
-
-                  <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setCreatePoModal(true)}>
-                    <FilePlus size={14} />
-                    <span>Workflow C/O: Draft Purchase Order</span>
-                  </button>
-
-                  <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setProductSetupModal(true)}>
-                    <PackagePlus size={14} />
-                    <span>Workflow A: Setup Product / SKU</span>
-                  </button>
-                </div>
-              </div>
-            </div>
-          ) : (
-            /* FOCUSED MODULE VIEW */
-            <MainDataTable
-              activeTab={activeTab}
-              searchQuery={searchQuery}
-              onOverrideCredit={(item) => setOverrideModal({ open: true, item })}
-              onViewPoDetails={(po) => showToast(`Viewing details for Purchase Order ${po.poNumber} (${po.vendorName})`)}
-            />
-          )}
-        </main>
-      </div>
+              )}
+            </main>
+          </div>
+        </>
+      )}
 
       {/* Workflow Modals */}
       {productSetupModal && (

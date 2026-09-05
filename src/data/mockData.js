@@ -16,6 +16,35 @@ export const SYSTEM_INFO = {
   currency: "SAR"
 };
 
+export const CURRENT_SELLER = {
+  id: "SEL-101",
+  name: "Omar Farooq",
+  role: "Field Sales Representative",
+  tier: "Seller",
+  assignedVehicle: {
+    id: "VH-01",
+    registration: "KSA-8841-R",
+    model: "Toyota Hilux Cargo 2.8L",
+    stockValue: 84200
+  },
+  shiftStatus: "Checked In (07:30 AM)",
+  checkInTime: "07:30 AM",
+  odometerStart: 142850,
+  odometerCurrent: 142992,
+  distanceTodayKm: 142,
+  route: "Riyadh North & Central",
+  cashInHand: 14500,
+  cashLimit: 12000,
+  cashBreachWarning: true,
+  dailySalesTarget: 40000,
+  dailySalesAchieved: 32400,
+  monthlySalesTarget: 250000,
+  monthlySalesAchieved: 198000,
+  assignedStoresCount: 14,
+  visitedTodayCount: 5,
+  scheduledTodayCount: 6
+};
+
 export const METRICS = {
   totalInventoryValue: 1845200,
   warehouseValue: 1420000,

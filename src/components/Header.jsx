@@ -1,8 +1,8 @@
 import React from 'react';
-import { Search, ShieldCheck, User, Building2, ChevronDown } from 'lucide-react';
+import { Search, Building2, ChevronDown, ArrowRightLeft } from 'lucide-react';
 import { SYSTEM_INFO } from '../data/mockData';
 
-export const Header = ({ onSearch, searchQuery }) => {
+export const Header = ({ onSearch, searchQuery, onSwitchRole }) => {
   return (
     <header className="erp-header">
       <div className="header-brand">
@@ -31,6 +31,15 @@ export const Header = ({ onSearch, searchQuery }) => {
             onChange={(e) => onSearch(e.target.value)}
           />
         </div>
+
+        <button 
+          className="btn-secondary"
+          style={{ backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.25)', color: '#fff' }}
+          onClick={onSwitchRole}
+        >
+          <ArrowRightLeft size={13} />
+          <span>Switch to Field Seller View</span>
+        </button>
 
         <div className="user-profile-badge">
           <div className="avatar-initials">SA</div>
