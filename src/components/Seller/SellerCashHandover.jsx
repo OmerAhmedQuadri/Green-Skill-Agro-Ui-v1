@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { Banknote, Upload, CheckCircle, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { Banknote, CheckCircle, AlertTriangle, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { CURRENT_SELLER } from '../../data/mockData';
 import { useManagerContext } from '../../context/ManagerContext';
 
-export const SellerCashHandover = () => {
+export const SellerCashHandover = ({ onNavigate }) => {
   const { approvals } = useManagerContext();
   const [routeType, setRouteType] = useState('Bank Deposit');
   const [amount, setAmount] = useState(14500);
@@ -17,7 +17,7 @@ export const SellerCashHandover = () => {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '20px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+    <div className="seller-subpage-layout">
       {/* LEFT COLUMN: Cash Status & Deposit Form */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div className="dashboard-topbar">

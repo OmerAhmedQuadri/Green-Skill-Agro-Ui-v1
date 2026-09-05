@@ -20,7 +20,7 @@ export const DispatchModal = ({ item, onClose, onConfirm }) => {
 
         <div className="modal-body">
           <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', padding: '10px 12px', borderRadius: '4px', fontSize: '12px', color: '#1e40af' }}>
-            <strong>Phase 1 Scope Rule:</strong> When vehicle stock is insufficient, goods are shipped directly from Warehouse WH-01 to the store. The sale remains attributed to seller <strong>{item.sellerName}</strong>.
+            <strong>System Rule:</strong> When vehicle stock is insufficient, goods are shipped directly from Warehouse WH-01 to the store. The sale remains attributed to seller <strong>{item.sellerName}</strong>.
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', fontSize: '12px' }}>
@@ -33,14 +33,6 @@ export const DispatchModal = ({ item, onClose, onConfirm }) => {
               <span className="form-label">Order Value</span>
               <div style={{ fontWeight: 700, color: 'var(--color-forest-dark)' }}>SAR {item.orderValue.toLocaleString()}</div>
             </div>
-            <div>
-              <span className="form-label">Requested Item</span>
-              <div style={{ fontWeight: 600 }}>{item.productName}</div>
-            </div>
-            <div>
-              <span className="form-label">Requested Quantity</span>
-              <div style={{ fontWeight: 700 }}>{item.requestedQty}</div>
-            </div>
           </div>
 
           <div className="form-group">
@@ -52,7 +44,7 @@ export const DispatchModal = ({ item, onClose, onConfirm }) => {
             >
               <option value="Al-Majdouie Logistics">Al-Majdouie Logistics (Hired Freight)</option>
               <option value="Saudi Post Logistics">Saudi Post Logistics (SPL Express)</option>
-              <option value="Green Agro Internal Fleet (WH-01)">Green Agro Internal Warehouse Truck</option>
+              <option value="Green Skill Agro Internal Fleet (WH-01)">Green Skill Agro Internal Warehouse Truck</option>
             </select>
           </div>
 

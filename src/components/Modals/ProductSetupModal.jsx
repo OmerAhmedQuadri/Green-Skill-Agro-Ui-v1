@@ -44,7 +44,7 @@ export const ProductSetupModal = ({ onClose, onConfirm }) => {
 
         <form onSubmit={handleSubmit} className="modal-body">
           <div style={{ backgroundColor: '#f0f4ee', padding: '10px 12px', borderRadius: '4px', fontSize: '11.5px', color: '#1b4332' }}>
-            <strong>Phase 1 Scope Rule:</strong> Product type determines attribute templates (Seeds carry variety, hybrid flag, MFD & expiry; Agriculture Essentials carry reduced template).
+            <strong>System Rule:</strong> Product type determines attribute templates (Seeds carry variety, hybrid flag, MFD & expiry; Agriculture Essentials carry reduced template).
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>

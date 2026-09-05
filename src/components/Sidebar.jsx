@@ -1,13 +1,13 @@
 import React from 'react';
-import { 
-  LayoutDashboard, 
-  Package, 
-  Truck, 
-  FileText, 
-  Send, 
-  Store, 
-  Banknote, 
-  Users, 
+import {
+  LayoutDashboard,
+  Package,
+  Truck,
+  FileText,
+  Send,
+  Store,
+  Banknote,
+  Users,
   TrendingUp,
   AlertTriangle
 } from 'lucide-react';
@@ -51,7 +51,7 @@ export const Sidebar = ({ activeTab, setActiveTab }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--text-muted)' }}>
           <AlertTriangle size={14} className="text-amber-600" />
           <div>
-            <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Phase 1 Single-Warehouse</div>
+            <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Central Warehouse</div>
             <div>All managers access WH-01 global data.</div>
           </div>
         </div>

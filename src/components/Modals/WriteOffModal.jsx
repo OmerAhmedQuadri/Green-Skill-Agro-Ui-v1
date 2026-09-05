@@ -20,7 +20,7 @@ export const WriteOffModal = ({ item, onClose, onConfirm }) => {
           <div style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a', padding: '10px 12px', borderRadius: '4px', fontSize: '12px', color: '#92400e', display: 'flex', gap: '8px' }}>
             <AlertTriangle size={16} className="shrink-0" />
             <div>
-              <strong>Phase 1 Scope Rule:</strong> Approving this write-off permanently removes stock from the holding location ledger and posts to the write-off journal.
+              <strong>System Rule:</strong> Approving this write-off permanently removes stock from the holding location ledger and posts to the write-off journal.
             </div>
           </div>
 

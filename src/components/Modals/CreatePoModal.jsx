@@ -39,7 +39,7 @@ export const CreatePoModal = ({ onClose, onConfirm }) => {
 
         <form onSubmit={handleSubmit} className="modal-body">
           <div style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a', padding: '10px 12px', borderRadius: '4px', fontSize: '11.5px', color: '#92400e' }}>
-            <strong>Phase 1 Scope Rule:</strong> Managers can draft purchase orders based on reorder recommendations. Approval always rests with an Admin before placing the order with vendors (30-40 day lead time).
+            <strong>System Rule:</strong> Managers can draft purchase orders based on reorder recommendations. Approval always rests with an Admin before placing the order with vendors (30-40 day lead time).
           </div>
 
           <div className="form-group">

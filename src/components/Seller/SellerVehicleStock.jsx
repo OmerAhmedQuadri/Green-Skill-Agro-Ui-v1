@@ -1,8 +1,8 @@
 import React from 'react';
-import { Package, Clock, CheckCircle, AlertTriangle, Truck } from 'lucide-react';
+import { Package, Clock, CheckCircle, AlertTriangle, Truck, ArrowLeft } from 'lucide-react';
 import { INVENTORY_STOCK, CURRENT_SELLER } from '../../data/mockData';
 
-export const SellerVehicleStock = () => {
+export const SellerVehicleStock = ({ onNavigate }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
       <div className="dashboard-topbar">

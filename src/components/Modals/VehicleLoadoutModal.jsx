@@ -29,7 +29,7 @@ export const VehicleLoadoutModal = ({ onClose, onConfirm }) => {
 
         <form onSubmit={handleSubmit} className="modal-body">
           <div style={{ backgroundColor: '#f0f4ee', border: '1px solid #c6dec3', padding: '10px 12px', borderRadius: '4px', fontSize: '11.5px', color: '#1b4332' }}>
-            <strong>Phase 1 Scope Rule:</strong> Batches are proposed First-Expiry-First-Out (FEFO). Issuing stock requires vehicle stock value ceiling validation. The seller must confirm receipt on their device to complete the transfer.
+            <strong>System Rule:</strong> Batches are proposed First-Expiry-First-Out (FEFO). Issuing stock requires vehicle stock value ceiling validation. The seller must confirm receipt on their device to complete the transfer.
           </div>
 
           <div className="form-group">

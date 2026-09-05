@@ -1,5 +1,5 @@
 /**
- * Green Agro Manager ERP - Backend Integration Layer
+ * Green Skill Agro Manager ERP - Backend Integration Layer
  * 
  * BACKEND ENGINEER NOTE:
  * All API interactions are routed through this service file.

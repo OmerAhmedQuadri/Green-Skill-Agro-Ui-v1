@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Store, Plus, Lock, CheckCircle, Search, Phone } from 'lucide-react';
+import { Store, Plus, Lock, CheckCircle, Search, Phone, ArrowLeft } from 'lucide-react';
 import { STORE_CREDIT_DATA, CURRENT_SELLER } from '../../data/mockData';
 import { NewStoreModal } from './Modals/NewStoreModal';
 
@@ -36,11 +36,10 @@ export const SellerStorePortfolio = ({ onNavigate }) => {
 
       <div className="data-panel">
         <div className="panel-header-toolbar">
-          <div className="toolbar-controls" style={{ width: '100%', justifyContent: 'space-between' }}>
+          <div className="toolbar-controls" style={{ width: '100%', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
             <input
               type="text"
-              className="table-search-input"
-              style={{ width: '280px' }}
+              className="table-search-input seller-search-input"
               placeholder="Search store name, owner, city..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}

@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { useManagerContext } from './context/ManagerContext';
 
-// Manager Components
+// Common Components
 import { Header } from './components/Header';
+
+// Manager Components
 import { Sidebar } from './components/Sidebar';
+import { ManagerDrawer } from './components/ManagerDrawer';
 import { MetricsOverview } from './components/MetricsOverview';
 import { ApprovalQueue } from './components/ApprovalQueue';
 import { MainDataTable } from './components/MainDataTable';
@@ -22,7 +25,7 @@ import { VehicleLoadoutModal } from './components/Modals/VehicleLoadoutModal';
 
 // Seller Components
 import { SellerHeader } from './components/Seller/SellerHeader';
-import { SellerNav } from './components/Seller/SellerNav';
+import { SellerDrawer } from './components/Seller/SellerDrawer';
 import { SellerHome } from './components/Seller/SellerHome';
 import { SellerNewSale } from './components/Seller/SellerNewSale';
 import { SellerVehicleStock } from './components/Seller/SellerVehicleStock';
@@ -30,10 +33,19 @@ import { SellerStorePortfolio } from './components/Seller/SellerStorePortfolio';
 import { SellerCashHandover } from './components/Seller/SellerCashHandover';
 import { SellerAttendance } from './components/Seller/SellerAttendance';
 
+// Admin Components
+import { AdminSidebar } from './components/Admin/AdminSidebar';
+import { AdminDrawer } from './components/Admin/AdminDrawer';
+import { AdminSystemRules } from './components/Admin/AdminSystemRules';
+import { AdminCatalogTemplates } from './components/Admin/AdminCatalogTemplates';
+import { AdminVendorManager } from './components/Admin/AdminVendorManager';
+import { AdminPermissionsManager } from './components/Admin/AdminPermissionsManager';
+import { AdminFeatureToggles } from './components/Admin/AdminFeatureToggles';
+import { AdminAuditTrail } from './components/Admin/AdminAuditTrail';
+
 import { 
   CheckCircle2, 
   Download, 
-  RefreshCw, 
   ShieldCheck, 
   AlertTriangle, 
   Clock, 
@@ -44,12 +56,12 @@ import {
   RepeatIcon,
   ClipboardCheck,
   Truck,
-  ArrowRightLeft
+  ArrowRightLeft,
+  Sliders
 } from 'lucide-react';
 
 export function App() {
   const { 
-    refreshData, 
     approveWriteOff, 
     releaseDispatch, 
     overrideCredit, 
@@ -62,12 +74,17 @@ export function App() {
     issueVehicleLoadout 
   } = useManagerContext();
 
-  // Role State: 'manager' | 'seller'
-  const [currentRole, setCurrentRole] = useState('seller'); // Defaulting to Seller to showcase field sales experience immediately!
+  // Role State: 'admin' | 'manager' | 'seller'
+  const [currentRole, setCurrentRole] = useState('admin');
+
+  // Drawer State
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Navigation Tabs
   const [activeTab, setActiveTab] = useState('overview'); // Manager tabs
   const [sellerTab, setSellerTab] = useState('home'); // Seller tabs
+  const [adminTab, setAdminTab] = useState('admin-rules'); // Admin tabs
+
   const [searchQuery, setSearchQuery] = useState('');
   const [toastMessage, setToastMessage] = useState(null);
 
@@ -181,27 +198,109 @@ export function App() {
 
       {/* RENDER BASED ON CURRENT ACTIVE ROLE */}
       {currentRole === 'seller' ? (
-        /* SELLER FIELD EXPERIENCE */
+        /* SELLER FIELD EXPERIENCE WITH DRAWER MENU */
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
-          <SellerHeader onSwitchRole={() => setCurrentRole('manager')} />
-          <SellerNav activeTab={sellerTab} setActiveTab={setSellerTab} />
+          <SellerHeader 
+            onOpenDrawer={() => setIsDrawerOpen(true)}
+            onSwitchRole={() => setCurrentRole('manager')}
+            onNavigate={setSellerTab}
+            activeTab={sellerTab}
+          />
           
-          <main className="erp-content">
+          <SellerDrawer 
+            isOpen={isDrawerOpen}
+            onClose={() => setIsDrawerOpen(false)}
+            activeTab={sellerTab}
+            setActiveTab={setSellerTab}
+            onSwitchRole={() => setCurrentRole('manager')}
+          />
+          
+          <main className="erp-content" style={{ paddingBottom: '32px' }}>
             {sellerTab === 'home' && <SellerHome onNavigate={setSellerTab} />}
-            {sellerTab === 'new-sale' && <SellerNewSale onCompleteSale={handleCompleteSale} />}
-            {sellerTab === 'van-stock' && <SellerVehicleStock />}
+            {sellerTab === 'new-sale' && <SellerNewSale onCompleteSale={handleCompleteSale} onNavigate={setSellerTab} />}
+            {sellerTab === 'van-stock' && <SellerVehicleStock onNavigate={setSellerTab} />}
             {sellerTab === 'stores' && <SellerStorePortfolio onNavigate={setSellerTab} />}
-            {sellerTab === 'cash' && <SellerCashHandover />}
-            {sellerTab === 'attendance' && <SellerAttendance />}
+            {sellerTab === 'cash' && <SellerCashHandover onNavigate={setSellerTab} />}
+            {sellerTab === 'attendance' && <SellerAttendance onNavigate={setSellerTab} />}
           </main>
         </div>
-      ) : (
-        /* MANAGER DESKTOP EXPERIENCE */
-        <>
+      ) : currentRole === 'admin' ? (
+        /* ADMIN DESKTOP & MOBILE SYSTEM CONTROL DESK */
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
           <Header 
             onSearch={setSearchQuery} 
             searchQuery={searchQuery} 
-            onSwitchRole={() => setCurrentRole('seller')} 
+            currentRole={currentRole}
+            onSwitchRole={setCurrentRole} 
+            onOpenDrawer={() => setIsDrawerOpen(true)}
+          />
+
+          <AdminDrawer 
+            isOpen={isDrawerOpen}
+            onClose={() => setIsDrawerOpen(false)}
+            activeTab={adminTab}
+            setActiveTab={setAdminTab}
+            onSwitchRole={setCurrentRole}
+          />
+
+          <div className="app-main-layout">
+            <AdminSidebar activeTab={adminTab} setActiveTab={setAdminTab} />
+
+            <main className="erp-content">
+              <div className="dashboard-topbar">
+                <div>
+                  <div className="topbar-title">
+                    <span>Admin System Governance Console</span>
+                    <span className="badge badge-success">
+                      <ShieldCheck size={12} />
+                      Master Configuration
+                    </span>
+                  </div>
+                  <div className="topbar-subtitle">
+                    Company System Ceilings, Vendor Master Directory, Category Templates & Permission Set Grants
+                  </div>
+                </div>
+
+                <div className="topbar-actions">
+                  <button className="btn-secondary" onClick={() => setCurrentRole('manager')}>
+                    <ArrowRightLeft size={14} />
+                    <span>Manager View</span>
+                  </button>
+                  <button className="btn-secondary" onClick={() => setCurrentRole('seller')}>
+                    <ArrowRightLeft size={14} />
+                    <span>Seller View</span>
+                  </button>
+                </div>
+              </div>
+
+              {adminTab === 'admin-rules' && <AdminSystemRules onShowToast={showToast} />}
+              {adminTab === 'admin-catalog' && <AdminCatalogTemplates onShowToast={showToast} />}
+              {adminTab === 'admin-vendors' && <AdminVendorManager onShowToast={showToast} />}
+              {adminTab === 'admin-permissions' && <AdminPermissionsManager onShowToast={showToast} />}
+              {adminTab === 'admin-features' && <AdminFeatureToggles onShowToast={showToast} />}
+              {adminTab === 'admin-audit' && <AdminAuditTrail />}
+            </main>
+          </div>
+        </div>
+      ) : (
+        /* MANAGER DESKTOP & MOBILE EXPERIENCE */
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+          <Header 
+            onSearch={setSearchQuery} 
+            searchQuery={searchQuery} 
+            currentRole={currentRole}
+            onSwitchRole={setCurrentRole} 
+            onOpenDrawer={() => setIsDrawerOpen(true)}
+          />
+
+          <ManagerDrawer 
+            isOpen={isDrawerOpen}
+            onClose={() => setIsDrawerOpen(false)}
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            onSwitchRole={() => setCurrentRole('seller')}
+            onOpenProductSetup={() => setProductSetupModal(true)}
+            onOpenCreatePo={() => setCreatePoModal(true)}
           />
 
           <div className="app-main-layout">
@@ -214,7 +313,7 @@ export function App() {
                     <span>Manager Operational Control Center</span>
                     <span className="badge badge-success">
                       <ShieldCheck size={12} />
-                      Phase 1 Scope
+                      Active System
                     </span>
                   </div>
                   <div className="topbar-subtitle">
@@ -352,7 +451,7 @@ export function App() {
               )}
             </main>
           </div>
-        </>
+        </div>
       )}
 
       {/* Workflow Modals */}

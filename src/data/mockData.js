@@ -1,10 +1,10 @@
-// Green Agro - Wholesale Distribution Platform (Saudi Arabia)
-// Mock Enterprise Domain Data matching Phase 1 Scope & Specifications
+// Green Skill Agro - Wholesale Distribution Platform (Saudi Arabia)
+// Mock Enterprise Domain Data & Specifications
 
 export const SYSTEM_INFO = {
-  appName: "Green Agro",
+  appName: "Green Skill Agro",
   subTitle: "Field Sales & Inventory Management Platform",
-  version: "v1.4 - Phase 1 Final",
+  version: "v1.4 Enterprise",
   warehouse: "Riyadh Central Distribution Center (WH-01)",
   currentUser: {
     name: "Sami Al-Mansoor",
@@ -488,3 +488,233 @@ export const STORE_CREDIT_DATA = [
     blocked: true
   }
 ];
+
+export const SYSTEM_CONFIG_RULES = {
+  maxSellerDiscountPct: 10,
+  maxSellerCashCeiling: 12000,
+  storeCreditGraceDays: 7,
+  expiryWarningWindowDays: 30,
+  vehicleAuditWindowDays: 35,
+  requirePhotoForWriteOff: true,
+  autoBlockOverdueStores: true,
+  vatTaxRatePct: 15,
+  lastUpdatedBy: "Admin System Owner (A. Al-Mansoor)",
+  lastUpdatedAt: "2026-09-05 14:20"
+};
+
+export const VENDORS_MASTER_DATA = [
+  {
+    vendorCode: "VND-AGRI-GREEN",
+    vendorName: "Al-Riyadh Agricultural Co.",
+    taxNumber: "310492049100003",
+    category: "Hybrid Seeds",
+    paymentTerms: "30 Days Net",
+    contactPerson: "Youssef Al-Zahrani",
+    phone: "+966 50 123 4567",
+    email: "procurement@riyadh-agri.com.sa",
+    status: "Active Authorized Vendor",
+    activePOsCount: 2
+  },
+  {
+    vendorCode: "VND-SAUDI-AGRI",
+    vendorName: "Saudi Agri Tech Industries",
+    taxNumber: "310994019200003",
+    category: "Shade Nets & Protective MESH",
+    paymentTerms: "15 Days Net",
+    contactPerson: "Ibrahim Al-Ghamdi",
+    phone: "+966 55 987 6543",
+    email: "sales@saudiagritech.com",
+    status: "Active Authorized Vendor",
+    activePOsCount: 1
+  },
+  {
+    vendorCode: "VND-ROYAL-DUTCH",
+    vendorName: "Royal Dutch Seeds BV",
+    taxNumber: "NL840291049B01",
+    category: "Imported Vegetable Seeds",
+    paymentTerms: "Letter of Credit (LC)",
+    contactPerson: "Hans van der Berg",
+    phone: "+31 20 555 0192",
+    email: "export@royaldutchseeds.nl",
+    status: "Active Global Vendor",
+    activePOsCount: 1
+  },
+  {
+    vendorCode: "VND-JORDAN-AGRI",
+    vendorName: "Jordan Agri Chemicals & Seeds",
+    taxNumber: "JO991040192",
+    category: "Agro Chemicals & Fertilizer",
+    paymentTerms: "45 Days Net",
+    contactPerson: "Ahmad Hamdan",
+    phone: "+962 6 500 1234",
+    email: "orders@jordanagri.jo",
+    status: "Active Authorized Vendor",
+    activePOsCount: 3
+  }
+];
+
+export const PRODUCT_CATEGORIES_DATA = [
+  {
+    categoryId: "CAT-01",
+    categoryName: "Hybrid Vegetable Seeds",
+    codePrefix: "HYB-SEED",
+    defaultUom: "1KG Pack",
+    taxRatePct: 15,
+    skusCount: 14,
+    fefoPolicy: "Strict 30-Day FEFO Clearance",
+    status: "Active Master Category"
+  },
+  {
+    categoryId: "CAT-02",
+    categoryName: "Protected Agriculture Shade Nets",
+    codePrefix: "NET-MESH",
+    defaultUom: "Roll (50m)",
+    taxRatePct: 15,
+    skusCount: 6,
+    fefoPolicy: "Standard FIFO Warehousing",
+    status: "Active Master Category"
+  },
+  {
+    categoryId: "CAT-03",
+    categoryName: "Agro Chemicals & Crop Protection",
+    codePrefix: "CROP-CARE",
+    defaultUom: "5L Canister",
+    taxRatePct: 15,
+    skusCount: 9,
+    fefoPolicy: "Batch Expiry Tracked",
+    status: "Active Master Category"
+  }
+];
+
+export const USER_PERMISSIONS_DATA = [
+  {
+    userId: "USR-MNG-01",
+    userName: "Sami Al-Mansoor",
+    role: "Manager",
+    assignedLocation: "Riyadh Central WH-01",
+    status: "Active",
+    canOverrideCredit: true,
+    canApproveWriteOff: true,
+    canReleaseDispatch: true,
+    canVerifyCash: true,
+    canCreateProduct: true,
+    canDraftPo: true
+  },
+  {
+    userId: "USR-MNG-02",
+    userName: "Tariq Al-Rashid",
+    role: "Manager",
+    assignedLocation: "Al-Qassim WH-02",
+    status: "Active",
+    canOverrideCredit: false,
+    canApproveWriteOff: true,
+    canReleaseDispatch: true,
+    canVerifyCash: true,
+    canCreateProduct: false,
+    canDraftPo: true
+  },
+  {
+    userId: "USR-SEL-01",
+    userName: "Omar Farooq",
+    role: "Seller",
+    assignedLocation: "Van #VH-01",
+    status: "Active",
+    canOverrideCredit: false,
+    canApproveWriteOff: false,
+    canReleaseDispatch: false,
+    canVerifyCash: false,
+    canCreateProduct: false,
+    canDraftPo: false
+  },
+  {
+    userId: "USR-SEL-02",
+    userName: "Faisal Ahmed",
+    role: "Seller",
+    assignedLocation: "Van #VH-02",
+    status: "Active",
+    canOverrideCredit: false,
+    canApproveWriteOff: false,
+    canReleaseDispatch: false,
+    canVerifyCash: false,
+    canCreateProduct: false,
+    canDraftPo: false
+  }
+];
+
+export const FEATURE_TOGGLES_DATA = [
+  {
+    id: "TOGGLE-01",
+    featureName: "Field Store Credit Sales",
+    description: "Allow field sellers to sell on running credit terms (weekly/monthly/bill-to-bill).",
+    enabled: true,
+    category: "Field Sales Rules"
+  },
+  {
+    id: "TOGGLE-02",
+    featureName: "Van Stock Repackaging & Conversion",
+    description: "Permit managers to execute Workflow D (repackaging bulk SKUs into seller packs).",
+    enabled: true,
+    category: "Inventory Rules"
+  },
+  {
+    id: "TOGGLE-03",
+    featureName: "Strict Cash Ceiling Order Lock",
+    description: "Automatically block sellers from taking new POS sales when daily cash ceiling (12,000 SAR) is breached.",
+    enabled: true,
+    category: "Cash & Security"
+  },
+  {
+    id: "TOGGLE-04",
+    featureName: "Auto-Block Overdue Credit Accounts",
+    description: "System automatically blocks store accounts exceeding credit grace period without manual intervention.",
+    enabled: true,
+    category: "Credit Governance"
+  },
+  {
+    id: "TOGGLE-05",
+    featureName: "Mandatory Photo Evidence for Write-Offs",
+    description: "Require photo upload verification before manager or admin stock write-off approval.",
+    enabled: true,
+    category: "Audit & Compliance"
+  }
+];
+
+export const ADMIN_AUDIT_TRAIL = [
+  {
+    id: "AUD-2026-901",
+    timestamp: "2026-09-05 14:20:15",
+    user: "Admin System Owner",
+    role: "Admin",
+    action: "UPDATE_SYSTEM_CEILING",
+    details: "Max seller discount ceiling updated from 8% to 10%.",
+    riskLevel: "Medium Risk"
+  },
+  {
+    id: "AUD-2026-902",
+    timestamp: "2026-09-05 12:45:00",
+    user: "Admin System Owner",
+    role: "Admin",
+    action: "APPROVE_DRAFT_PO",
+    details: "Final approval granted for PO-2026-019 (Al-Riyadh Agricultural Co.) - SAR 184,000.",
+    riskLevel: "Low Risk"
+  },
+  {
+    id: "AUD-2026-903",
+    timestamp: "2026-09-04 18:10:30",
+    user: "Sami Al-Mansoor",
+    role: "Manager",
+    action: "OVERRIDE_CREDIT_BLOCK",
+    details: "Credit override granted for Green Oasis Agribusiness (STR-188). Reason: Harvest seasonal payment agreement.",
+    riskLevel: "High Risk"
+  },
+  {
+    id: "AUD-2026-904",
+    timestamp: "2026-09-04 11:30:22",
+    user: "Admin System Owner",
+    role: "Admin",
+    action: "GRANT_PERMISSION_SET",
+    details: "Granted canCreateProduct permission set to Manager Sami Al-Mansoor.",
+    riskLevel: "Medium Risk"
+  }
+];
+

@@ -11,104 +11,109 @@ import { CURRENT_SELLER } from '../../data/mockData';
 
 export const SellerNav = ({ activeTab, setActiveTab }) => {
   const tabs = [
-    { id: 'home', label: 'Home', icon: Home },
+    { id: 'home', label: 'Route & Shift', icon: Home },
     { id: 'new-sale', label: '+ POS Sale', icon: ShoppingCart, highlight: true },
     { id: 'van-stock', label: 'Van Stock', icon: Package, badge: '4' },
     { id: 'stores', label: 'My Stores', icon: Store, badge: `${CURRENT_SELLER.assignedStoresCount}` },
-    { id: 'cash', label: 'Cash', icon: Banknote, alert: CURRENT_SELLER.cashBreachWarning },
-    { id: 'attendance', label: 'Shift', icon: Clock }
+    { id: 'cash', label: 'Cash & Deposit', icon: Banknote, alert: CURRENT_SELLER.cashBreachWarning },
+    { id: 'attendance', label: 'Shift Attendance', icon: Clock }
   ];
 
   return (
-    <>
-      {/* Desktop / Tablet Navigation Bar */}
-      <div 
-        className="desktop-seller-nav"
-        style={{
-          backgroundColor: '#ffffff',
-          borderBottom: '1px solid var(--border-color)',
-          padding: '0 20px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          overflowX: 'auto'
-        }}
-      >
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
+    <div 
+      style={{
+        backgroundColor: '#ffffff',
+        borderBottom: '1px solid var(--border-color)',
+        padding: '0 16px',
+        height: '46px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
+        overflowX: 'auto',
+        flexShrink: 0
+      }}
+    >
+      {tabs.map((tab) => {
+        const Icon = tab.icon;
+        const isActive = activeTab === tab.id;
+        
+        if (tab.highlight) {
           return (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id)}
               style={{
-                padding: '10px 16px',
-                fontSize: '13px',
-                fontWeight: isActive ? 700 : 500,
-                backgroundColor: tab.highlight ? (isActive ? 'var(--color-forest-dark)' : 'var(--color-agro-green)') : (isActive ? 'var(--color-agro-green-light)' : 'transparent'),
-                color: tab.highlight ? '#ffffff' : (isActive ? 'var(--color-forest-dark)' : 'var(--text-muted)'),
+                padding: '6px 12px',
+                fontSize: '12px',
+                fontWeight: 600,
+                backgroundColor: isActive ? 'var(--color-forest-dark)' : 'var(--color-agro-green)',
+                color: '#ffffff',
                 border: 'none',
-                borderBottom: isActive && !tab.highlight ? '3px solid var(--color-agro-green)' : '3px solid transparent',
-                borderRadius: tab.highlight ? '4px' : '0',
-                margin: tab.highlight ? '4px 4px' : '0',
+                borderRadius: '4px',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
+                gap: '5px',
                 whiteSpace: 'nowrap',
-                transition: 'all 0.12s ease'
+                height: '32px'
               }}
             >
-              <Icon size={16} />
+              <Icon size={14} />
               <span>{tab.label}</span>
-              {tab.badge && (
-                <span style={{
-                  backgroundColor: 'rgba(0,0,0,0.06)',
-                  fontSize: '10.5px',
-                  fontWeight: 700,
-                  padding: '1px 6px',
-                  borderRadius: '4px'
-                }}>
-                  {tab.badge}
-                </span>
-              )}
-              {tab.alert && (
-                <span style={{
-                  backgroundColor: '#fee2e2',
-                  color: '#991b1b',
-                  fontSize: '10px',
-                  fontWeight: 700,
-                  padding: '1px 5px',
-                  borderRadius: '4px'
-                }}>
-                  Alert
-                </span>
-              )}
             </button>
           );
-        })}
-      </div>
+        }
 
-      {/* Mobile Fixed Bottom Navigation Bar */}
-      <nav className="mobile-bottom-nav" style={{ display: 'none' }}>
-        {tabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeTab === tab.id;
-          return (
-            <button
-              key={tab.id}
-              className={`mobile-nav-btn ${isActive ? 'active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-              style={{
-                color: tab.highlight ? (isActive ? 'var(--color-forest-dark)' : 'var(--color-agro-green)') : (isActive ? 'var(--color-forest-dark)' : 'var(--text-muted)')
-              }}
-            >
-              <Icon size={20} />
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </nav>
-    </>
+        return (
+          <button
+            key={tab.id}
+            onClick={() => setActiveTab(tab.id)}
+            style={{
+              padding: '0 12px',
+              fontSize: '12.5px',
+              fontWeight: isActive ? 600 : 500,
+              backgroundColor: isActive ? 'var(--color-agro-green-light)' : 'transparent',
+              color: isActive ? 'var(--color-forest-dark)' : 'var(--text-muted)',
+              border: 'none',
+              borderBottom: isActive ? '2px solid var(--color-agro-green)' : '2px solid transparent',
+              borderRadius: '0',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              whiteSpace: 'nowrap',
+              height: '46px',
+              transition: 'all 0.12s ease'
+            }}
+          >
+            <Icon size={15} />
+            <span>{tab.label}</span>
+            {tab.badge && (
+              <span style={{
+                backgroundColor: 'rgba(0,0,0,0.06)',
+                fontSize: '10px',
+                fontWeight: 700,
+                padding: '1px 5px',
+                borderRadius: '3px'
+              }}>
+                {tab.badge}
+              </span>
+            )}
+            {tab.alert && (
+              <span style={{
+                backgroundColor: '#fee2e2',
+                color: '#991b1b',
+                fontSize: '9.5px',
+                fontWeight: 700,
+                padding: '1px 4px',
+                borderRadius: '3px'
+              }}>
+                Alert
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
   );
 };

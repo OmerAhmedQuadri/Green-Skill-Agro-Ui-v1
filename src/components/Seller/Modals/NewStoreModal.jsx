@@ -42,10 +42,10 @@ export const NewStoreModal = ({ onClose, onConfirm }) => {
 
         <form onSubmit={handleSubmit} className="modal-body">
           <div style={{ backgroundColor: '#f0f4ee', padding: '10px 12px', borderRadius: '4px', fontSize: '11.5px', color: '#1b4332' }}>
-            <strong>Phase 1 Scope Rule:</strong> Storefront photo and auto-detected GPS coordinates are captured. CR/VAT numbers are optional. New stores require Manager approval before first sale.
+            <strong>System Rule:</strong> Storefront photo and auto-detected GPS coordinates are captured. CR/VAT numbers are optional. New stores require Manager approval before first sale.
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+          <div className="modal-form-grid">
             <div className="form-group">
               <span className="form-label">Store Name</span>
               <input type="text" className="form-input" placeholder="e.g. Al-Waha Agricultural Store" value={storeName} onChange={(e) => setStoreName(e.target.value)} required />
@@ -70,9 +70,7 @@ export const NewStoreModal = ({ onClose, onConfirm }) => {
                 <option value="Jeddah">Jeddah</option>
               </select>
             </div>
-          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             <div className="form-group">
               <span className="form-label">CR Number (Optional)</span>
               <input type="text" className="form-input" placeholder="1010XXXXXX" value={crNumber} onChange={(e) => setCrNumber(e.target.value)} />
@@ -82,9 +80,7 @@ export const NewStoreModal = ({ onClose, onConfirm }) => {
               <span className="form-label">VAT Number (Optional)</span>
               <input type="text" className="form-input" placeholder="300XXXXXXXXX" value={vatNumber} onChange={(e) => setVatNumber(e.target.value)} />
             </div>
-          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
             <div className="form-group">
               <span className="form-label">Proposed Credit Cycle</span>
               <select className="form-select" value={proposedCycle} onChange={(e) => setProposedCycle(e.target.value)}>

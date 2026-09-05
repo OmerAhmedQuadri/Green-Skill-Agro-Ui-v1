@@ -2,9 +2,8 @@ import React, { useState } from 'react';
 import { Clock, Camera, MapPin, CheckCircle, ShieldCheck } from 'lucide-react';
 import { CURRENT_SELLER } from '../../data/mockData';
 
-export const SellerAttendance = () => {
+export const SellerAttendance = ({ onNavigate }) => {
   const [odometer, setOdometer] = useState(CURRENT_SELLER.odometerCurrent);
-  const [selfiePhoto] = useState('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80');
   const [checkedOut, setCheckedOut] = useState(false);
 
   const handleCheckOut = (e) => {
@@ -13,7 +12,7 @@ export const SellerAttendance = () => {
   };
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: '20px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
+    <div className="seller-subpage-layout">
       <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
         <div className="dashboard-topbar">
           <div>
@@ -36,7 +35,7 @@ export const SellerAttendance = () => {
             </span>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px', fontSize: '12.5px' }}>
+          <div className="seller-shift-details-grid" style={{ marginBottom: '16px', fontSize: '12.5px' }}>
             <div style={{ padding: '12px', backgroundColor: 'var(--bg-surface-subtle)', borderRadius: '4px', border: '1px solid var(--border-color-light)' }}>
               <span className="form-label">Check-in Time</span>
               <div style={{ fontWeight: 700, fontSize: '15px', color: 'var(--color-forest-dark)' }}>{CURRENT_SELLER.checkInTime}</div>
@@ -58,8 +57,12 @@ export const SellerAttendance = () => {
 
             <div className="form-group">
               <span className="form-label">Identity Selfie Capture</span>
-              <div className="photo-preview-box">
-                <img src={selfiePhoto} alt="Selfie" />
+              <div className="photo-preview-box" style={{ padding: 0, backgroundColor: '#c4c4c4', maxHeight: '240px' }}>
+                <img 
+                  src="/avatar-placeholder.png" 
+                  alt="Identity Selfie" 
+                  style={{ width: '100%', height: '220px', objectFit: 'contain', display: 'block' }}
+                />
               </div>
               <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <MapPin size={12} />

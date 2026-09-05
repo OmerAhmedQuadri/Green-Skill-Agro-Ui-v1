@@ -33,7 +33,7 @@ export const SkuConversionModal = ({ onClose, onConfirm }) => {
 
         <form onSubmit={handleSubmit} className="modal-body">
           <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', padding: '10px 12px', borderRadius: '4px', fontSize: '11.5px', color: '#1e40af' }}>
-            <strong>Phase 1 Scope Rule:</strong> Converts stock from one pack size/packaging to another (e.g. 5kg bags to 1kg pouches). LOT #, MFD, and Expiry carry across unchanged. Loss quantity automatically posts to the write-off ledger.
+            <strong>System Rule:</strong> Converts stock from one pack size/packaging to another (e.g. 5kg bags to 1kg pouches). LOT #, MFD, and Expiry carry across unchanged. Loss quantity automatically posts to the write-off ledger.
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
