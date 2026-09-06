@@ -1,8 +1,11 @@
 import React from 'react';
 import { Menu, ArrowLeft, AlertTriangle, ArrowRightLeft, ShoppingCart } from 'lucide-react';
-import { CURRENT_SELLER } from '../../data/mockData';
+import { useManagerContext } from '../../context/ManagerContext';
 
 export const SellerHeader = ({ onOpenDrawer, onSwitchRole, onNavigate, activeTab = 'home' }) => {
+  const { currentSeller } = useManagerContext();
+  const seller = currentSeller || { assignedVehicle: { id: 'VH-01' }, cashInHand: 14500, cashBreachWarning: true };
+
   const pageTitles = {
     'new-sale': 'POS Sale',
     'van-stock': 'Van Stock',
@@ -86,7 +89,7 @@ export const SellerHeader = ({ onOpenDrawer, onSwitchRole, onNavigate, activeTab
                 Green Skill Agro Field
               </span>
               <span className="desktop-only-inline" style={{ fontSize: '10.5px', color: 'rgba(255, 255, 255, 0.7)', whiteSpace: 'nowrap' }}>
-                Van #{CURRENT_SELLER.assignedVehicle.id}
+                Van #{seller.assignedVehicle?.id}
               </span>
             </div>
           </div>
@@ -95,7 +98,7 @@ export const SellerHeader = ({ onOpenDrawer, onSwitchRole, onNavigate, activeTab
 
       {/* Right: Quick Actions & Role Switcher */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexShrink: 0 }}>
-        {CURRENT_SELLER.cashBreachWarning && (
+        {seller.cashBreachWarning && (
           <div 
             className="mobile-hide-cash"
             style={{
@@ -113,7 +116,7 @@ export const SellerHeader = ({ onOpenDrawer, onSwitchRole, onNavigate, activeTab
             title="Cash Limit Exceeded"
           >
             <AlertTriangle size={12} />
-            <span>SAR {CURRENT_SELLER.cashInHand.toLocaleString()}</span>
+            <span>SAR {seller.cashInHand?.toLocaleString()}</span>
           </div>
         )}
 
@@ -142,4 +145,3 @@ export const SellerHeader = ({ onOpenDrawer, onSwitchRole, onNavigate, activeTab
     </header>
   );
 };
-

@@ -1,18 +1,22 @@
 import React from 'react';
-import { Package, Clock, CheckCircle, AlertTriangle, Truck, ArrowLeft } from 'lucide-react';
-import { INVENTORY_STOCK, CURRENT_SELLER } from '../../data/mockData';
+import { Package, CheckCircle, AlertTriangle } from 'lucide-react';
+import { useManagerContext } from '../../context/ManagerContext';
 
-export const SellerVehicleStock = ({ onNavigate }) => {
+export const SellerVehicleStock = () => {
+  const { inventory, currentSeller } = useManagerContext();
+  const stockList = inventory || [];
+  const seller = currentSeller || { assignedVehicle: { id: 'VH-01', stockValue: 84200 } };
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
       <div className="dashboard-topbar">
         <div>
           <div className="topbar-title">
             <Package size={18} />
-            <span>Vehicle Inventory Register (Van #{CURRENT_SELLER.assignedVehicle.id})</span>
+            <span>Vehicle Inventory Register (Van #{seller.assignedVehicle?.id})</span>
           </div>
           <div className="topbar-subtitle">
-            Unsold stock remains on vehicle &bull; Total Valuation: SAR {CURRENT_SELLER.assignedVehicle.stockValue.toLocaleString()}
+            Unsold stock remains on vehicle &bull; Total Valuation: SAR {seller.assignedVehicle?.stockValue?.toLocaleString()}
           </div>
         </div>
       </div>
@@ -33,7 +37,7 @@ export const SellerVehicleStock = ({ onNavigate }) => {
               </tr>
             </thead>
             <tbody>
-              {INVENTORY_STOCK.map((item) => (
+              {stockList.map((item) => (
                 <tr key={item.sku}>
                   <td><span className="code-cell">{item.sku}</span></td>
                   <td>

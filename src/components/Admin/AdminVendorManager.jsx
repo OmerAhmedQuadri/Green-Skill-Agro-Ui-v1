@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
-import { Building2, Plus, CheckCircle, FileText, Check, ExternalLink, ShieldCheck } from 'lucide-react';
-import { VENDORS_MASTER_DATA, PURCHASE_ORDERS } from '../../data/mockData';
+import { Building2, Plus, FileText, Check, ShieldCheck } from 'lucide-react';
+import { VENDORS_MASTER_DATA } from '../../data/mockData';
+import { useManagerContext } from '../../context/ManagerContext';
 
 export const AdminVendorManager = ({ onShowToast }) => {
+  const { orders, approvePurchaseOrder } = useManagerContext();
   const [vendors, setVendors] = useState([...VENDORS_MASTER_DATA]);
-  const [draftPOs, setDraftPOs] = useState(
-    PURCHASE_ORDERS.filter(po => po.stateName.includes('Draft') || po.stateName.includes('Pending'))
-  );
   const [modalOpen, setModalOpen] = useState(false);
   const [newVendor, setNewVendor] = useState({
     vendorName: '',
@@ -18,8 +17,14 @@ export const AdminVendorManager = ({ onShowToast }) => {
     email: ''
   });
 
-  const handleApprovePo = (poNumber) => {
-    setDraftPOs(prev => prev.filter(po => po.poNumber !== poNumber));
+  const draftPOs = (orders || []).filter(po => 
+    (po.stateName || '').toLowerCase().includes('draft') || 
+    (po.stateName || '').toLowerCase().includes('pending') ||
+    (po.adminApprovalStatus || '').toLowerCase().includes('awaiting')
+  );
+
+  const handleApprovePo = async (poNumber) => {
+    await approvePurchaseOrder(poNumber);
     if (onShowToast) {
       onShowToast(`Final Admin Approval granted for Purchase Order ${poNumber}. PO status updated to "Approved & Issued".`);
     }
@@ -83,7 +88,7 @@ export const AdminVendorManager = ({ onShowToast }) => {
                         Vendor: <strong>{po.vendorName}</strong> ({po.vendorCode}) &bull; Raised on {po.dateRaised} &bull; Lead Time: {po.leadTimeDays} days
                       </div>
                       <div style={{ fontSize: '11px', color: 'var(--color-forest-dark)', fontWeight: 600, marginTop: '2px' }}>
-                        Order Summary: {po.itemsSummary} &bull; Total Value: <strong>SAR {po.totalValue.toLocaleString()}</strong>
+                        Order Summary: {po.itemsSummary} &bull; Total Value: <strong>SAR {po.totalValue?.toLocaleString()}</strong>
                       </div>
                     </div>
                   </div>

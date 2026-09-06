@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { ToggleLeft, ToggleRight, CheckCircle, RotateCcw, AlertTriangle } from 'lucide-react';
-import { FEATURE_TOGGLES_DATA } from '../../data/mockData';
+import { ToggleLeft, ToggleRight, RotateCcw } from 'lucide-react';
+import { useManagerContext } from '../../context/ManagerContext';
 
 export const AdminFeatureToggles = ({ onShowToast }) => {
-  const [toggles, setToggles] = useState([...FEATURE_TOGGLES_DATA]);
+  const { featureToggles, toggleFeature } = useManagerContext();
+  const toggles = featureToggles || [];
+
   const [returnPolicy, setReturnPolicy] = useState({
     maxReturnDays: 14,
     restockingFeePct: 5,
@@ -11,17 +13,12 @@ export const AdminFeatureToggles = ({ onShowToast }) => {
     autoRestockGoodBatches: true
   });
 
-  const handleToggle = (id) => {
-    setToggles(prev => prev.map(t => {
-      if (t.id === id) {
-        const updated = !t.enabled;
-        if (onShowToast) {
-          onShowToast(`Feature "${t.featureName}" set to ${updated ? 'ENABLED' : 'DISABLED'}.`);
-        }
-        return { ...t, enabled: updated };
-      }
-      return t;
-    }));
+  const handleToggle = async (id, featureName, currentEnabled) => {
+    const updated = !currentEnabled;
+    await toggleFeature(id);
+    if (onShowToast) {
+      onShowToast(`Feature "${featureName}" set to ${updated ? 'ENABLED' : 'DISABLED'}.`);
+    }
   };
 
   const handleSaveReturnPolicy = (e) => {
@@ -62,7 +59,7 @@ export const AdminFeatureToggles = ({ onShowToast }) => {
               <button 
                 className={t.enabled ? 'btn-primary' : 'btn-secondary'}
                 style={{ minWidth: '110px', justifyContent: 'center', height: '36px' }}
-                onClick={() => handleToggle(t.id)}
+                onClick={() => handleToggle(t.id, t.featureName, t.enabled)}
               >
                 {t.enabled ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
                 <span>{t.enabled ? 'Active' : 'Disabled'}</span>

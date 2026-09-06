@@ -1,20 +1,31 @@
 import React, { useState } from 'react';
-import { Banknote, CheckCircle, AlertTriangle, ShieldCheck, ArrowLeft } from 'lucide-react';
-import { CURRENT_SELLER } from '../../data/mockData';
+import { Banknote, CheckCircle, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { useManagerContext } from '../../context/ManagerContext';
 
-export const SellerCashHandover = ({ onNavigate }) => {
-  const { approvals } = useManagerContext();
+export const SellerCashHandover = () => {
+  const { currentSeller, submitCashHandover, approvals } = useManagerContext();
   const [routeType, setRouteType] = useState('Bank Deposit');
   const [amount, setAmount] = useState(14500);
   const [refNumber, setRefNumber] = useState('ALRAJ-998412');
   const [proofImage] = useState('https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80');
   const [submitted, setSubmitted] = useState(false);
 
-  const handleSubmit = (e) => {
+  const seller = currentSeller || { cashInHand: 14500, cashLimit: 12000, cashBreachWarning: true };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    await submitCashHandover({
+      type: routeType,
+      amount,
+      refNumber,
+      proofImage,
+      sellerName: seller.name,
+      route: seller.route
+    });
     setSubmitted(true);
   };
+
+  const pendingList = approvals?.cashHandovers || [];
 
   return (
     <div className="seller-subpage-layout">
@@ -32,13 +43,13 @@ export const SellerCashHandover = ({ onNavigate }) => {
           </div>
         </div>
 
-        {CURRENT_SELLER.cashBreachWarning && (
+        {seller.cashBreachWarning && (
           <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', padding: '12px 16px', borderRadius: '6px', fontSize: '12.5px', display: 'flex', gap: '10px' }}>
             <AlertTriangle size={18} className="shrink-0" />
             <div>
               <strong>Cash Ceiling Limit Breached!</strong>
               <div style={{ marginTop: '2px' }}>
-                Your current cash in hand (SAR {CURRENT_SELLER.cashInHand.toLocaleString()}) exceeds the ceiling limit of SAR {CURRENT_SELLER.cashLimit.toLocaleString()}. Please submit a bank deposit or handover to clear the warning flag.
+                Your current cash in hand (SAR {seller.cashInHand?.toLocaleString()}) exceeds the ceiling limit of SAR {seller.cashLimit?.toLocaleString()}. Please submit a bank deposit or handover to clear the warning flag.
               </div>
             </div>
           </div>
@@ -95,31 +106,27 @@ export const SellerCashHandover = ({ onNavigate }) => {
         <div className="side-panel-card" style={{ padding: '18px' }}>
           <div className="side-panel-title">
             <ShieldCheck size={16} />
-            <span>Recent Settlement Records</span>
+            <span>Recent Settlement Records ({pendingList.length} Pending)</span>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ padding: '10px', backgroundColor: 'var(--bg-surface-subtle)', border: '1px solid var(--border-color-light)', borderRadius: '4px', fontSize: '12px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}>
-                <span>Bank Deposit (Al Rajhi)</span>
-                <span className="badge badge-warning">Pending Review</span>
+            {pendingList.map((item) => (
+              <div key={item.id} style={{ padding: '10px', backgroundColor: 'var(--bg-surface-subtle)', border: '1px solid var(--border-color-light)', borderRadius: '4px', fontSize: '12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}>
+                  <span>{item.type}</span>
+                  <span className="badge badge-warning">{item.status}</span>
+                </div>
+                <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-forest-dark)', marginTop: '4px' }}>
+                  SAR {item.declaredAmount?.toLocaleString()}
+                </div>
+                <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>Ref: #{item.bankName} &bull; {item.dateSubmitted}</div>
               </div>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: 'var(--color-forest-dark)', marginTop: '4px' }}>
-                SAR 14,500
+            ))}
+            {pendingList.length === 0 && (
+              <div style={{ fontSize: '12px', color: 'var(--text-muted)', textAlign: 'center', padding: '12px' }}>
+                No active pending settlements.
               </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>Ref: #ALRAJ-998412 &bull; Today 14:10</div>
-            </div>
-
-            <div style={{ padding: '10px', backgroundColor: 'var(--bg-surface-subtle)', border: '1px solid var(--border-color-light)', borderRadius: '4px', fontSize: '12px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontWeight: 600 }}>
-                <span>Bank Deposit (SNB)</span>
-                <span className="badge badge-success">Approved</span>
-              </div>
-              <div style={{ fontSize: '14px', fontWeight: 700, color: '#166534', marginTop: '4px' }}>
-                SAR 22,000
-              </div>
-              <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>Ref: #SNB-441029 &bull; Yesterday 16:45</div>
-            </div>
+            )}
           </div>
         </div>
       </div>

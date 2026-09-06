@@ -1,17 +1,30 @@
 import React, { useState } from 'react';
-import { Store, Plus, Lock, CheckCircle, Search, Phone, ArrowLeft } from 'lucide-react';
-import { STORE_CREDIT_DATA, CURRENT_SELLER } from '../../data/mockData';
+import { Store, Plus, Lock, CheckCircle, Search } from 'lucide-react';
+import { useManagerContext } from '../../context/ManagerContext';
 import { NewStoreModal } from './Modals/NewStoreModal';
 
 export const SellerStorePortfolio = ({ onNavigate }) => {
+  const { stores, onboardStore, currentSeller } = useManagerContext();
   const [showNewStoreModal, setShowNewStoreModal] = useState(false);
   const [search, setSearch] = useState('');
+  const [successMsg, setSuccessMsg] = useState('');
 
-  const filteredStores = STORE_CREDIT_DATA.filter(s => 
-    s.storeName.toLowerCase().includes(search.toLowerCase()) ||
-    s.ownerName.toLowerCase().includes(search.toLowerCase()) ||
-    s.city.toLowerCase().includes(search.toLowerCase())
+  const storeList = stores && stores.length > 0 ? stores : [];
+
+  const filteredStores = storeList.filter(s => 
+    (s.storeName || '').toLowerCase().includes(search.toLowerCase()) ||
+    (s.ownerName || '').toLowerCase().includes(search.toLowerCase()) ||
+    (s.city || '').toLowerCase().includes(search.toLowerCase())
   );
+
+  const handleConfirmNewStore = async (data) => {
+    setShowNewStoreModal(false);
+    await onboardStore(data);
+    setSuccessMsg(`Store "${data.storeName}" submitted for Manager approval!`);
+    setTimeout(() => setSuccessMsg(''), 5000);
+  };
+
+  const sellerInfo = currentSeller || { route: 'Riyadh North', assignedStoresCount: storeList.length };
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
@@ -19,10 +32,10 @@ export const SellerStorePortfolio = ({ onNavigate }) => {
         <div>
           <div className="topbar-title">
             <Store size={18} />
-            <span>My Store Portfolio ({CURRENT_SELLER.assignedStoresCount} Stores)</span>
+            <span>My Store Portfolio ({sellerInfo.assignedStoresCount || storeList.length} Stores)</span>
           </div>
           <div className="topbar-subtitle">
-            Assigned stores in route {CURRENT_SELLER.route}
+            Assigned stores in route {sellerInfo.route}
           </div>
         </div>
 
@@ -33,6 +46,13 @@ export const SellerStorePortfolio = ({ onNavigate }) => {
           </button>
         </div>
       </div>
+
+      {successMsg && (
+        <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', padding: '10px 14px', borderRadius: '6px', fontSize: '12.5px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <CheckCircle size={16} />
+          <span>{successMsg}</span>
+        </div>
+      )}
 
       <div className="data-panel">
         <div className="panel-header-toolbar">
@@ -70,10 +90,10 @@ export const SellerStorePortfolio = ({ onNavigate }) => {
                   </td>
                   <td>{store.city}</td>
                   <td>{store.creditCycle}</td>
-                  <td>SAR {store.creditLimit.toLocaleString()}</td>
+                  <td>SAR {store.creditLimit?.toLocaleString()}</td>
                   <td>
                     <strong style={{ color: store.blocked ? '#991b1b' : 'var(--text-main)' }}>
-                      SAR {store.outstandingBalance.toLocaleString()}
+                      SAR {store.outstandingBalance?.toLocaleString()}
                     </strong>
                   </td>
                   <td>
@@ -104,10 +124,7 @@ export const SellerStorePortfolio = ({ onNavigate }) => {
       {showNewStoreModal && (
         <NewStoreModal
           onClose={() => setShowNewStoreModal(false)}
-          onConfirm={(data) => {
-            setShowNewStoreModal(false);
-            alert(`Store "${data.storeName}" submitted for Manager approval!`);
-          }}
+          onConfirm={handleConfirmNewStore}
         />
       )}
     </div>

@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
-import { FileSpreadsheet, Search, ShieldAlert, AlertTriangle, ShieldCheck } from 'lucide-react';
-import { ADMIN_AUDIT_TRAIL } from '../../data/mockData';
+import { FileSpreadsheet, Search, AlertTriangle, ShieldCheck } from 'lucide-react';
+import { useManagerContext } from '../../context/ManagerContext';
 
 export const AdminAuditTrail = () => {
-  const [logs, setLogs] = useState([...ADMIN_AUDIT_TRAIL]);
+  const { auditTrail } = useManagerContext();
   const [searchTerm, setSearchTerm] = useState('');
 
+  const logs = auditTrail || [];
+
   const filteredLogs = logs.filter(l => 
-    l.id.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    l.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    l.action.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    l.details.toLowerCase().includes(searchTerm.toLowerCase())
+    (l.id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (l.user || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (l.action || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (l.details || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (

@@ -1,34 +1,25 @@
-import React, { useState } from 'react';
-import { Shield, CheckCircle, Lock, UserCheck, AlertTriangle } from 'lucide-react';
-import { USER_PERMISSIONS_DATA } from '../../data/mockData';
+import React from 'react';
+import { Shield, UserCheck, AlertTriangle } from 'lucide-react';
+import { useManagerContext } from '../../context/ManagerContext';
 
 export const AdminPermissionsManager = ({ onShowToast }) => {
-  const [users, setUsers] = useState([...USER_PERMISSIONS_DATA]);
+  const { userPermissions, updateUserPermission, updateUserStatus } = useManagerContext();
+  const users = userPermissions || [];
 
-  const handleTogglePermission = (userId, field) => {
-    setUsers(prev => prev.map(u => {
-      if (u.userId === userId) {
-        const updatedVal = !u[field];
-        if (onShowToast) {
-          onShowToast(`Updated permission for ${u.userName}: set ${field} to ${updatedVal ? 'GRANTED' : 'REVOKED'}.`);
-        }
-        return { ...u, [field]: updatedVal };
-      }
-      return u;
-    }));
+  const handleTogglePermission = async (userId, field, currentVal, userName) => {
+    const updatedVal = !currentVal;
+    await updateUserPermission(userId, field, updatedVal);
+    if (onShowToast) {
+      onShowToast(`Updated permission for ${userName}: set ${field} to ${updatedVal ? 'GRANTED' : 'REVOKED'}.`);
+    }
   };
 
-  const handleToggleStatus = (userId) => {
-    setUsers(prev => prev.map(u => {
-      if (u.userId === userId) {
-        const newStatus = u.status === 'Active' ? 'Suspended' : 'Active';
-        if (onShowToast) {
-          onShowToast(`User account status for ${u.userName} changed to ${newStatus}.`);
-        }
-        return { ...u, status: newStatus };
-      }
-      return u;
-    }));
+  const handleToggleStatus = async (userId, currentStatus, userName) => {
+    const newStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
+    await updateUserStatus(userId, newStatus);
+    if (onShowToast) {
+      onShowToast(`User account status for ${userName} changed to ${newStatus}.`);
+    }
   };
 
   return (
@@ -75,8 +66,8 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
                       <input 
                         type="checkbox"
                         disabled={u.role === 'Seller'}
-                        checked={u.canOverrideCredit}
-                        onChange={() => handleTogglePermission(u.userId, 'canOverrideCredit')}
+                        checked={!!u.canOverrideCredit}
+                        onChange={() => handleTogglePermission(u.userId, 'canOverrideCredit', u.canOverrideCredit, u.userName)}
                       />
                       <span style={{ fontSize: '11.5px', fontWeight: u.canOverrideCredit ? 700 : 400 }}>
                         {u.canOverrideCredit ? 'Granted' : 'Locked'}
@@ -89,8 +80,8 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
                       <input 
                         type="checkbox"
                         disabled={u.role === 'Seller'}
-                        checked={u.canApproveWriteOff}
-                        onChange={() => handleTogglePermission(u.userId, 'canApproveWriteOff')}
+                        checked={!!u.canApproveWriteOff}
+                        onChange={() => handleTogglePermission(u.userId, 'canApproveWriteOff', u.canApproveWriteOff, u.userName)}
                       />
                       <span style={{ fontSize: '11.5px', fontWeight: u.canApproveWriteOff ? 700 : 400 }}>
                         {u.canApproveWriteOff ? 'Granted' : 'Locked'}
@@ -103,8 +94,8 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
                       <input 
                         type="checkbox"
                         disabled={u.role === 'Seller'}
-                        checked={u.canReleaseDispatch}
-                        onChange={() => handleTogglePermission(u.userId, 'canReleaseDispatch')}
+                        checked={!!u.canReleaseDispatch}
+                        onChange={() => handleTogglePermission(u.userId, 'canReleaseDispatch', u.canReleaseDispatch, u.userName)}
                       />
                       <span style={{ fontSize: '11.5px', fontWeight: u.canReleaseDispatch ? 700 : 400 }}>
                         {u.canReleaseDispatch ? 'Granted' : 'Locked'}
@@ -117,8 +108,8 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
                       <input 
                         type="checkbox"
                         disabled={u.role === 'Seller'}
-                        checked={u.canVerifyCash}
-                        onChange={() => handleTogglePermission(u.userId, 'canVerifyCash')}
+                        checked={!!u.canVerifyCash}
+                        onChange={() => handleTogglePermission(u.userId, 'canVerifyCash', u.canVerifyCash, u.userName)}
                       />
                       <span style={{ fontSize: '11.5px', fontWeight: u.canVerifyCash ? 700 : 400 }}>
                         {u.canVerifyCash ? 'Granted' : 'Locked'}
@@ -131,8 +122,8 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
                       <input 
                         type="checkbox"
                         disabled={u.role === 'Seller'}
-                        checked={u.canCreateProduct}
-                        onChange={() => handleTogglePermission(u.userId, 'canCreateProduct')}
+                        checked={!!u.canCreateProduct}
+                        onChange={() => handleTogglePermission(u.userId, 'canCreateProduct', u.canCreateProduct, u.userName)}
                       />
                       <span style={{ fontSize: '11.5px', fontWeight: u.canCreateProduct ? 700 : 400 }}>
                         {u.canCreateProduct ? 'Granted' : 'Locked'}
@@ -144,7 +135,7 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
                     <button 
                       className={u.status === 'Active' ? 'btn-sm-primary' : 'btn-sm-secondary'}
                       style={{ fontSize: '10.5px', padding: '3px 8px' }}
-                      onClick={() => handleToggleStatus(u.userId)}
+                      onClick={() => handleToggleStatus(u.userId, u.status, u.userName)}
                     >
                       {u.status === 'Active' ? <UserCheck size={11} /> : <AlertTriangle size={11} />}
                       <span>{u.status}</span>

@@ -11,10 +11,15 @@ import {
   Search,
   Check
 } from 'lucide-react';
-import { STORE_CREDIT_DATA, INVENTORY_STOCK } from '../../data/mockData';
+import { useManagerContext } from '../../context/ManagerContext';
 
 export const SellerNewSale = ({ onCompleteSale }) => {
-  const [selectedStoreId, setSelectedStoreId] = useState('STR-102');
+  const { stores, inventory, systemRules } = useManagerContext();
+
+  const storeList = stores && stores.length > 0 ? stores : [];
+  const inventoryList = inventory && inventory.length > 0 ? inventory : [];
+
+  const [selectedStoreId, setSelectedStoreId] = useState(storeList[0]?.storeId || 'STR-102');
   const [searchTerm, setSearchTerm] = useState('');
   const [mobileTab, setMobileTab] = useState('stock'); // 'stock' or 'cart'
   const [cart, setCart] = useState([
@@ -24,14 +29,15 @@ export const SellerNewSale = ({ onCompleteSale }) => {
   const [paymentMode, setPaymentMode] = useState('Immediate Cash');
   const [discountError, setDiscountError] = useState('');
 
-  const selectedStore = STORE_CREDIT_DATA.find(s => s.storeId === selectedStoreId) || STORE_CREDIT_DATA[0];
+  const selectedStore = storeList.find(s => s.storeId === selectedStoreId) || storeList[0] || { storeName: 'Select Store', blocked: false, outstandingBalance: 0, creditLimit: 10000 };
 
-  const filteredStock = INVENTORY_STOCK.filter(item => 
-    item.productName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    item.sku.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredStock = inventoryList.filter(item => 
+    (item.productName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (item.sku || '').toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   const subtotal = cart.reduce((acc, item) => acc + (item.unitPrice * item.qty * (1 - item.discountPct / 100)), 0);
+  const maxDiscountCeiling = systemRules?.maxSellerDiscountPct ?? 10;
 
   const handleQtyChange = (sku, delta) => {
     setCart(prev => prev.map(item => {
@@ -45,8 +51,8 @@ export const SellerNewSale = ({ onCompleteSale }) => {
 
   const handleDiscountChange = (sku, pct) => {
     const numPct = Number(pct);
-    if (numPct > 10) {
-      setDiscountError(`Discount ${numPct}% exceeds permitted seller ceiling (Max 10%). Manager approval required.`);
+    if (numPct > maxDiscountCeiling) {
+      setDiscountError(`Discount ${numPct}% exceeds permitted seller ceiling (Max ${maxDiscountCeiling}%). Manager approval required.`);
     } else {
       setDiscountError('');
     }
@@ -84,10 +90,12 @@ export const SellerNewSale = ({ onCompleteSale }) => {
       return;
     }
     onCompleteSale({
+      storeId: selectedStore.storeId,
       storeName: selectedStore.storeName,
       totalAmount: subtotal,
       itemCount: cart.length,
-      paymentMode
+      paymentMode,
+      items: cart
     });
   };
 
@@ -135,7 +143,7 @@ export const SellerNewSale = ({ onCompleteSale }) => {
               value={selectedStoreId}
               onChange={(e) => setSelectedStoreId(e.target.value)}
             >
-              {STORE_CREDIT_DATA.map(s => (
+              {storeList.map(s => (
                 <option key={s.storeId} value={s.storeId}>
                   {s.storeName} ({s.city}) - {s.creditCycle} {s.blocked ? '[BLOCKED]' : ''}
                 </option>
@@ -150,7 +158,7 @@ export const SellerNewSale = ({ onCompleteSale }) => {
                   <span>Account Blocked from Sales</span>
                 </div>
                 <div style={{ marginTop: '3px' }}>
-                  Outstanding: SAR {selectedStore.outstandingBalance.toLocaleString()} (Limit SAR {selectedStore.creditLimit.toLocaleString()})
+                  Outstanding: SAR {selectedStore.outstandingBalance?.toLocaleString()} (Limit SAR {selectedStore.creditLimit?.toLocaleString()})
                 </div>
               </div>
             ) : (

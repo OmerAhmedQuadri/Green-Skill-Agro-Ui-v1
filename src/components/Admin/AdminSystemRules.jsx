@@ -1,18 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Sliders, Save, CheckCircle, ShieldAlert, Lock, Clock, DollarSign, Percent } from 'lucide-react';
-import { SYSTEM_CONFIG_RULES } from '../../data/mockData';
+import { useManagerContext } from '../../context/ManagerContext';
 
 export const AdminSystemRules = ({ onShowToast }) => {
-  const [config, setConfig] = useState({ ...SYSTEM_CONFIG_RULES });
+  const { systemRules, updateSystemRules } = useManagerContext();
+  const [config, setConfig] = useState(systemRules || { maxSellerDiscountPct: 10, maxSellerCashCeiling: 12000, storeCreditGraceDays: 7, expiryWarningWindowDays: 30, lastUpdatedBy: 'Admin System Owner', lastUpdatedAt: 'Just Now' });
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (systemRules) {
+      setConfig(systemRules);
+    }
+  }, [systemRules]);
 
   const handleChange = (field, val) => {
     setConfig(prev => ({ ...prev, [field]: Number(val) }));
     setSaved(false);
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
+    await updateSystemRules(config);
     setSaved(true);
     if (onShowToast) {
       onShowToast(`System Rules & Ceilings Updated! New parameters saved to master governance ledger.`);

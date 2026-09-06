@@ -5,20 +5,32 @@ import {
   Store, 
   Clock, 
   MapPin, 
-  CheckCircle, 
-  AlertTriangle, 
   TrendingUp, 
   Package,
   ChevronRight
 } from 'lucide-react';
-import { CURRENT_SELLER, STORE_CREDIT_DATA } from '../../data/mockData';
+import { useManagerContext } from '../../context/ManagerContext';
 
 export const SellerHome = ({ onNavigate }) => {
-  const formatSAR = (val) => {
-    return new Intl.NumberFormat('en-SA', { style: 'currency', currency: 'SAR', maximumFractionDigits: 0 }).format(val);
+  const { currentSeller, stores } = useManagerContext();
+
+  const seller = currentSeller || {
+    dailySalesAchieved: 32400,
+    dailySalesTarget: 40000,
+    cashInHand: 14500,
+    cashLimit: 12000,
+    cashBreachWarning: true,
+    assignedVehicle: { id: 'VH-01', stockValue: 84200 },
+    route: 'Riyadh North & Central'
   };
 
-  const targetPercentage = Math.round((CURRENT_SELLER.dailySalesAchieved / CURRENT_SELLER.dailySalesTarget) * 100);
+  const storeList = stores && stores.length > 0 ? stores : [];
+
+  const formatSAR = (val) => {
+    return new Intl.NumberFormat('en-SA', { style: 'currency', currency: 'SAR', maximumFractionDigits: 0 }).format(val || 0);
+  };
+
+  const targetPercentage = Math.round(((seller.dailySalesAchieved || 0) / (seller.dailySalesTarget || 1)) * 100);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '1200px', margin: '0 auto', width: '100%' }}>
@@ -71,12 +83,12 @@ export const SellerHome = ({ onNavigate }) => {
               <TrendingUp size={16} />
             </div>
           </div>
-          <div className="metric-value">{formatSAR(CURRENT_SELLER.dailySalesAchieved)}</div>
+          <div className="metric-value">{formatSAR(seller.dailySalesAchieved)}</div>
           <div style={{ width: '100%', backgroundColor: '#edf2ea', borderRadius: '4px', height: '8px', overflow: 'hidden', marginBottom: '8px' }}>
             <div style={{ width: `${targetPercentage}%`, backgroundColor: 'var(--color-agro-green)', height: '100%' }}></div>
           </div>
           <div className="breakdown-row">
-            <span>Target: {formatSAR(CURRENT_SELLER.dailySalesTarget)}</span>
+            <span>Target: {formatSAR(seller.dailySalesTarget)}</span>
             <span style={{ fontWeight: 700, color: 'var(--color-forest-dark)' }}>{targetPercentage}% Achieved</span>
           </div>
         </div>
@@ -89,17 +101,17 @@ export const SellerHome = ({ onNavigate }) => {
               <Banknote size={16} />
             </div>
           </div>
-          <div className="metric-value" style={{ color: CURRENT_SELLER.cashBreachWarning ? '#991b1b' : 'var(--color-forest-dark)' }}>
-            {formatSAR(CURRENT_SELLER.cashInHand)}
+          <div className="metric-value" style={{ color: seller.cashBreachWarning ? '#991b1b' : 'var(--color-forest-dark)' }}>
+            {formatSAR(seller.cashInHand)}
           </div>
           <div className="metric-sub-breakdown">
             <div className="breakdown-row">
               <span>Cash Limit:</span>
-              <span className="breakdown-val">{formatSAR(CURRENT_SELLER.cashLimit)}</span>
+              <span className="breakdown-val">{formatSAR(seller.cashLimit)}</span>
             </div>
             <div className="breakdown-row">
               <span>Status:</span>
-              {CURRENT_SELLER.cashBreachWarning ? (
+              {seller.cashBreachWarning ? (
                 <span className="breakdown-val alert">Limit Exceeded (Deposit Needed)</span>
               ) : (
                 <span className="breakdown-val" style={{ color: '#166534' }}>Within Ceiling</span>
@@ -116,11 +128,11 @@ export const SellerHome = ({ onNavigate }) => {
               <Package size={16} />
             </div>
           </div>
-          <div className="metric-value">{formatSAR(CURRENT_SELLER.assignedVehicle.stockValue)}</div>
+          <div className="metric-value">{formatSAR(seller.assignedVehicle?.stockValue)}</div>
           <div className="metric-sub-breakdown">
             <div className="breakdown-row">
               <span>Assigned Van:</span>
-              <span className="breakdown-val">Van #{CURRENT_SELLER.assignedVehicle.id}</span>
+              <span className="breakdown-val">Van #{seller.assignedVehicle?.id}</span>
             </div>
             <div className="breakdown-row">
               <span>Expiry Priority:</span>
@@ -135,7 +147,7 @@ export const SellerHome = ({ onNavigate }) => {
         <div className="panel-header-toolbar">
           <div className="panel-main-title">
             <MapPin size={16} />
-            <span>Today's Route Schedule ({CURRENT_SELLER.route})</span>
+            <span>Today's Route Schedule ({seller.route})</span>
           </div>
           <button className="btn-secondary" onClick={() => onNavigate('stores')}>
             <span>All Stores</span>
@@ -156,7 +168,7 @@ export const SellerHome = ({ onNavigate }) => {
               </tr>
             </thead>
             <tbody>
-              {STORE_CREDIT_DATA.map((store) => (
+              {storeList.map((store) => (
                 <tr key={store.storeId}>
                   <td>
                     <div style={{ fontWeight: 600, color: 'var(--color-forest-dark)' }}>{store.storeName}</div>
@@ -166,7 +178,7 @@ export const SellerHome = ({ onNavigate }) => {
                   <td>{store.creditCycle}</td>
                   <td>
                     <strong style={{ color: store.blocked ? '#991b1b' : 'var(--text-main)' }}>
-                      SAR {store.outstandingBalance.toLocaleString()}
+                      SAR {store.outstandingBalance?.toLocaleString()}
                     </strong>
                   </td>
                   <td>

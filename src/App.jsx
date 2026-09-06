@@ -71,7 +71,8 @@ export function App() {
     createPurchaseOrder, 
     convertSku, 
     submitVehicleAudit, 
-    issueVehicleLoadout 
+    issueVehicleLoadout,
+    completeSale
   } = useManagerContext();
 
   // Role State: 'admin' | 'manager' | 'seller'
@@ -166,7 +167,8 @@ export function App() {
     showToast(`Workflow F: Issued ${data.quantity} units of ${data.sku} to ${data.vehicle}. Awaiting seller confirmation.`);
   };
 
-  const handleCompleteSale = (saleData) => {
+  const handleCompleteSale = async (saleData) => {
+    await completeSale(saleData);
     showToast(`Sale Completed! Delivery document issued for ${saleData.storeName} (SAR ${saleData.totalAmount.toLocaleString()}).`);
     setSellerTab('home');
   };
@@ -175,7 +177,7 @@ export function App() {
     <div className="app-container">
       {/* Toast Notification Banner */}
       {toastMessage && (
-        <div style={{
+        <div className="toast-banner" style={{
           position: 'fixed',
           top: '64px',
           right: '24px',

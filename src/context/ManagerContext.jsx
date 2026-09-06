@@ -5,11 +5,17 @@ const ManagerContext = createContext(null);
 
 export const ManagerProvider = ({ children }) => {
   const [metrics, setMetrics] = useState(null);
-  const [approvals, setApprovals] = useState(null);
+  const [approvals, setApprovals] = useState({ writeOffs: [], dispatchRequests: [], cashHandovers: [], storeOverrides: [], newStores: [] });
   const [fleet, setFleet] = useState([]);
   const [inventory, setInventory] = useState([]);
   const [orders, setOrders] = useState([]);
   const [stores, setStores] = useState([]);
+  const [systemRules, setSystemRules] = useState(null);
+  const [userPermissions, setUserPermissions] = useState([]);
+  const [featureToggles, setFeatureToggles] = useState([]);
+  const [auditTrail, setAuditTrail] = useState([]);
+  const [currentSeller, setCurrentSeller] = useState(null);
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -17,22 +23,32 @@ export const ManagerProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-      const [m, a, f, i, o, s] = await Promise.all([
+      const [m, a, f, i, o, s, sys, perm, feat, audit, sel] = await Promise.all([
         apiService.getMetrics(),
         apiService.getApprovalQueue(),
         apiService.getFleetData(),
         apiService.getInventoryData(),
         apiService.getPurchaseOrders(),
-        apiService.getStoreCreditData()
+        apiService.getStoreCreditData(),
+        apiService.getSystemRules(),
+        apiService.getUserPermissions(),
+        apiService.getFeatureToggles(),
+        apiService.getAuditTrail(),
+        apiService.getCurrentSeller()
       ]);
       setMetrics(m);
-      setApprovals(a);
-      setFleet(f);
-      setInventory(i);
-      setOrders(o);
-      setStores(s);
+      setApprovals(a || { writeOffs: [], dispatchRequests: [], cashHandovers: [], storeOverrides: [], newStores: [] });
+      setFleet(f || []);
+      setInventory(i || []);
+      setOrders(o || []);
+      setStores(s || []);
+      setSystemRules(sys);
+      setUserPermissions(perm || []);
+      setFeatureToggles(feat || []);
+      setAuditTrail(audit || []);
+      setCurrentSeller(sel);
     } catch (err) {
-      console.error('Failed to load manager ERP data:', err);
+      console.error('Failed to load ERP data:', err);
       setError(err.message || 'Failed to connect to API');
     } finally {
       setLoading(false);
@@ -43,101 +59,131 @@ export const ManagerProvider = ({ children }) => {
     loadAllData();
   }, []);
 
-  // Operational Action Handlers
-  const approveWriteOff = async (item, notes) => {
-    await apiService.approveWriteOff(item.id, notes);
-    // Optimistic UI state update
-    if (approvals?.writeOffs) {
-      setApprovals(prev => ({
-        ...prev,
-        writeOffs: prev.writeOffs.filter(w => w.id !== item.id)
-      }));
-    }
-  };
+  // --- WORKFLOW ACTION HANDLERS ---
 
-  const releaseDispatch = async (item, transporter, driver) => {
-    await apiService.releaseDispatchOrder(item.id, { transporter, driver });
-    if (approvals?.dispatchRequests) {
-      setApprovals(prev => ({
-        ...prev,
-        dispatchRequests: prev.dispatchRequests.filter(d => d.id !== item.id)
-      }));
-    }
-  };
-
-  const overrideCredit = async (item, reason) => {
-    await apiService.overrideStoreCredit(item.id || item.storeId, reason);
-    if (approvals?.storeOverrides) {
-      setApprovals(prev => ({
-        ...prev,
-        storeOverrides: prev.storeOverrides.filter(o => o.id !== item.id)
-      }));
-    }
-  };
-
-  const verifyCash = async (item) => {
-    await apiService.verifyCashHandover(item.id);
-    if (approvals?.cashHandovers) {
-      setApprovals(prev => ({
-        ...prev,
-        cashHandovers: prev.cashHandovers.filter(c => c.id !== item.id)
-      }));
-    }
-  };
-
-  const approveStore = async (item) => {
-    await apiService.approveStoreOnboarding(item.id);
-    if (approvals?.newStores) {
-      setApprovals(prev => ({
-        ...prev,
-        newStores: prev.newStores.filter(s => s.id !== item.id)
-      }));
-    }
-  };
-
-  const createProduct = async (productData) => {
-    const res = await apiService.createProduct(productData);
-    setInventory(prev => [
-      {
-        sku: productData.sku,
-        productName: productData.productName,
-        category: productData.category,
-        subCategory: productData.subCategory,
-        productType: productData.productType,
-        packSize: productData.packSize,
-        vendorCode: productData.vendorCode,
-        warehouseQty: 100,
-        fleetQty: 0,
-        unitPrice: productData.unitPrice,
-        totalValue: productData.unitPrice * 100,
-        lotNumber: `LOT-${new Date().getFullYear()}-NEW`,
-        mfd: new Date().toISOString().split('T')[0],
-        expiryDate: '2027-12-31',
-        expiryStatus: 'Good',
-        expiryFlag: 'Healthy',
-        dispatchPriority: 'Standard'
-      },
-      ...prev
-    ]);
+  // 1. Seller Onboard Store
+  const onboardStore = async (storeData) => {
+    const res = await apiService.onboardStore(storeData);
+    await loadAllData();
     return res;
   };
 
+  // 2. Manager Approve Store Onboarding
+  const approveStore = async (item) => {
+    const res = await apiService.approveStoreOnboarding(item.id);
+    await loadAllData();
+    return res;
+  };
+
+  // 3. Seller Submit Cash Handover
+  const submitCashHandover = async (cashData) => {
+    const res = await apiService.submitCashHandover(cashData);
+    await loadAllData();
+    return res;
+  };
+
+  // 4. Manager Verify Cash Handover
+  const verifyCash = async (item) => {
+    const res = await apiService.verifyCashHandover(item.id);
+    await loadAllData();
+    return res;
+  };
+
+  // 5. Seller Complete POS Sale
+  const completeSale = async (saleData) => {
+    const res = await apiService.completeSale(saleData);
+    await loadAllData();
+    return res;
+  };
+
+  // 6. Manager Raise Draft PO
   const createPurchaseOrder = async (poData) => {
     const res = await apiService.createPurchaseOrder(poData);
-    setOrders(prev => [poData, ...prev]);
+    await loadAllData();
     return res;
   };
 
+  // 7. Admin Approve PO
+  const approvePurchaseOrder = async (poNumber) => {
+    const res = await apiService.approvePurchaseOrder(poNumber);
+    await loadAllData();
+    return res;
+  };
+
+  // 8. Manager Override Credit Block
+  const overrideCredit = async (item, reason) => {
+    const res = await apiService.overrideStoreCredit(item.id || item.storeId, reason);
+    await loadAllData();
+    return res;
+  };
+
+  // 9. Manager Approve Write-off
+  const approveWriteOff = async (item, notes) => {
+    const res = await apiService.approveWriteOff(item.id, notes);
+    await loadAllData();
+    return res;
+  };
+
+  // 10. Manager Release Warehouse Dispatch
+  const releaseDispatch = async (item, transporter, driver) => {
+    const res = await apiService.releaseDispatchOrder(item.id, { transporter, driver });
+    await loadAllData();
+    return res;
+  };
+
+  // 11. Admin Update System Rules
+  const updateSystemRules = async (newRules) => {
+    const res = await apiService.updateSystemRules(newRules);
+    await loadAllData();
+    return res;
+  };
+
+  // 12. Admin Permission Toggles & Status
+  const updateUserPermission = async (userId, field, value) => {
+    const res = await apiService.updateUserPermission(userId, field, value);
+    await loadAllData();
+    return res;
+  };
+
+  const updateUserStatus = async (userId, status) => {
+    const res = await apiService.updateUserStatus(userId, status);
+    await loadAllData();
+    return res;
+  };
+
+  // 13. Admin Feature Toggles
+  const toggleFeature = async (id) => {
+    const res = await apiService.toggleFeature(id);
+    await loadAllData();
+    return res;
+  };
+
+  // 14. Manager Create Product
+  const createProduct = async (productData) => {
+    const res = await apiService.createProduct(productData);
+    await loadAllData();
+    return res;
+  };
+
+  // 15. Manager Convert SKU
   const convertSku = async (conversionData) => {
-    return apiService.convertSku(conversionData);
+    const res = await apiService.convertSku(conversionData);
+    await loadAllData();
+    return res;
   };
 
+  // 16. Manager Vehicle Audit
   const submitVehicleAudit = async (auditData) => {
-    return apiService.submitVehicleAudit(auditData);
+    const res = await apiService.submitVehicleAudit(auditData);
+    await loadAllData();
+    return res;
   };
 
+  // 17. Manager Vehicle Loadout
   const issueVehicleLoadout = async (loadoutData) => {
-    return apiService.issueVehicleLoadout(loadoutData);
+    const res = await apiService.issueVehicleLoadout(loadoutData);
+    await loadAllData();
+    return res;
   };
 
   const value = {
@@ -147,16 +193,29 @@ export const ManagerProvider = ({ children }) => {
     inventory,
     orders,
     stores,
+    systemRules,
+    userPermissions,
+    featureToggles,
+    auditTrail,
+    currentSeller,
     loading,
     error,
     refreshData: loadAllData,
+    onboardStore,
+    approveStore,
+    submitCashHandover,
+    verifyCash,
+    completeSale,
+    createPurchaseOrder,
+    approvePurchaseOrder,
+    overrideCredit,
     approveWriteOff,
     releaseDispatch,
-    overrideCredit,
-    verifyCash,
-    approveStore,
+    updateSystemRules,
+    updateUserPermission,
+    updateUserStatus,
+    toggleFeature,
     createProduct,
-    createPurchaseOrder,
     convertSku,
     submitVehicleAudit,
     issueVehicleLoadout

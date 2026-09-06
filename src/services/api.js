@@ -1,22 +1,50 @@
 /**
- * Green Skill Agro Manager ERP - Backend Integration Layer
+ * Green Skill Agro ERP - Backend Integration Layer & Service Interface
  * 
  * BACKEND ENGINEER NOTE:
- * All API interactions are routed through this service file.
+ * All API interactions, workflow queries, and state mutations are routed through this service file.
  * Set `VITE_USE_MOCK=false` in your `.env` file to plug in real REST API endpoints.
  */
 
-import { METRICS, APPROVAL_ITEMS, FLEET_DATA, INVENTORY_STOCK, PURCHASE_ORDERS, STORE_CREDIT_DATA } from '../data/mockData';
+import { 
+  METRICS, 
+  APPROVAL_ITEMS, 
+  FLEET_DATA, 
+  INVENTORY_STOCK, 
+  PURCHASE_ORDERS, 
+  STORE_CREDIT_DATA,
+  SYSTEM_CONFIG_RULES,
+  VENDORS_MASTER_DATA,
+  PRODUCT_CATEGORIES_DATA,
+  USER_PERMISSIONS_DATA,
+  FEATURE_TOGGLES_DATA,
+  ADMIN_AUDIT_TRAIL,
+  CURRENT_SELLER
+} from '../data/mockData';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false';
 const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
-// Helper for real HTTP requests (AXIOS / FETCH)
+// In-Memory Mock Database for USE_MOCK mode
+let dbMetrics = { ...METRICS };
+let dbApprovals = JSON.parse(JSON.stringify(APPROVAL_ITEMS));
+let dbFleet = JSON.parse(JSON.stringify(FLEET_DATA));
+let dbInventory = JSON.parse(JSON.stringify(INVENTORY_STOCK));
+let dbPurchaseOrders = JSON.parse(JSON.stringify(PURCHASE_ORDERS));
+let dbStores = JSON.parse(JSON.stringify(STORE_CREDIT_DATA));
+let dbSystemRules = { ...SYSTEM_CONFIG_RULES };
+let dbVendors = JSON.parse(JSON.stringify(VENDORS_MASTER_DATA));
+let dbCategories = JSON.parse(JSON.stringify(PRODUCT_CATEGORIES_DATA));
+let dbUserPermissions = JSON.parse(JSON.stringify(USER_PERMISSIONS_DATA));
+let dbFeatureToggles = JSON.parse(JSON.stringify(FEATURE_TOGGLES_DATA));
+let dbAuditTrail = JSON.parse(JSON.stringify(ADMIN_AUDIT_TRAIL));
+let dbCurrentSeller = { ...CURRENT_SELLER };
+
+// Helper for real HTTP requests (FETCH / REST API)
 async function request(endpoint, options = {}) {
   if (USE_MOCK) {
-    // Simulate realistic 200ms network latency in mock mode
-    await new Promise((resolve) => setTimeout(resolve, 200));
-    return null; // Fallback to mock data handlers
+    await new Promise((resolve) => setTimeout(resolve, 150));
+    return null;
   }
 
   const response = await fetch(`${BASE_URL}${endpoint}`, {
@@ -36,90 +64,257 @@ async function request(endpoint, options = {}) {
   return response.json();
 }
 
+function logAudit(user, role, action, details, riskLevel = 'Low Risk') {
+  const newLog = {
+    id: `AUD-2026-${Math.floor(100 + Math.random() * 900)}`,
+    timestamp: new Date().toISOString().replace('T', ' ').substring(0, 19),
+    user,
+    role,
+    action,
+    details,
+    riskLevel
+  };
+  dbAuditTrail = [newLog, ...dbAuditTrail];
+}
+
 export const apiService = {
-  // 1. Executive Dashboard & Metrics API
+  // --- READ DATA ENDPOINTS ---
   async getMetrics() {
-    if (USE_MOCK) return METRICS;
+    if (USE_MOCK) return dbMetrics;
     return request('/dashboard/metrics');
   },
 
-  // 2. Approval Queues API
   async getApprovalQueue() {
-    if (USE_MOCK) return APPROVAL_ITEMS;
+    if (USE_MOCK) return dbApprovals;
     return request('/approvals/queue');
   },
 
-  // 3. Stock Write-off Workflow (Workflow E)
-  async approveWriteOff(writeOffId, notes = '') {
+  async getFleetData() {
+    if (USE_MOCK) return dbFleet;
+    return request('/fleet');
+  },
+
+  async getInventoryData() {
+    if (USE_MOCK) return dbInventory;
+    return request('/inventory');
+  },
+
+  async getPurchaseOrders() {
+    if (USE_MOCK) return dbPurchaseOrders;
+    return request('/purchase-orders');
+  },
+
+  async getStoreCreditData() {
+    if (USE_MOCK) return dbStores;
+    return request('/stores/credit-ledger');
+  },
+
+  async getSystemRules() {
+    if (USE_MOCK) return dbSystemRules;
+    return request('/admin/system-rules');
+  },
+
+  async getUserPermissions() {
+    if (USE_MOCK) return dbUserPermissions;
+    return request('/admin/permissions');
+  },
+
+  async getFeatureToggles() {
+    if (USE_MOCK) return dbFeatureToggles;
+    return request('/admin/feature-toggles');
+  },
+
+  async getAuditTrail() {
+    if (USE_MOCK) return dbAuditTrail;
+    return request('/admin/audit-trail');
+  },
+
+  async getCurrentSeller() {
+    if (USE_MOCK) return dbCurrentSeller;
+    return request('/seller/profile');
+  },
+
+  // --- WORKFLOW MUTATION ENDPOINTS ---
+
+  // Workflow H: Onboard New Store (Seller -> Manager Approval)
+  async onboardStore(storeData) {
     if (USE_MOCK) {
-      console.log(`[MOCK API] Approved Write-off ${writeOffId}`, { notes });
-      return { success: true, message: 'Stock write-off executed successfully', writeOffId };
+      const newApprovalItem = {
+        id: storeData.id || `STR-NEW-${Math.floor(100 + Math.random() * 900)}`,
+        storeName: storeData.storeName,
+        ownerName: storeData.ownerName,
+        contactPhone: storeData.contactPhone,
+        city: storeData.city,
+        sellerName: storeData.sellerName || dbCurrentSeller.name,
+        crNumber: storeData.crNumber || 'Optional',
+        vatNumber: storeData.vatNumber || 'Optional',
+        proposedCycle: storeData.proposedCycle,
+        proposedLimit: storeData.proposedLimit,
+        storefrontPhoto: storeData.storefrontPhoto,
+        coordinates: storeData.coordinates || '24.7136° N, 46.6753° E',
+        duplicateCheck: 'Passed (No nearby store matching)',
+        status: 'Pending Approval'
+      };
+      dbApprovals.newStores = [newApprovalItem, ...dbApprovals.newStores];
+      logAudit(dbCurrentSeller.name, 'Seller', 'ONBOARD_STORE_REQUEST', `Submitted new store onboarding request for ${storeData.storeName}`);
+      return { success: true, item: newApprovalItem };
     }
-    return request(`/approvals/write-offs/${writeOffId}/approve`, {
+    return request('/stores/onboard', {
       method: 'POST',
-      body: JSON.stringify({ manager_notes: notes }),
+      body: JSON.stringify(storeData)
     });
   },
 
-  // 4. Warehouse Dispatch Workflow (Workflows J & K)
-  async releaseDispatchOrder(dispatchId, payload) {
-    if (USE_MOCK) {
-      console.log(`[MOCK API] Released Dispatch ${dispatchId}`, payload);
-      return { success: true, message: 'Dispatch order released into in-transit', dispatchId };
-    }
-    return request(`/dispatches/${dispatchId}/release`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    });
-  },
-
-  // 5. Store Credit Override (Section 07 Rule)
-  async overrideStoreCredit(storeId, reason) {
-    if (USE_MOCK) {
-      console.log(`[MOCK API] Store Credit Override Granted for ${storeId}`, { reason });
-      return { success: true, message: 'Manager override recorded', storeId };
-    }
-    return request(`/stores/${storeId}/override-credit-block`, {
-      method: 'POST',
-      body: JSON.stringify({ manager_reason: reason }),
-    });
-  },
-
-  // 6. Cash Handover Verification (Workflow M)
-  async verifyCashHandover(cashId) {
-    if (USE_MOCK) {
-      console.log(`[MOCK API] Verified Cash Handover ${cashId}`);
-      return { success: true, cashId };
-    }
-    return request(`/cash-handovers/${cashId}/verify`, { method: 'POST' });
-  },
-
-  // 7. Store Onboarding Approval (Workflow H)
+  // Workflow H (Approve): Approve Store Onboarding (Manager Action)
   async approveStoreOnboarding(storeId) {
     if (USE_MOCK) {
-      console.log(`[MOCK API] Store Approved ${storeId}`);
+      const storeItem = dbApprovals.newStores.find(s => s.id === storeId);
+      dbApprovals.newStores = dbApprovals.newStores.filter(s => s.id !== storeId);
+
+      if (storeItem) {
+        const activeStore = {
+          storeId: storeItem.id,
+          storeName: storeItem.storeName,
+          ownerName: storeItem.ownerName,
+          city: storeItem.city,
+          assignedSeller: storeItem.sellerName || dbCurrentSeller.name,
+          creditCycle: storeItem.proposedCycle,
+          creditLimit: storeItem.proposedLimit,
+          outstandingBalance: 0,
+          daysOverdue: 0,
+          status: 'Active (Approved)',
+          blocked: false
+        };
+        dbStores = [activeStore, ...dbStores];
+        dbCurrentSeller.assignedStoresCount += 1;
+        logAudit('Sami Al-Mansoor', 'Manager', 'APPROVE_STORE_ONBOARDING', `Approved store ${storeItem.storeName} for field sales`);
+      }
       return { success: true, storeId };
     }
     return request(`/stores/${storeId}/approve`, { method: 'POST' });
   },
 
-  // 8. Setup Product & Generate SKU (Workflow A)
-  async createProduct(productData) {
+  // Workflow M: Cash Settlement Request (Seller -> Manager Approval)
+  async submitCashHandover(cashData) {
     if (USE_MOCK) {
-      console.log(`[MOCK API] Created Product`, productData);
-      return { success: true, data: productData };
+      const newHandover = {
+        id: `CS-2026-${Math.floor(100 + Math.random() * 900)}`,
+        sellerName: cashData.sellerName || dbCurrentSeller.name,
+        route: cashData.route || dbCurrentSeller.route,
+        type: cashData.type || 'Bank Deposit',
+        declaredAmount: Number(cashData.amount),
+        bankName: cashData.refNumber || 'Bank Deposit Slip',
+        dateSubmitted: new Date().toISOString().replace('T', ' ').substring(0, 16),
+        proofImage: cashData.proofImage || 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?auto=format&fit=crop&w=600&q=80',
+        status: 'Pending Verification',
+        ceilingBreachFlag: Number(cashData.amount) >= dbSystemRules.maxSellerCashCeiling
+      };
+      dbApprovals.cashHandovers = [newHandover, ...dbApprovals.cashHandovers];
+      logAudit(dbCurrentSeller.name, 'Seller', 'SUBMIT_CASH_HANDOVER', `Submitted cash settlement request of SAR ${cashData.amount}`);
+      return { success: true, item: newHandover };
     }
-    return request('/products', {
+    return request('/cash-handovers', {
       method: 'POST',
-      body: JSON.stringify(productData),
+      body: JSON.stringify(cashData)
     });
   },
 
-  // 9. Draft Purchase Order (Workflows C & O)
+  // Workflow M (Verify): Verify Cash Handover (Manager Action)
+  async verifyCashHandover(cashId) {
+    if (USE_MOCK) {
+      const handover = dbApprovals.cashHandovers.find(c => c.id === cashId);
+      dbApprovals.cashHandovers = dbApprovals.cashHandovers.filter(c => c.id !== cashId);
+
+      if (handover) {
+        dbCurrentSeller.cashInHand = Math.max(0, dbCurrentSeller.cashInHand - handover.declaredAmount);
+        dbCurrentSeller.cashBreachWarning = dbCurrentSeller.cashInHand > dbSystemRules.maxSellerCashCeiling;
+
+        dbFleet = dbFleet.map(f => {
+          if (f.assignedSeller === handover.sellerName || f.vehicleId === dbCurrentSeller.assignedVehicle.id) {
+            const newCash = Math.max(0, f.cashInHand - handover.declaredAmount);
+            return {
+              ...f,
+              cashInHand: newCash,
+              cashBreach: newCash > dbSystemRules.maxSellerCashCeiling
+            };
+          }
+          return f;
+        });
+
+        logAudit('Sami Al-Mansoor', 'Manager', 'VERIFY_CASH_HANDOVER', `Verified cash handover ${cashId} of SAR ${handover.declaredAmount}`);
+      }
+      return { success: true, cashId };
+    }
+    return request(`/cash-handovers/${cashId}/verify`, { method: 'POST' });
+  },
+
+  // Workflow B: Complete POS Sale (Seller Action)
+  async completeSale(saleData) {
+    if (USE_MOCK) {
+      const totalAmt = saleData.totalAmount || 0;
+
+      dbCurrentSeller.dailySalesAchieved += totalAmt;
+
+      if (saleData.paymentMode === 'Immediate Cash') {
+        dbCurrentSeller.cashInHand += totalAmt;
+        dbCurrentSeller.cashBreachWarning = dbCurrentSeller.cashInHand > dbSystemRules.maxSellerCashCeiling;
+      }
+
+      if (saleData.paymentMode !== 'Immediate Cash' && saleData.storeId) {
+        dbStores = dbStores.map(s => {
+          if (s.storeId === saleData.storeId || s.storeName === saleData.storeName) {
+            const newBal = s.outstandingBalance + totalAmt;
+            return {
+              ...s,
+              outstandingBalance: newBal,
+              blocked: newBal > s.creditLimit
+            };
+          }
+          return s;
+        });
+      }
+
+      if (saleData.items && Array.isArray(saleData.items)) {
+        saleData.items.forEach(cartItem => {
+          dbInventory = dbInventory.map(inv => {
+            if (inv.sku === cartItem.sku) {
+              const newFleetQty = Math.max(0, inv.fleetQty - cartItem.qty);
+              return { ...inv, fleetQty: newFleetQty };
+            }
+            return inv;
+          });
+        });
+      }
+
+      logAudit(dbCurrentSeller.name, 'Seller', 'COMPLETE_POS_SALE', `Completed POS sale for ${saleData.storeName} totaling SAR ${totalAmt}`);
+      return { success: true, saleData };
+    }
+    return request('/sales/complete', {
+      method: 'POST',
+      body: JSON.stringify(saleData)
+    });
+  },
+
+  // Workflow C/O: Draft Purchase Order (Manager -> Admin Approval)
   async createPurchaseOrder(poData) {
     if (USE_MOCK) {
-      console.log(`[MOCK API] Created Draft PO`, poData);
-      return { success: true, data: poData };
+      const newPo = {
+        poNumber: poData.poNumber || `PO-2026-0${dbPurchaseOrders.length + 20}`,
+        vendorName: poData.vendorName || 'Selected Vendor',
+        vendorCode: poData.vendorCode || 'VND-001',
+        itemsSummary: poData.itemsSummary || `${poData.quantity}x ${poData.sku}`,
+        totalValue: Number(poData.totalValue) || 50000,
+        stateIndex: 1,
+        stateName: '1. Draft (Pending Admin Approval)',
+        dateRaised: new Date().toISOString().split('T')[0],
+        expectedArrival: '2026-10-10',
+        leadTimeDays: 25,
+        adminApprovalStatus: 'Awaiting Admin Review',
+        reorderSource: 'Manager Draft PO'
+      };
+      dbPurchaseOrders = [newPo, ...dbPurchaseOrders];
+      logAudit('Sami Al-Mansoor', 'Manager', 'CREATE_DRAFT_PO', `Drafted Purchase Order ${newPo.poNumber} for vendor ${newPo.vendorName}`);
+      return { success: true, data: newPo };
     }
     return request('/purchase-orders', {
       method: 'POST',
@@ -127,10 +322,215 @@ export const apiService = {
     });
   },
 
-  // 10. SKU Conversion & Repackaging (Workflow D)
+  // Approve Draft Purchase Order (Admin Action)
+  async approvePurchaseOrder(poNumber) {
+    if (USE_MOCK) {
+      dbPurchaseOrders = dbPurchaseOrders.map(po => {
+        if (po.poNumber === poNumber) {
+          return {
+            ...po,
+            stateIndex: 3,
+            stateName: '3. Approved & Issued',
+            adminApprovalStatus: 'Approved by Admin'
+          };
+        }
+        return po;
+      });
+      logAudit('Admin System Owner', 'Admin', 'APPROVE_PURCHASE_ORDER', `Granted final Admin approval for Purchase Order ${poNumber}`);
+      return { success: true, poNumber };
+    }
+    return request(`/purchase-orders/${poNumber}/approve`, { method: 'POST' });
+  },
+
+  // Section 07 Rule: Override Store Credit Block (Manager Action)
+  async overrideStoreCredit(storeId, reason) {
+    if (USE_MOCK) {
+      dbApprovals.storeOverrides = dbApprovals.storeOverrides.filter(o => o.id !== storeId && o.storeId !== storeId);
+      dbStores = dbStores.map(s => {
+        if (s.storeId === storeId || s.storeName === storeId) {
+          return { ...s, blocked: false, status: 'Active (Manager Credit Override)' };
+        }
+        return s;
+      });
+      logAudit('Sami Al-Mansoor', 'Manager', 'OVERRIDE_STORE_CREDIT', `Granted credit block override for store ${storeId}. Reason: ${reason}`, 'High Risk');
+      return { success: true, storeId };
+    }
+    return request(`/stores/${storeId}/override-credit-block`, {
+      method: 'POST',
+      body: JSON.stringify({ manager_reason: reason }),
+    });
+  },
+
+  // Workflow E: Stock Write-Off Approval (Manager Action)
+  async approveWriteOff(writeOffId, notes = '') {
+    if (USE_MOCK) {
+      const item = dbApprovals.writeOffs.find(w => w.id === writeOffId);
+      dbApprovals.writeOffs = dbApprovals.writeOffs.filter(w => w.id !== writeOffId);
+
+      if (item) {
+        dbInventory = dbInventory.map(inv => {
+          if (inv.sku === item.sku) {
+            const qtyNum = parseInt(item.quantity) || 10;
+            return {
+              ...inv,
+              warehouseQty: Math.max(0, inv.warehouseQty - qtyNum)
+            };
+          }
+          return inv;
+        });
+        logAudit('Sami Al-Mansoor', 'Manager', 'APPROVE_WRITE_OFF', `Approved stock write-off ${writeOffId} (${item.quantity} of ${item.productName})`);
+      }
+      return { success: true, writeOffId };
+    }
+    return request(`/approvals/write-offs/${writeOffId}/approve`, {
+      method: 'POST',
+      body: JSON.stringify({ manager_notes: notes }),
+    });
+  },
+
+  // Workflows J & K: Warehouse Dispatch Order Release (Manager Action)
+  async releaseDispatchOrder(dispatchId, payload) {
+    if (USE_MOCK) {
+      const item = dbApprovals.dispatchRequests.find(d => d.id === dispatchId);
+      dbApprovals.dispatchRequests = dbApprovals.dispatchRequests.filter(d => d.id !== dispatchId);
+
+      if (item) {
+        dbInventory = dbInventory.map(inv => {
+          if (inv.sku === item.sku) {
+            const qtyNum = parseInt(item.requestedQty) || 20;
+            return {
+              ...inv,
+              warehouseQty: Math.max(0, inv.warehouseQty - qtyNum)
+            };
+          }
+          return inv;
+        });
+        logAudit('Sami Al-Mansoor', 'Manager', 'RELEASE_DISPATCH_ORDER', `Released warehouse dispatch ${dispatchId} via transporter ${payload.transporter}`);
+      }
+      return { success: true, dispatchId };
+    }
+    return request(`/dispatches/${dispatchId}/release`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
+  },
+
+  // Admin Config Rules: Update System Rules & Governance Ceilings (Admin Action)
+  async updateSystemRules(newRules) {
+    if (USE_MOCK) {
+      dbSystemRules = { ...dbSystemRules, ...newRules, lastUpdatedAt: new Date().toISOString().replace('T', ' ').substring(0, 16) };
+      
+      if (newRules.maxSellerCashCeiling) {
+        dbCurrentSeller.cashLimit = newRules.maxSellerCashCeiling;
+        dbCurrentSeller.cashBreachWarning = dbCurrentSeller.cashInHand > newRules.maxSellerCashCeiling;
+      }
+      logAudit('Admin System Owner', 'Admin', 'UPDATE_SYSTEM_RULES', `Updated master system rules and operational ceilings`);
+      return { success: true, rules: dbSystemRules };
+    }
+    return request('/admin/system-rules', {
+      method: 'POST',
+      body: JSON.stringify(newRules)
+    });
+  },
+
+  // Admin Permission Sets: Update User Permission (Admin Action)
+  async updateUserPermission(userId, field, value) {
+    if (USE_MOCK) {
+      dbUserPermissions = dbUserPermissions.map(u => {
+        if (u.userId === userId) {
+          return { ...u, [field]: value };
+        }
+        return u;
+      });
+      logAudit('Admin System Owner', 'Admin', 'UPDATE_USER_PERMISSION', `Updated permission ${field} for user ${userId} to ${value}`);
+      return { success: true, userId, field, value };
+    }
+    return request(`/admin/permissions/${userId}`, {
+      method: 'POST',
+      body: JSON.stringify({ field, value })
+    });
+  },
+
+  async updateUserStatus(userId, status) {
+    if (USE_MOCK) {
+      dbUserPermissions = dbUserPermissions.map(u => {
+        if (u.userId === userId) {
+          return { ...u, status };
+        }
+        return u;
+      });
+      logAudit('Admin System Owner', 'Admin', 'UPDATE_USER_STATUS', `Updated account status for ${userId} to ${status}`);
+      return { success: true, userId, status };
+    }
+    return request(`/admin/users/${userId}/status`, {
+      method: 'POST',
+      body: JSON.stringify({ status })
+    });
+  },
+
+  // Admin Feature Toggles (Admin Action)
+  async toggleFeature(id) {
+    if (USE_MOCK) {
+      dbFeatureToggles = dbFeatureToggles.map(t => {
+        if (t.id === id) {
+          return { ...t, enabled: !t.enabled };
+        }
+        return t;
+      });
+      logAudit('Admin System Owner', 'Admin', 'TOGGLE_FEATURE', `Toggled feature flag ${id}`);
+      return { success: true, id };
+    }
+    return request(`/admin/features/${id}/toggle`, { method: 'POST' });
+  },
+
+  // Workflow A: Create Product
+  async createProduct(productData) {
+    if (USE_MOCK) {
+      const newInv = {
+        sku: productData.sku,
+        productName: productData.productName,
+        category: productData.category,
+        subCategory: productData.subCategory,
+        productType: productData.productType,
+        packSize: productData.packSize,
+        vendorCode: productData.vendorCode,
+        warehouseQty: 100,
+        fleetQty: 0,
+        unitPrice: Number(productData.unitPrice),
+        totalValue: Number(productData.unitPrice) * 100,
+        lotNumber: `LOT-${new Date().getFullYear()}-NEW`,
+        mfd: new Date().toISOString().split('T')[0],
+        expiryDate: '2027-12-31',
+        expiryStatus: 'Good',
+        expiryFlag: 'Healthy',
+        dispatchPriority: 'Standard'
+      };
+      dbInventory = [newInv, ...dbInventory];
+      logAudit('Sami Al-Mansoor', 'Manager', 'CREATE_PRODUCT', `Created new product ${productData.productName} (SKU: ${productData.sku})`);
+      return { success: true, data: newInv };
+    }
+    return request('/products', {
+      method: 'POST',
+      body: JSON.stringify(productData),
+    });
+  },
+
+  // Workflow D: SKU Conversion & Repackaging
   async convertSku(conversionData) {
     if (USE_MOCK) {
-      console.log(`[MOCK API] Converted SKU`, conversionData);
+      const sourceQtyNum = Number(conversionData.sourceQty) || 50;
+      const targetQtyNum = Number(conversionData.targetQty) || 48;
+
+      dbInventory = dbInventory.map(inv => {
+        if (inv.sku === conversionData.sourceSku) {
+          return { ...inv, warehouseQty: Math.max(0, inv.warehouseQty - sourceQtyNum) };
+        }
+        if (inv.sku === conversionData.targetSku) {
+          return { ...inv, warehouseQty: inv.warehouseQty + targetQtyNum };
+        }
+        return inv;
+      });
+      logAudit('Sami Al-Mansoor', 'Manager', 'CONVERT_SKU', `Executed SKU conversion from ${conversionData.sourceSku} to ${conversionData.targetSku}`);
       return { success: true, data: conversionData };
     }
     return request('/inventory/convert-sku', {
@@ -139,10 +539,21 @@ export const apiService = {
     });
   },
 
-  // 11. Vehicle Physical Audit (Workflow N)
+  // Workflow N: Submit Vehicle Physical Audit
   async submitVehicleAudit(auditData) {
     if (USE_MOCK) {
-      console.log(`[MOCK API] Submitted Vehicle Audit`, auditData);
+      dbFleet = dbFleet.map(f => {
+        if (f.vehicleId.includes(auditData.vehicleId) || auditData.vehicleId.includes(f.vehicleId)) {
+          return {
+            ...f,
+            auditDueFlag: false,
+            lastAuditDate: new Date().toISOString().split('T')[0],
+            auditVariance: `${auditData.variance} Units Variance`
+          };
+        }
+        return f;
+      });
+      logAudit('Sami Al-Mansoor', 'Manager', 'SUBMIT_VEHICLE_AUDIT', `Submitted vehicle stock audit for ${auditData.vehicleId}`);
       return { success: true, data: auditData };
     }
     return request('/fleet/audits', {
@@ -151,36 +562,26 @@ export const apiService = {
     });
   },
 
-  // 12. Issue Vehicle Stock Loadout (Workflow F)
+  // Workflow F: Issue Vehicle Stock Loadout
   async issueVehicleLoadout(loadoutData) {
     if (USE_MOCK) {
-      console.log(`[MOCK API] Issued Vehicle Loadout`, loadoutData);
+      const qtyNum = Number(loadoutData.quantity) || 10;
+      dbInventory = dbInventory.map(inv => {
+        if (inv.sku === loadoutData.sku) {
+          return {
+            ...inv,
+            warehouseQty: Math.max(0, inv.warehouseQty - qtyNum),
+            fleetQty: inv.fleetQty + qtyNum
+          };
+        }
+        return inv;
+      });
+      logAudit('Sami Al-Mansoor', 'Manager', 'ISSUE_VEHICLE_LOADOUT', `Issued ${loadoutData.quantity} units of ${loadoutData.sku} to vehicle ${loadoutData.vehicle}`);
       return { success: true, data: loadoutData };
     }
     return request('/fleet/loadouts', {
       method: 'POST',
       body: JSON.stringify(loadoutData),
     });
-  },
-
-  // 13. Data Tables Fetch API
-  async getFleetData() {
-    if (USE_MOCK) return FLEET_DATA;
-    return request('/fleet');
-  },
-
-  async getInventoryData() {
-    if (USE_MOCK) return INVENTORY_STOCK;
-    return request('/inventory');
-  },
-
-  async getPurchaseOrders() {
-    if (USE_MOCK) return PURCHASE_ORDERS;
-    return request('/purchase-orders');
-  },
-
-  async getStoreCreditData() {
-    if (USE_MOCK) return STORE_CREDIT_DATA;
-    return request('/stores/credit-ledger');
   }
 };
