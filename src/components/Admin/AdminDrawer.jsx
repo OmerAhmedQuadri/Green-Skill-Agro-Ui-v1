@@ -10,7 +10,8 @@ import {
   ArrowRightLeft,
   ShieldCheck,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  User
 } from 'lucide-react';
 import { SYSTEM_INFO } from '../../data/mockData';
 import { Logo } from '../Logo';
@@ -33,7 +34,8 @@ export const AdminDrawer = ({
     { id: 'admin-vendors', label: t('vendorDirectoryPO'), icon: Building2, badge: '1 PO Draft' },
     { id: 'admin-permissions', label: t('userRolesPermissions'), icon: Shield },
     { id: 'admin-features', label: t('returnRulesFeatures'), icon: ToggleLeft },
-    { id: 'admin-audit', label: t('systemAuditTrail'), icon: FileSpreadsheet }
+    { id: 'admin-audit', label: t('systemAuditTrail'), icon: FileSpreadsheet },
+    { id: 'profile', label: t('myProfile'), icon: User }
   ];
 
   const handleSelect = (tabId) => {

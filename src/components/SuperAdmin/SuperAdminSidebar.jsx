@@ -5,7 +5,8 @@ import {
   ShieldAlert, 
   GitMerge, 
   Building2, 
-  ShieldCheck 
+  ShieldCheck,
+  User 
 } from 'lucide-react';
 
 import { Logo } from '../Logo';
@@ -19,7 +20,8 @@ export const SuperAdminSidebar = ({ activeTab, setActiveTab }) => {
     { id: 'superadmin-governance', label: t('userAdminGovernance'), icon: Users, badge: language === 'ar' ? '4 أدوار' : '4 Roles' },
     { id: 'superadmin-permissions', label: t('masterHierarchyMatrix'), icon: GitMerge },
     { id: 'superadmin-branches', label: t('centralWarehouseWH01'), icon: Building2 },
-    { id: 'superadmin-security', label: t('securityKillSwitches'), icon: ShieldAlert }
+    { id: 'superadmin-security', label: t('securityKillSwitches'), icon: ShieldAlert },
+    { id: 'profile', label: t('myProfile'), icon: User }
   ];
 
   return (

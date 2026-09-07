@@ -6,7 +6,8 @@ import {
   Shield, 
   ToggleLeft, 
   FileSpreadsheet,
-  ShieldCheck
+  ShieldCheck,
+  User
 } from 'lucide-react';
 
 import { Logo } from '../Logo';
@@ -21,7 +22,8 @@ export const AdminSidebar = ({ activeTab, setActiveTab }) => {
     { id: 'admin-vendors', label: t('vendorDirectoryPO'), icon: Building2, badge: language === 'ar' ? '1 مسودة' : '1 PO Draft' },
     { id: 'admin-permissions', label: t('userRolesPermissions'), icon: Shield },
     { id: 'admin-features', label: t('returnRulesFeatures'), icon: ToggleLeft },
-    { id: 'admin-audit', label: t('systemAuditTrail'), icon: FileSpreadsheet }
+    { id: 'admin-audit', label: t('systemAuditTrail'), icon: FileSpreadsheet },
+    { id: 'profile', label: t('myProfile'), icon: User }
   ];
 
   return (

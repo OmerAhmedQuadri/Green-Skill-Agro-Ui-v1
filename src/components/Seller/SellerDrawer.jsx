@@ -11,7 +11,8 @@ import {
   UserCheck,
   AlertTriangle,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  User
 } from 'lucide-react';
 import { CURRENT_SELLER } from '../../data/mockData';
 import { Logo } from '../Logo';
@@ -28,7 +29,8 @@ export const SellerDrawer = ({ isOpen, onClose, activeTab, setActiveTab, onSwitc
     { id: 'van-stock', label: t('vehicleInventoryFefo'), icon: Package, badge: '4 SKUs' },
     { id: 'stores', label: t('myStorePortfolioNav'), icon: Store, badge: `${CURRENT_SELLER.assignedStoresCount}` },
     { id: 'cash', label: t('cashBankDepositsNav'), icon: Banknote, alert: CURRENT_SELLER.cashBreachWarning },
-    { id: 'attendance', label: t('shiftAttendanceNav'), icon: Clock }
+    { id: 'attendance', label: t('shiftAttendanceNav'), icon: Clock },
+    { id: 'profile', label: t('myProfile'), icon: User }
   ];
 
   const handleSelect = (tabId) => {

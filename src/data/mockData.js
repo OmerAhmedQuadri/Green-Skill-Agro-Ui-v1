@@ -16,6 +16,91 @@ export const SYSTEM_INFO = {
   currency: "SAR"
 };
 
+export const ROLE_PROFILES = {
+  superadmin: {
+    id: "USR-001",
+    name: "Abdulaziz Al-Saud",
+    email: "abdulaziz@greenskillagro.sa",
+    phone: "+966 50 111 2222",
+    address: "King Fahd Road, Olaya District, Riyadh 12211, Kingdom of Saudi Arabia",
+    role: "Super Administrator",
+    roleKey: "superadmin",
+    accountStatus: "Active (Root Security)",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=250",
+    permissions: [
+      "System Control",
+      "Tenant Management",
+      "Database Governance",
+      "Branch Administration",
+      "Global Audit",
+      "Security Override",
+      "API Management"
+    ]
+  },
+  admin: {
+    id: "USR-002",
+    name: "Admin System Owner",
+    email: "admin@greenskillagro.sa",
+    phone: "+966 50 333 4444",
+    address: "Al-Malaz District, University Street, Riyadh 12831, Kingdom of Saudi Arabia",
+    role: "System Administrator",
+    roleKey: "admin",
+    accountStatus: "Active (Admin Tier)",
+    avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=250",
+    permissions: [
+      "System Rules Config",
+      "Catalog & Templates",
+      "Vendor Master Data",
+      "Role & Permission Control",
+      "Feature Toggles",
+      "Audit Log Review",
+      "PO Authorization"
+    ]
+  },
+  manager: {
+    id: "USR-003",
+    name: "Sami Al-Mansoor",
+    email: "sami.almansoor@greenskillagro.sa",
+    phone: "+966 50 987 6543",
+    address: "Central Distribution Center WH-01, Industrial Area 2, Riyadh 14321, Kingdom of Saudi Arabia",
+    role: "Operational Manager",
+    roleKey: "manager",
+    accountStatus: "Active (Branch WH-01)",
+    avatar: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&q=80&w=250",
+    permissions: [
+      "Catalogue Management",
+      "Vendors Portal",
+      "Inventory Stock Control",
+      "Cash Reconciliation",
+      "Attendance Review",
+      "Sales Approvals",
+      "Stores Onboarding",
+      "Returns & Write-Offs",
+      "Reports & Analytics",
+      "Target Allocation"
+    ]
+  },
+  seller: {
+    id: "SEL-101",
+    name: "Omar Farooq",
+    email: "omar.farooq@greenskillagro.sa",
+    phone: "+966 50 123 4567",
+    address: "Al-Naseem District, Route 4 North, Riyadh 14233, Kingdom of Saudi Arabia",
+    role: "Field Sales Representative",
+    roleKey: "seller",
+    accountStatus: "Active (Checked In)",
+    avatar: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&q=80&w=250",
+    permissions: [
+      "POS Terminal Access",
+      "Van Inventory Stock View",
+      "Store Portfolio Access",
+      "Cash Handover Submission",
+      "Daily Attendance Check-In",
+      "Store Onboarding Submission"
+    ]
+  }
+};
+
 export const CURRENT_SELLER = {
   id: "SEL-101",
   name: "Omar Farooq",

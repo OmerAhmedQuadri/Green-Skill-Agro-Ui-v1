@@ -4,7 +4,7 @@ import { SYSTEM_INFO } from '../data/mockData';
 import { Logo } from './Logo';
 import { useLanguage } from '../context/LanguageContext';
 
-export const Header = ({ onSearch, searchQuery, currentRole = 'manager', onSwitchRole, onOpenDrawer }) => {
+export const Header = ({ onSearch, searchQuery, currentRole = 'manager', onSwitchRole, onOpenDrawer, onNavigateProfile }) => {
   const { language, toggleLanguage, t } = useLanguage();
 
   return (
@@ -87,7 +87,12 @@ export const Header = ({ onSearch, searchQuery, currentRole = 'manager', onSwitc
           </select>
         </div>
 
-        <div className="user-profile-badge">
+        <div 
+          className="user-profile-badge cursor-pointer hover:bg-white/20 transition-colors"
+          onClick={() => onNavigateProfile && onNavigateProfile()}
+          title={t('myProfile')}
+          style={{ cursor: 'pointer' }}
+        >
           <div className="avatar-initials">
             {currentRole === 'superadmin' ? 'SU' : (currentRole === 'admin' ? 'AD' : (currentRole === 'manager' ? 'SA' : 'OF'))}
           </div>

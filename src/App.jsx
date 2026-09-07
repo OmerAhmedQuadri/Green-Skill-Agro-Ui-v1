@@ -4,6 +4,7 @@ import { useLanguage } from './context/LanguageContext';
 
 // Common Components
 import { Header } from './components/Header';
+import { ProfilePage } from './components/ProfilePage';
 
 // Manager Components
 import { Sidebar } from './components/Sidebar';
@@ -256,6 +257,7 @@ export function App() {
             currentRole={currentRole}
             onSwitchRole={setCurrentRole} 
             onOpenDrawer={() => setIsDrawerOpen(true)}
+            onNavigateProfile={() => setSuperAdminTab('profile')}
           />
 
           <SuperAdminDrawer 
@@ -304,6 +306,7 @@ export function App() {
                 </div>
               </div>
 
+              {superAdminTab === 'profile' && <ProfilePage currentRole="superadmin" />}
               {superAdminTab === 'superadmin-overview' && (
                 <SuperAdminOverview 
                   onOpenCreateAdmin={() => setCreateAdminModalOpen(true)} 
@@ -341,6 +344,7 @@ export function App() {
           />
           
           <main className="erp-content" style={{ paddingBottom: '32px' }}>
+            {sellerTab === 'profile' && <ProfilePage currentRole="seller" />}
             {sellerTab === 'home' && <SellerHome onNavigate={setSellerTab} />}
             {sellerTab === 'new-sale' && <SellerNewSale onCompleteSale={handleCompleteSale} onNavigate={setSellerTab} />}
             {sellerTab === 'van-stock' && <SellerVehicleStock onNavigate={setSellerTab} />}
@@ -358,6 +362,7 @@ export function App() {
             currentRole={currentRole}
             onSwitchRole={setCurrentRole} 
             onOpenDrawer={() => setIsDrawerOpen(true)}
+            onNavigateProfile={() => setAdminTab('profile')}
           />
 
           <AdminDrawer 
@@ -398,6 +403,7 @@ export function App() {
                 </div>
               </div>
 
+              {adminTab === 'profile' && <ProfilePage currentRole="admin" />}
               {adminTab === 'admin-rules' && <AdminSystemRules onShowToast={showToast} />}
               {adminTab === 'admin-catalog' && <AdminCatalogTemplates onShowToast={showToast} />}
               {adminTab === 'admin-vendors' && <AdminVendorManager onShowToast={showToast} />}
@@ -416,6 +422,7 @@ export function App() {
             currentRole={currentRole}
             onSwitchRole={setCurrentRole} 
             onOpenDrawer={() => setIsDrawerOpen(true)}
+            onNavigateProfile={() => setActiveTab('profile')}
           />
 
           <ManagerDrawer 
@@ -471,108 +478,114 @@ export function App() {
                 </div>
               </div>
 
-              <MetricsOverview />
+              {activeTab === 'profile' ? (
+                <ProfilePage currentRole="manager" />
+              ) : (
+                <>
+                  <MetricsOverview />
 
-              {activeTab === 'overview' ? (
-                <div className="dashboard-split-layout">
-                  <div className="main-column">
-                    <ApprovalQueue
-                      onViewPhoto={(url, title) => setPhotoModal({ open: true, url, title })}
-                      onApproveWriteOff={(item) => setWriteOffModal({ open: true, item })}
-                      onHandleDispatch={(item) => setDispatchModal({ open: true, item })}
-                      onVerifyCash={handleVerifyCash}
-                      onOverrideCredit={(item) => setOverrideModal({ open: true, item })}
-                      onApproveStore={handleApproveStore}
-                    />
+                  {activeTab === 'overview' ? (
+                    <div className="dashboard-split-layout">
+                      <div className="main-column">
+                        <ApprovalQueue
+                          onViewPhoto={(url, title) => setPhotoModal({ open: true, url, title })}
+                          onApproveWriteOff={(item) => setWriteOffModal({ open: true, item })}
+                          onHandleDispatch={(item) => setDispatchModal({ open: true, item })}
+                          onVerifyCash={handleVerifyCash}
+                          onOverrideCredit={(item) => setOverrideModal({ open: true, item })}
+                          onApproveStore={handleApproveStore}
+                        />
 
+                        <MainDataTable
+                          activeTab="overview"
+                          searchQuery={searchQuery}
+                          onOverrideCredit={(item) => setOverrideModal({ open: true, item })}
+                          onViewPoDetails={(po) => setPoDetailsModal({ open: true, item: po })}
+                        />
+                      </div>
+
+                      <div className="side-column">
+                        <div className="side-panel-card">
+                          <div className="side-panel-title">
+                            <AlertTriangle size={15} className="text-amber-700" />
+                            <span>{language === 'ar' ? 'مراقبة التنبيهات التشغيلية' : 'Operational Alerts Watch'}</span>
+                          </div>
+
+                          <div className="side-alert-item alert-danger">
+                            <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+                            <div>
+                              <strong>{language === 'ar' ? 'تجاوز حد النقدية (حالتان)' : '2 Cash Ceiling Breaches'}</strong>
+                              <div style={{ fontSize: '11px', marginTop: '2px' }}>{language === 'ar' ? 'المندوبان عمر وفيصل تجاووزا حد النقدية المسموح به.' : 'Sellers Omar & Faisal exceeded cash limits.'}</div>
+                            </div>
+                          </div>
+
+                          <div className="side-alert-item alert-warning">
+                            <Clock size={16} className="shrink-0 mt-0.5" />
+                            <div>
+                              <strong>{language === 'ar' ? 'جرد شاحنة متأخر (حالة واحدة)' : '1 Overdue Vehicle Audit'}</strong>
+                              <div style={{ fontSize: '11px', marginTop: '2px' }}>{language === 'ar' ? 'الشاحنة #VH-02 (خالد) تجاوزت فترة الجرد 35 يوماً.' : 'Van #VH-02 (Khalid) past 35-day audit window.'}</div>
+                            </div>
+                          </div>
+
+                          <div className="side-alert-item alert-warning">
+                            <Clock size={16} className="shrink-0 mt-0.5" />
+                            <div>
+                              <strong>{language === 'ar' ? 'تنبهيات قُرب الصلاحية (FEFO)' : '3 Expiry FEFO Clearance Flags'}</strong>
+                              <div style={{ fontSize: '11px', marginTop: '2px' }}>{language === 'ar' ? 'صنف بامية باربهاني كرانتي ينتهي خلال 25 يوماً.' : 'Okra Parbhani Kranti expires in 25 days.'}</div>
+                            </div>
+                          </div>
+
+                          <div className="side-alert-item alert-info">
+                            <Lock size={16} className="shrink-0 mt-0.5" />
+                            <div>
+                              <strong>{language === 'ar' ? 'حظر ائتمان المتاجر (4 متاجر)' : '4 Stores Credit Blocked'}</strong>
+                              <div style={{ fontSize: '11px', marginTop: '2px' }}>{language === 'ar' ? 'مبالغ متأخرة تجاوزت دورة الائتمان.' : 'Overdue balances past credit cycle.'}</div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="side-panel-card">
+                          <div className="side-panel-title">
+                            <Send size={15} />
+                            <span>{language === 'ar' ? 'إجراءات سير العمل للمدير' : 'Manager Workflows'}</span>
+                          </div>
+
+                          <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setVehicleLoadoutModal(true)}>
+                            <Truck size={14} />
+                            <span>{t('issueVehicleLoadout')}</span>
+                          </button>
+
+                          <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setVehicleAuditModal(true)}>
+                            <ClipboardCheck size={14} />
+                            <span>{t('auditVehicleStock')}</span>
+                          </button>
+
+                          <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setSkuConversionModal(true)}>
+                            <RepeatIcon size={14} />
+                            <span>{t('convertSkuRepackage')}</span>
+                          </button>
+
+                          <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setCreatePoModal(true)}>
+                            <FilePlus size={14} />
+                            <span>{t('draftPurchaseOrder')}</span>
+                          </button>
+
+                          <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setProductSetupModal(true)}>
+                            <PackagePlus size={14} />
+                            <span>{t('setupProductSku')}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
                     <MainDataTable
-                      activeTab="overview"
+                      activeTab={activeTab}
                       searchQuery={searchQuery}
                       onOverrideCredit={(item) => setOverrideModal({ open: true, item })}
                       onViewPoDetails={(po) => setPoDetailsModal({ open: true, item: po })}
                     />
-                  </div>
-
-                  <div className="side-column">
-                    <div className="side-panel-card">
-                      <div className="side-panel-title">
-                        <AlertTriangle size={15} className="text-amber-700" />
-                        <span>{language === 'ar' ? 'مراقبة التنبيهات التشغيلية' : 'Operational Alerts Watch'}</span>
-                      </div>
-
-                      <div className="side-alert-item alert-danger">
-                        <AlertTriangle size={16} className="shrink-0 mt-0.5" />
-                        <div>
-                          <strong>{language === 'ar' ? 'تجاوز حد النقدية (حالتان)' : '2 Cash Ceiling Breaches'}</strong>
-                          <div style={{ fontSize: '11px', marginTop: '2px' }}>{language === 'ar' ? 'المندوبان عمر وفيصل تجاووزا حد النقدية المسموح به.' : 'Sellers Omar & Faisal exceeded cash limits.'}</div>
-                        </div>
-                      </div>
-
-                      <div className="side-alert-item alert-warning">
-                        <Clock size={16} className="shrink-0 mt-0.5" />
-                        <div>
-                          <strong>{language === 'ar' ? 'جرد شاحنة متأخر (حالة واحدة)' : '1 Overdue Vehicle Audit'}</strong>
-                          <div style={{ fontSize: '11px', marginTop: '2px' }}>{language === 'ar' ? 'الشاحنة #VH-02 (خالد) تجاوزت فترة الجرد 35 يوماً.' : 'Van #VH-02 (Khalid) past 35-day audit window.'}</div>
-                        </div>
-                      </div>
-
-                      <div className="side-alert-item alert-warning">
-                        <Clock size={16} className="shrink-0 mt-0.5" />
-                        <div>
-                          <strong>{language === 'ar' ? 'تنبهيات قُرب الصلاحية (FEFO)' : '3 Expiry FEFO Clearance Flags'}</strong>
-                          <div style={{ fontSize: '11px', marginTop: '2px' }}>{language === 'ar' ? 'صنف بامية باربهاني كرانتي ينتهي خلال 25 يوماً.' : 'Okra Parbhani Kranti expires in 25 days.'}</div>
-                        </div>
-                      </div>
-
-                      <div className="side-alert-item alert-info">
-                        <Lock size={16} className="shrink-0 mt-0.5" />
-                        <div>
-                          <strong>{language === 'ar' ? 'حظر ائتمان المتاجر (4 متاجر)' : '4 Stores Credit Blocked'}</strong>
-                          <div style={{ fontSize: '11px', marginTop: '2px' }}>{language === 'ar' ? 'مبالغ متأخرة تجاوزت دورة الائتمان.' : 'Overdue balances past credit cycle.'}</div>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="side-panel-card">
-                      <div className="side-panel-title">
-                        <Send size={15} />
-                        <span>{language === 'ar' ? 'إجراءات سير العمل للمدير' : 'Manager Workflows'}</span>
-                      </div>
-
-                      <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setVehicleLoadoutModal(true)}>
-                        <Truck size={14} />
-                        <span>{t('issueVehicleLoadout')}</span>
-                      </button>
-
-                      <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setVehicleAuditModal(true)}>
-                        <ClipboardCheck size={14} />
-                        <span>{t('auditVehicleStock')}</span>
-                      </button>
-
-                      <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setSkuConversionModal(true)}>
-                        <RepeatIcon size={14} />
-                        <span>{t('convertSkuRepackage')}</span>
-                      </button>
-
-                      <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setCreatePoModal(true)}>
-                        <FilePlus size={14} />
-                        <span>{t('draftPurchaseOrder')}</span>
-                      </button>
-
-                      <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setProductSetupModal(true)}>
-                        <PackagePlus size={14} />
-                        <span>{t('setupProductSku')}</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <MainDataTable
-                  activeTab={activeTab}
-                  searchQuery={searchQuery}
-                  onOverrideCredit={(item) => setOverrideModal({ open: true, item })}
-                  onViewPoDetails={(po) => setPoDetailsModal({ open: true, item: po })}
-                />
+                  )}
+                </>
               )}
             </main>
           </div>

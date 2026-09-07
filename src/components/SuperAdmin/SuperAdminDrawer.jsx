@@ -9,7 +9,8 @@ import {
   ArrowRightLeft, 
   ShieldCheck, 
   ChevronRight,
-  ChevronLeft 
+  ChevronLeft,
+  User 
 } from 'lucide-react';
 import { Logo } from '../Logo';
 import { useLanguage } from '../../context/LanguageContext';
@@ -30,7 +31,8 @@ export const SuperAdminDrawer = ({
     { id: 'superadmin-governance', label: t('userAdminGovernance'), icon: Users, badge: isRtl ? '4 أدوار' : '4 Roles' },
     { id: 'superadmin-permissions', label: t('masterHierarchyMatrix'), icon: GitMerge },
     { id: 'superadmin-branches', label: t('centralWarehouseWH01'), icon: Building2 },
-    { id: 'superadmin-security', label: t('securityKillSwitches'), icon: ShieldAlert }
+    { id: 'superadmin-security', label: t('securityKillSwitches'), icon: ShieldAlert },
+    { id: 'profile', label: t('myProfile'), icon: User }
   ];
 
   const handleSelect = (tabId) => {

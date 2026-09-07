@@ -20,7 +20,8 @@ import {
   ADMIN_AUDIT_TRAIL,
   CURRENT_SELLER,
   BRANCHES_MASTER_DATA,
-  SYSTEM_KILL_SWITCHES
+  SYSTEM_KILL_SWITCHES,
+  ROLE_PROFILES
 } from '../data/mockData';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false';
@@ -41,6 +42,7 @@ let dbAuditTrail = JSON.parse(JSON.stringify(ADMIN_AUDIT_TRAIL));
 let dbCurrentSeller = { ...CURRENT_SELLER };
 let dbBranches = JSON.parse(JSON.stringify(BRANCHES_MASTER_DATA));
 let dbKillSwitches = JSON.parse(JSON.stringify(SYSTEM_KILL_SWITCHES));
+let dbProfiles = JSON.parse(JSON.stringify(ROLE_PROFILES));
 
 // Helper for real HTTP requests (FETCH / REST API)
 async function request(endpoint, options = {}) {
@@ -739,5 +741,55 @@ export const apiService = {
       return { success: true, switchId };
     }
     return request(`/superadmin/kill-switches/${switchId}/toggle`, { method: 'POST' });
+  },
+
+  async getCurrentUser(role = 'superadmin') {
+    if (USE_MOCK) {
+      return dbProfiles[role] || dbProfiles.manager;
+    }
+    const raw = await request(`/users/me?role=${role}`);
+    return raw || dbProfiles[role] || dbProfiles.manager;
+  },
+
+  async updateProfilePhoto(role = 'superadmin', photoUrl = '') {
+    if (USE_MOCK) {
+      if (dbProfiles[role]) {
+        dbProfiles[role].avatar = photoUrl;
+      }
+      logAudit(dbProfiles[role]?.name || 'User', role, 'UPDATE_PROFILE_PHOTO', `Updated profile avatar image`);
+      return { success: true, user: dbProfiles[role] };
+    }
+    return request(`/users/profile-photo`, {
+      method: 'PUT',
+      body: JSON.stringify({ role, avatar: photoUrl })
+    });
+  },
+
+  async updateUserProfile(role = 'superadmin', profileData = {}) {
+    if (USE_MOCK) {
+      if (dbProfiles[role]) {
+        dbProfiles[role] = {
+          ...dbProfiles[role],
+          ...profileData
+        };
+      }
+      logAudit(dbProfiles[role]?.name || 'User', role, 'UPDATE_PROFILE_INFO', `Updated profile contact & address details`);
+      return { success: true, user: dbProfiles[role] };
+    }
+    return request(`/users/profile`, {
+      method: 'PUT',
+      body: JSON.stringify({ role, ...profileData })
+    });
+  },
+
+  async resetUserPassword(role = 'superadmin', passwordData = {}) {
+    if (USE_MOCK) {
+      logAudit(dbProfiles[role]?.name || 'User', role, 'RESET_PASSWORD', `Updated user security password credentials`);
+      return { success: true, message: 'Password updated successfully' };
+    }
+    return request(`/users/password-reset`, {
+      method: 'POST',
+      body: JSON.stringify({ role, ...passwordData })
+    });
   }
 };

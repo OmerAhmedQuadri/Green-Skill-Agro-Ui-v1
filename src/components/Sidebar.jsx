@@ -9,7 +9,8 @@ import {
   Banknote,
   Users,
   TrendingUp,
-  AlertTriangle
+  AlertTriangle,
+  User
 } from 'lucide-react';
 import { METRICS } from '../data/mockData';
 import { Logo } from './Logo';
@@ -27,7 +28,8 @@ export const Sidebar = ({ activeTab, setActiveTab }) => {
     { id: 'stores', label: t('storesCreditLedger'), icon: Store, badge: language === 'ar' ? `${METRICS.overdueStoresCount} محظور` : `${METRICS.overdueStoresCount} Blocked` },
     { id: 'cash', label: t('cashHandovers'), icon: Banknote, badge: language === 'ar' ? '2 مراجعة' : '2 Review' },
     { id: 'attendance', label: t('attendanceRoutes'), icon: Users },
-    { id: 'analytics', label: t('reorderForecasting'), icon: TrendingUp }
+    { id: 'analytics', label: t('reorderForecasting'), icon: TrendingUp },
+    { id: 'profile', label: t('myProfile'), icon: User }
   ];
 
   return (

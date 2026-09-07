@@ -15,7 +15,8 @@ import {
   PackagePlus,
   FilePlus,
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  User
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { useLanguage } from '../context/LanguageContext';
@@ -43,7 +44,8 @@ export const ManagerDrawer = ({
     { id: 'stores', label: t('storesCreditLedger'), icon: Store, badge: `${METRICS.overdueStoresCount} ${t('blocked')}`, alert: true },
     { id: 'cash', label: t('cashHandovers'), icon: Banknote, badge: `2 ${t('review')}` },
     { id: 'attendance', label: t('attendanceRoutes'), icon: Users },
-    { id: 'analytics', label: t('reorderForecasting'), icon: TrendingUp }
+    { id: 'analytics', label: t('reorderForecasting'), icon: TrendingUp },
+    { id: 'profile', label: t('myProfile'), icon: User }
   ];
 
   const handleSelect = (tabId) => {

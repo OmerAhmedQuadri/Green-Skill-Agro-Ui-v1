@@ -231,6 +231,29 @@ export const ManagerProvider = ({ children }) => {
     return res;
   };
 
+  // 19. Profile Operations
+  const getUserProfile = async (role) => {
+    return await apiService.getCurrentUser(role);
+  };
+
+  const updateProfilePhoto = async (role, photoUrl) => {
+    const res = await apiService.updateProfilePhoto(role, photoUrl);
+    await loadAllData();
+    return res;
+  };
+
+  const updateUserProfile = async (role, profileData) => {
+    const res = await apiService.updateUserProfile(role, profileData);
+    await loadAllData();
+    return res;
+  };
+
+  const resetUserPassword = async (role, passwordData) => {
+    const res = await apiService.resetUserPassword(role, passwordData);
+    await loadAllData();
+    return res;
+  };
+
   const value = {
     metrics,
     approvals,
@@ -272,7 +295,11 @@ export const ManagerProvider = ({ children }) => {
     toggleKillSwitch,
     addVendor,
     updateBranchStatus,
-    updateBranchDetails
+    updateBranchDetails,
+    getUserProfile,
+    updateProfilePhoto,
+    updateUserProfile,
+    resetUserPassword
   };
 
   return (
