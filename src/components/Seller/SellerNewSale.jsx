@@ -12,9 +12,11 @@ import {
   Check
 } from 'lucide-react';
 import { useManagerContext } from '../../context/ManagerContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const SellerNewSale = ({ onCompleteSale }) => {
-  const { stores, inventory, systemRules } = useManagerContext();
+  const { stores, inventory, systemRules, killSwitches = [], featureToggles = [], currentSeller } = useManagerContext();
+  const { language, t } = useLanguage();
 
   const storeList = stores && stores.length > 0 ? stores : [];
   const inventoryList = inventory && inventory.length > 0 ? inventory : [];
@@ -28,6 +30,12 @@ export const SellerNewSale = ({ onCompleteSale }) => {
   ]);
   const [paymentMode, setPaymentMode] = useState('Immediate Cash');
   const [discountError, setDiscountError] = useState('');
+
+  // Enforcement Checks
+  const isPosFreezeActive = killSwitches.some(k => (k.id === 'KILL-01' || (k.name && k.name.includes('POS Sales Freeze'))) && (k.active || k.enabled));
+  const isCreditSalesEnabled = featureToggles.find(f => f.id === 'TOGGLE-01')?.enabled ?? true;
+  const isStrictCashCeilingActive = featureToggles.find(f => f.id === 'TOGGLE-03')?.enabled ?? true;
+  const isCashCeilingBreached = isStrictCashCeilingActive && (currentSeller?.cashBreachWarning || (currentSeller?.cashInHand > (systemRules?.maxSellerCashCeiling || 12000)));
 
   const selectedStore = storeList.find(s => s.storeId === selectedStoreId) || storeList[0] || { storeName: 'Select Store', blocked: false, outstandingBalance: 0, creditLimit: 10000 };
 
@@ -50,15 +58,15 @@ export const SellerNewSale = ({ onCompleteSale }) => {
   };
 
   const handleDiscountChange = (sku, pct) => {
-    const numPct = Number(pct);
+    const numPct = Math.max(0, Number(pct) || 0);
     if (numPct > maxDiscountCeiling) {
-      setDiscountError(`Discount ${numPct}% exceeds permitted seller ceiling (Max ${maxDiscountCeiling}%). Manager approval required.`);
+      setDiscountError(language === 'ar' ? `الخصم ${numPct}% يتجاوز السقف المسموح (${maxDiscountCeiling}%). يتطلب موافقة المدير.` : `Discount ${numPct}% exceeds permitted seller ceiling (Max ${maxDiscountCeiling}%). Manager approval required.`);
     } else {
       setDiscountError('');
     }
     setCart(prev => prev.map(item => {
       if (item.sku === sku) {
-        return { ...item, discountPct: numPct };
+        return { ...item, discountPct: Math.min(100, numPct) };
       }
       return item;
     }));
@@ -85,8 +93,16 @@ export const SellerNewSale = ({ onCompleteSale }) => {
 
   const handleSubmitSale = (e) => {
     e.preventDefault();
+    if (isPosFreezeActive) {
+      alert(language === 'ar' ? 'تجميد المبيعات نشط: قام المشرف العام بقفل مبيعات نقاط البيع.' : 'GLOBAL POS FREEZE ACTIVE: Super Admin has locked all POS sales transactions across the platform.');
+      return;
+    }
     if (selectedStore.blocked) {
-      alert(`Cannot complete sale: ${selectedStore.storeName} is blocked due to overdue balance.`);
+      alert(language === 'ar' ? `تعذر البيع: ${selectedStore.storeName} محظور بسبب المستحقات المتأخرة.` : `Cannot complete sale: ${selectedStore.storeName} is blocked due to overdue balance.`);
+      return;
+    }
+    if (paymentMode === 'Immediate Cash' && isCashCeilingBreached) {
+      alert(language === 'ar' ? 'تجاوز حد النقدية: لقد تجاوزت حد النقدية المسموح به. يرجى تسليم النقدية.' : `CASH CEILING BREACHED: You have exceeded the permitted daily cash limit. Please perform a cash handover before taking more cash sales.`);
       return;
     }
     onCompleteSale({
@@ -116,14 +132,14 @@ export const SellerNewSale = ({ onCompleteSale }) => {
           onClick={() => setMobileTab('stock')}
         >
           <Package size={15} />
-          <span>1. Van Stock ({filteredStock.length})</span>
+          <span>1. {t('vanStock')} ({filteredStock.length})</span>
         </button>
         <button 
           className={`mobile-tab-btn ${mobileTab === 'cart' ? 'active' : ''}`}
           onClick={() => setMobileTab('cart')}
         >
           <ShoppingCart size={15} />
-          <span>2. Cart ({cart.length}) • SAR {subtotal.toLocaleString()}</span>
+          <span>2. {t('cartSummary')} ({cart.length}) • SAR {subtotal.toLocaleString()}</span>
         </button>
       </div>
 
@@ -134,7 +150,7 @@ export const SellerNewSale = ({ onCompleteSale }) => {
           <div className="data-panel seller-pos-step1-panel" style={{ padding: '16px', minHeight: 'auto', height: 'auto', flex: 'none' }}>
             <div style={{ fontWeight: 700, fontSize: '13.5px', color: 'var(--color-forest-dark)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Store size={16} />
-              <span>Step 1: Select Store Account</span>
+              <span>{language === 'ar' ? 'الخطوة 1: اختيار حساب المتجر' : 'Step 1: Select Store Account'}</span>
             </div>
 
             <select 
@@ -145,7 +161,7 @@ export const SellerNewSale = ({ onCompleteSale }) => {
             >
               {storeList.map(s => (
                 <option key={s.storeId} value={s.storeId}>
-                  {s.storeName} ({s.city}) - {s.creditCycle} {s.blocked ? '[BLOCKED]' : ''}
+                  {s.storeName} ({s.city}) - {s.creditCycle} {s.blocked ? `[${t('blocked')}]` : ''}
                 </option>
               ))}
             </select>
@@ -155,16 +171,16 @@ export const SellerNewSale = ({ onCompleteSale }) => {
               <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', padding: '10px', borderRadius: '6px', marginTop: '10px', color: '#991b1b', fontSize: '12px' }}>
                 <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <Lock size={14} />
-                  <span>Account Blocked from Sales</span>
+                  <span>{t('overdueWarning')}</span>
                 </div>
                 <div style={{ marginTop: '3px' }}>
-                  Outstanding: SAR {selectedStore.outstandingBalance?.toLocaleString()} (Limit SAR {selectedStore.creditLimit?.toLocaleString()})
+                  {language === 'ar' ? 'المستحقات المتأخرة:' : 'Outstanding:'} SAR {selectedStore.outstandingBalance?.toLocaleString()} ({language === 'ar' ? 'الحد:' : 'Limit'} SAR {selectedStore.creditLimit?.toLocaleString()})
                 </div>
               </div>
             ) : (
               <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', padding: '8px 12px', borderRadius: '6px', marginTop: '10px', color: '#166534', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <CheckCircle size={14} />
-                <span>Credit Check Passed: Active Account</span>
+                <span>{language === 'ar' ? 'اجتاز فحص الائتمان: حساب نشط' : 'Credit Check Passed: Active Account'}</span>
               </div>
             )}
           </div>
@@ -174,7 +190,7 @@ export const SellerNewSale = ({ onCompleteSale }) => {
             <div className="panel-header-toolbar pos-header-toolbar">
               <div className="panel-main-title">
                 <Package size={15} />
-                <span>Step 2: Add Items from Van Stock</span>
+                <span>{language === 'ar' ? 'الخطوة 2: إضافة الأصناف من مخزون الشاحنة' : 'Step 2: Add Items from Van Stock'}</span>
               </div>
 
               <div className="pos-search-box">
@@ -182,7 +198,7 @@ export const SellerNewSale = ({ onCompleteSale }) => {
                 <input 
                   type="text" 
                   className="form-input pos-search-input" 
-                  placeholder="Search item or SKU..."
+                  placeholder={t('searchProducts')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
@@ -194,11 +210,11 @@ export const SellerNewSale = ({ onCompleteSale }) => {
               <table className="erp-table">
                 <thead>
                   <tr>
-                    <th>SKU</th>
-                    <th>Item Name</th>
-                    <th>Van Qty</th>
-                    <th>Price</th>
-                    <th>Action</th>
+                    <th>{t('id')}</th>
+                    <th>{t('item')}</th>
+                    <th>{language === 'ar' ? 'كمية الشاحنة' : 'Van Qty'}</th>
+                    <th>{t('unitPrice')}</th>
+                    <th>{t('action')}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -217,7 +233,7 @@ export const SellerNewSale = ({ onCompleteSale }) => {
                             onClick={() => handleAddItem(item)}
                           >
                             {inCart ? <Check size={12} /> : <Plus size={12} />}
-                            <span>{inCart ? "Added" : "Add"}</span>
+                            <span>{inCart ? (language === 'ar' ? 'تمت الإضافة' : 'Added') : (language === 'ar' ? 'إضافة' : 'Add')}</span>
                           </button>
                         </td>
                       </tr>
@@ -226,7 +242,7 @@ export const SellerNewSale = ({ onCompleteSale }) => {
                   {filteredStock.length === 0 && (
                     <tr>
                       <td colSpan={5} style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>
-                        No inventory matching "{searchTerm}"
+                        {t('noDataFound')}
                       </td>
                     </tr>
                   )}
@@ -247,11 +263,11 @@ export const SellerNewSale = ({ onCompleteSale }) => {
 
                     <div className="pos-card-meta">
                       <div className="pos-meta-item">
-                        <span className="meta-label">Van Stock:</span>
-                        <strong className="meta-val">{item.fleetQty} units</strong>
+                        <span className="meta-label">{t('vanStock')}:</span>
+                        <strong className="meta-val">{item.fleetQty} {language === 'ar' ? 'وحدة' : 'units'}</strong>
                       </div>
                       <div className="pos-meta-item">
-                        <span className="meta-label">Price:</span>
+                        <span className="meta-label">{t('unitPrice')}:</span>
                         <strong className="meta-val price-val">SAR {item.unitPrice}</strong>
                       </div>
                     </div>
@@ -262,14 +278,14 @@ export const SellerNewSale = ({ onCompleteSale }) => {
                       onClick={() => handleAddItem(item)}
                     >
                       {inCart ? <Check size={15} /> : <Plus size={15} />}
-                      <span>{inCart ? "Added to Cart" : "Add to Order"}</span>
+                      <span>{inCart ? (language === 'ar' ? 'تمت الإضافة للسلة' : 'Added to Cart') : (language === 'ar' ? 'إضافة للطلب' : 'Add to Order')}</span>
                     </button>
                   </div>
                 );
               })}
               {filteredStock.length === 0 && (
                 <div style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)', fontSize: '13px' }}>
-                  No stock items match "{searchTerm}"
+                  {t('noDataFound')}
                 </div>
               )}
             </div>
@@ -281,12 +297,12 @@ export const SellerNewSale = ({ onCompleteSale }) => {
           <div className="side-panel-card pos-cart-card" style={{ padding: '16px' }}>
             <div className="side-panel-title">
               <ShoppingCart size={16} />
-              <span>Order Cart & Delivery Receipt</span>
+              <span>{t('cartSummary')}</span>
             </div>
 
             {cart.length === 0 ? (
               <div style={{ padding: '24px 12px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '13px' }}>
-                Cart is empty. Select items from van stock to build order.
+                {language === 'ar' ? 'السلة فارغة. اختر أصنافاً من مخزون الشاحنة.' : 'Cart is empty. Select items from van stock to build order.'}
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
@@ -300,7 +316,7 @@ export const SellerNewSale = ({ onCompleteSale }) => {
                       </span>
                       <button 
                         style={{ background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', cursor: 'pointer', padding: '4px 6px', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
-                        title="Remove item" 
+                        title={t('delete')} 
                         onClick={() => handleRemoveItem(item.sku)}
                       >
                         <Trash2 size={14} />
@@ -331,7 +347,7 @@ export const SellerNewSale = ({ onCompleteSale }) => {
 
                       {/* Discount % Box */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '12px', color: 'var(--text-muted)', flexShrink: 0 }}>
-                        <span>Disc:</span>
+                        <span>{t('discount')}:</span>
                         <input 
                           type="number" 
                           style={{ width: '38px', height: '26px', padding: '2px 4px', fontSize: '12px', border: '1px solid var(--border-color)', borderRadius: '4px', textAlign: 'center' }}
@@ -355,17 +371,31 @@ export const SellerNewSale = ({ onCompleteSale }) => {
                   </div>
                 )}
 
+                {isPosFreezeActive && (
+                  <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', padding: '8px 10px', borderRadius: '6px', fontSize: '11.5px', marginTop: '4px', fontWeight: 700 }}>
+                    ⛔ {language === 'ar' ? 'تجميد المبيعات نشط: قام المشرف العام بقفل المبيعات.' : 'GLOBAL POS FREEZE ACTIVE: Super Admin locked all sales transactions.'}
+                  </div>
+                )}
+
+                {isCashCeilingBreached && paymentMode === 'Immediate Cash' && (
+                  <div style={{ backgroundColor: '#fffbeb', border: '1px solid #fde68a', color: '#92400e', padding: '8px 10px', borderRadius: '6px', fontSize: '11.5px', marginTop: '4px', fontWeight: 700 }}>
+                    ⚠️ {t('cashBreachAlert')}
+                  </div>
+                )}
+
                 <div className="form-group" style={{ marginTop: '8px' }}>
-                  <span className="form-label" style={{ fontWeight: 600, fontSize: '12px', marginBottom: '4px', display: 'block' }}>Payment Mode</span>
+                  <span className="form-label" style={{ fontWeight: 600, fontSize: '12px', marginBottom: '4px', display: 'block' }}>{language === 'ar' ? 'طريقة الدفع' : 'Payment Mode'}</span>
                   <select className="form-select" style={{ fontSize: '13px', padding: '8px 10px' }} value={paymentMode} onChange={(e) => setPaymentMode(e.target.value)}>
-                    <option value="Immediate Cash">Immediate Cash (Bill-to-Bill)</option>
-                    <option value="Add to Credit Cycle Balance">Add to Running Credit Balance</option>
+                    <option value="Immediate Cash">{language === 'ar' ? 'نقد فوراً (فاتورة بفاتورة)' : 'Immediate Cash (Bill-to-Bill)'}</option>
+                    {isCreditSalesEnabled && (
+                      <option value="Add to Credit Cycle Balance">{language === 'ar' ? 'إضافة لرصيد الائتمان الجاري' : 'Add to Running Credit Balance'}</option>
+                    )}
                   </select>
                 </div>
 
                 <div style={{ paddingTop: '12px', borderTop: '2px solid var(--border-color)', marginTop: '6px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px', fontWeight: 700, color: 'var(--color-forest-dark)' }}>
-                    <span>Total Order:</span>
+                    <span>{t('totalAmount')}:</span>
                     <span>SAR {subtotal.toLocaleString()}</span>
                   </div>
                 </div>
@@ -373,11 +403,11 @@ export const SellerNewSale = ({ onCompleteSale }) => {
                 <button 
                   className="btn-primary" 
                   style={{ width: '100%', minHeight: '44px', marginTop: '8px', justifyContent: 'center', fontSize: '13.5px', fontWeight: 700 }}
-                  disabled={selectedStore.blocked || cart.length === 0}
+                  disabled={selectedStore.blocked || cart.length === 0 || isPosFreezeActive || (paymentMode === 'Immediate Cash' && isCashCeilingBreached)}
                   onClick={handleSubmitSale}
                 >
                   <FileText size={16} />
-                  <span>Issue Delivery Document</span>
+                  <span>{t('issueDeliveryDoc')}</span>
                 </button>
               </div>
             )}
@@ -385,19 +415,19 @@ export const SellerNewSale = ({ onCompleteSale }) => {
         </div>
       </div>
 
-      {/* Floating Sticky Cart Footer on Mobile */}
-      {cart.length > 0 && (
+      {/* Floating Sticky Cart Footer on Mobile - Only shown when browsing Van Stock */}
+      {cart.length > 0 && mobileTab === 'stock' && (
         <div className="mobile-pos-floating-bar">
           <div className="floating-bar-info">
             <ShoppingCart size={18} />
             <div>
-              <div className="floating-cart-count">{cart.length} {cart.length === 1 ? 'item' : 'items'} in cart</div>
+              <div className="floating-cart-count">{cart.length} {language === 'ar' ? 'عنصر في السلة' : (cart.length === 1 ? 'item' : 'items')}</div>
               <div className="floating-cart-total">SAR {subtotal.toLocaleString()}</div>
             </div>
           </div>
 
           <button className="floating-bar-action" onClick={scrollToCart}>
-            <span>{mobileTab === 'cart' ? 'Review Order' : 'Checkout Cart →'}</span>
+            <span>{language === 'ar' ? 'معاينة السلة ←' : 'Checkout Cart →'}</span>
           </button>
         </div>
       )}

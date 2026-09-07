@@ -1,49 +1,36 @@
 import React from 'react';
 import { 
   X, 
-  LayoutDashboard, 
-  Package, 
-  Truck, 
-  FileText, 
-  Send, 
-  Store, 
-  Banknote, 
+  Crown, 
   Users, 
-  TrendingUp, 
-  ArrowRightLeft,
-  ShieldCheck,
-  PackagePlus,
-  FilePlus,
+  GitMerge, 
+  Building2, 
+  ShieldAlert, 
+  ArrowRightLeft, 
+  ShieldCheck, 
   ChevronRight,
-  ChevronLeft
+  ChevronLeft 
 } from 'lucide-react';
-import { Logo } from './Logo';
-import { useLanguage } from '../context/LanguageContext';
-import { METRICS, SYSTEM_INFO } from '../data/mockData';
+import { Logo } from '../Logo';
+import { useLanguage } from '../../context/LanguageContext';
 
-export const ManagerDrawer = ({ 
+export const SuperAdminDrawer = ({ 
   isOpen, 
   onClose, 
   activeTab, 
   setActiveTab, 
-  onSwitchRole,
-  onOpenProductSetup,
-  onOpenCreatePo
+  onSwitchRole 
 }) => {
   const { t, isRtl } = useLanguage();
 
   if (!isOpen) return null;
 
   const navItems = [
-    { id: 'overview', label: t('executiveDashboard'), icon: LayoutDashboard },
-    { id: 'fleet', label: t('vehicleFleetSellers'), icon: Truck, badge: METRICS.cashCeilingBreaches > 0 ? `${METRICS.cashCeilingBreaches} ${t('alert')}` : null, alert: true },
-    { id: 'inventory', label: t('warehouseStock'), icon: Package, badge: `${METRICS.expiryRiskCount} ${t('expiry')}` },
-    { id: 'orders', label: t('purchaseOrdersPO'), icon: FileText, badge: `1 ${t('draft')}` },
-    { id: 'dispatch', label: t('warehouseDispatches'), icon: Send, badge: `${METRICS.activeDispatchesPending} ${t('pending')}` },
-    { id: 'stores', label: t('storesCreditLedger'), icon: Store, badge: `${METRICS.overdueStoresCount} ${t('blocked')}`, alert: true },
-    { id: 'cash', label: t('cashHandovers'), icon: Banknote, badge: `2 ${t('review')}` },
-    { id: 'attendance', label: t('attendanceRoutes'), icon: Users },
-    { id: 'analytics', label: t('reorderForecasting'), icon: TrendingUp }
+    { id: 'superadmin-overview', label: t('enterpriseOversight'), icon: Crown },
+    { id: 'superadmin-governance', label: t('userAdminGovernance'), icon: Users, badge: isRtl ? '4 أدوار' : '4 Roles' },
+    { id: 'superadmin-permissions', label: t('masterHierarchyMatrix'), icon: GitMerge },
+    { id: 'superadmin-branches', label: t('centralWarehouseWH01'), icon: Building2 },
+    { id: 'superadmin-security', label: t('securityKillSwitches'), icon: ShieldAlert }
   ];
 
   const handleSelect = (tabId) => {
@@ -86,42 +73,22 @@ export const ManagerDrawer = ({
           </button>
         </div>
 
-        {/* Manager User Info */}
+        {/* Profile Header */}
         <div style={{ padding: '12px 18px', backgroundColor: '#f8faf7', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-forest-dark)' }}>{SYSTEM_INFO.currentUser.name}</div>
-            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t('managerRole')} &bull; WH-01</div>
+            <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-forest-dark)' }}>{t('superadminTitle')}</div>
+            <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t('superadminRole')}</div>
           </div>
           <span className="badge badge-success" style={{ fontSize: '10px' }}>
             <ShieldCheck size={11} />
-            Admin
+            Highest Authority
           </span>
-        </div>
-
-        {/* Quick Action Shortcuts */}
-        <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color-light)', display: 'flex', gap: '8px' }}>
-          <button 
-            className="btn-sm-primary" 
-            style={{ flex: 1, padding: '7px 8px', fontSize: '11px', justifyContent: 'center' }}
-            onClick={() => { onClose(); onOpenProductSetup(); }}
-          >
-            <PackagePlus size={13} />
-            <span>+ {t('setupProductSku')}</span>
-          </button>
-          <button 
-            className="btn-sm-secondary" 
-            style={{ flex: 1, padding: '7px 8px', fontSize: '11px', justifyContent: 'center' }}
-            onClick={() => { onClose(); onOpenCreatePo(); }}
-          >
-            <FilePlus size={13} />
-            <span>+ {t('draftPurchaseOrder')}</span>
-          </button>
         </div>
 
         {/* Navigation Items */}
         <nav style={{ display: 'flex', flexDirection: 'column', padding: '8px 0', flex: 1, overflowY: 'auto' }}>
           <div style={{ fontSize: '10px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', color: 'var(--text-muted)', padding: '6px 18px' }}>
-            {t('operationalControl')}
+            {t('superAdminGovernance')}
           </div>
 
           {navItems.map((item) => {
@@ -149,8 +116,8 @@ export const ManagerDrawer = ({
                 <span style={{ flex: 1 }}>{item.label}</span>
                 {item.badge && (
                   <span style={{ 
-                    backgroundColor: item.alert ? '#fee2e2' : 'rgba(0,0,0,0.06)', 
-                    color: item.alert ? '#991b1b' : 'var(--text-main)',
+                    backgroundColor: 'rgba(0,0,0,0.06)', 
+                    color: 'var(--text-main)',
                     fontSize: '10.5px', 
                     fontWeight: 700, 
                     padding: '2px 6px', 
@@ -166,17 +133,17 @@ export const ManagerDrawer = ({
         </nav>
 
         {/* Role Switcher Footer */}
-        <div style={{ padding: '14px 16px', borderTop: '1px solid var(--border-color)', backgroundColor: '#fafcf9' }}>
+        <div style={{ padding: '14px 16px', borderTop: '1px solid var(--border-color)', backgroundColor: '#fafcf9', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <button 
             className="btn-secondary" 
             style={{ width: '100%', justifyContent: 'center', padding: '9px', fontSize: '12px', backgroundColor: '#1b4332', color: '#ffffff', borderColor: '#1b4332' }}
             onClick={() => {
               onClose();
-              onSwitchRole();
+              onSwitchRole('admin');
             }}
           >
             <ArrowRightLeft size={14} />
-            <span>{t('switchToSeller')}</span>
+            <span>{t('switchRole')}</span>
           </button>
         </div>
       </div>

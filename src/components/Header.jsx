@@ -1,32 +1,30 @@
 import React from 'react';
-import { Search, Building2, ChevronDown, ArrowRightLeft, Menu } from 'lucide-react';
+import { Search, Building2, ChevronDown, ArrowRightLeft, Menu, Globe } from 'lucide-react';
 import { SYSTEM_INFO } from '../data/mockData';
+import { Logo } from './Logo';
+import { useLanguage } from '../context/LanguageContext';
 
 export const Header = ({ onSearch, searchQuery, currentRole = 'manager', onSwitchRole, onOpenDrawer }) => {
+  const { language, toggleLanguage, t } = useLanguage();
+
   return (
     <header className="erp-header">
-      <div className="header-brand">
+      <div className="header-brand" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
         <button
           className="drawer-toggle-btn"
-          style={{ background: 'transparent', border: 'none', color: '#ffffff', cursor: 'pointer', display: 'flex', alignItems: 'center', padding: '4px', marginRight: '4px' }}
+          style={{ background: 'transparent', border: 'none', color: '#ffffff', cursor: 'pointer', padding: '4px', marginRight: '2px' }}
           onClick={onOpenDrawer}
           title="Open Navigation Menu"
         >
           <Menu size={22} />
         </button>
 
-        <div className="brand-icon">GSA</div>
-        <div>
-          <span className="brand-title">{SYSTEM_INFO.appName}</span>
-          <span className="brand-subtitle">{SYSTEM_INFO.subTitle}</span>
-        </div>
-      </div>
+        <Logo height={28} />
 
-      <div className="header-center-info">
-        <div className="warehouse-tag">
+        <div className="warehouse-tag" style={{ marginLeft: '4px' }}>
           <Building2 size={14} className="text-white/70" />
-          <span>{SYSTEM_INFO.warehouse}</span>
-          <span className="live-dot" title="Live Server Connection"></span>
+          <span>{t('warehouseName')}</span>
+          <span className="live-dot" title={t('liveServer')}></span>
         </div>
       </div>
 
@@ -35,11 +33,34 @@ export const Header = ({ onSearch, searchQuery, currentRole = 'manager', onSwitc
           <Search size={14} className="search-icon-pos" />
           <input
             type="text"
-            placeholder="Search SKU, PO, Store, Vendor..."
+            placeholder={t('searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => onSearch(e.target.value)}
           />
         </div>
+
+        {/* Language Switcher Button */}
+        <button
+          onClick={toggleLanguage}
+          style={{
+            backgroundColor: 'rgba(255, 255, 255, 0.15)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            color: '#ffffff',
+            fontSize: '12px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            padding: '4px 10px',
+            borderRadius: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '5px',
+            whiteSpace: 'nowrap'
+          }}
+          title={language === 'en' ? 'Switch to Saudi Arabic (RTL)' : 'التغيير إلى الإنجليزية'}
+        >
+          <Globe size={14} style={{ color: '#4ade80' }} />
+          <span>{t('langName')}</span>
+        </button>
 
         {/* Multi-role Switcher Dropdown */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
@@ -59,22 +80,23 @@ export const Header = ({ onSearch, searchQuery, currentRole = 'manager', onSwitc
             value={currentRole}
             onChange={(e) => onSwitchRole(e.target.value)}
           >
-            <option value="admin" style={{ color: '#000' }}>Role: Admin System Desk</option>
-            <option value="manager" style={{ color: '#000' }}>Role: Manager Control</option>
-            <option value="seller" style={{ color: '#000' }}>Role: Field Seller Mobile</option>
+            <option value="superadmin" style={{ color: '#000' }}>{t('superadminRole')}</option>
+            <option value="admin" style={{ color: '#000' }}>{t('adminRole')}</option>
+            <option value="manager" style={{ color: '#000' }}>{t('managerRole')}</option>
+            <option value="seller" style={{ color: '#000' }}>{t('sellerRole')}</option>
           </select>
         </div>
 
         <div className="user-profile-badge">
           <div className="avatar-initials">
-            {currentRole === 'admin' ? 'AD' : (currentRole === 'manager' ? 'SA' : 'OF')}
+            {currentRole === 'superadmin' ? 'SU' : (currentRole === 'admin' ? 'AD' : (currentRole === 'manager' ? 'SA' : 'OF'))}
           </div>
           <div className="user-info">
             <span className="user-name">
-              {currentRole === 'admin' ? 'Admin System Owner' : (currentRole === 'manager' ? SYSTEM_INFO.currentUser.name : 'Omar Farooq')}
+              {currentRole === 'superadmin' ? (language === 'ar' ? 'عبدالعزيز آل سعود' : 'Abdulaziz Al-Saud') : (currentRole === 'admin' ? (language === 'ar' ? 'مدير النظام' : 'Admin System Owner') : (currentRole === 'manager' ? (language === 'ar' ? 'سامي المنصور' : SYSTEM_INFO.currentUser.name) : (language === 'ar' ? 'عمر فاروق' : 'Omar Farooq')))}
             </span>
             <span className="user-role">
-              {currentRole === 'admin' ? 'System Configuration' : (currentRole === 'manager' ? SYSTEM_INFO.currentUser.role : 'Field Representative')}
+              {currentRole === 'superadmin' ? t('superadminTitle') : (currentRole === 'admin' ? t('adminTitle') : (currentRole === 'manager' ? t('managerTitle') : t('sellerTitle')))}
             </span>
           </div>
           <ChevronDown size={14} className="text-white/60" />

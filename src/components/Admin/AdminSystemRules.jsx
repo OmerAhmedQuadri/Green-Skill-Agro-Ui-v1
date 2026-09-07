@@ -1,17 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Sliders, Save, CheckCircle, ShieldAlert, Lock, Clock, DollarSign, Percent } from 'lucide-react';
 import { useManagerContext } from '../../context/ManagerContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const AdminSystemRules = ({ onShowToast }) => {
   const { systemRules, updateSystemRules } = useManagerContext();
-  const [config, setConfig] = useState(systemRules || { maxSellerDiscountPct: 10, maxSellerCashCeiling: 12000, storeCreditGraceDays: 7, expiryWarningWindowDays: 30, lastUpdatedBy: 'Admin System Owner', lastUpdatedAt: 'Just Now' });
+  const { language, t } = useLanguage();
+  const [config, setConfig] = useState(() => systemRules || { maxSellerDiscountPct: 10, maxSellerCashCeiling: 12000, storeCreditGraceDays: 7, expiryWarningWindowDays: 30, lastUpdatedBy: 'Admin System Owner', lastUpdatedAt: 'Just Now' });
   const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    if (systemRules) {
-      setConfig(systemRules);
-    }
-  }, [systemRules]);
 
   const handleChange = (field, val) => {
     setConfig(prev => ({ ...prev, [field]: Number(val) }));
@@ -23,7 +19,7 @@ export const AdminSystemRules = ({ onShowToast }) => {
     await updateSystemRules(config);
     setSaved(true);
     if (onShowToast) {
-      onShowToast(`System Rules & Ceilings Updated! New parameters saved to master governance ledger.`);
+      onShowToast(language === 'ar' ? 'تم تحديث قواعد وسقوف النظام! تم حفظ الإعدادات الجديدة.' : `System Rules & Ceilings Updated! New parameters saved to master governance ledger.`);
     }
   };
 
@@ -34,23 +30,23 @@ export const AdminSystemRules = ({ onShowToast }) => {
           <div>
             <div style={{ fontSize: '15px', fontWeight: 700, color: 'var(--color-forest-dark)', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <Sliders size={18} />
-              <span>System-Wide Rules & Governance Ceilings</span>
+              <span>{t('systemRulesTitle')}</span>
             </div>
             <div style={{ fontSize: '11.5px', color: 'var(--text-muted)', marginTop: '2px' }}>
-              Configure company-wide operational limits, cash ceilings, discount guardrails, and audit windows for Green Skill Agro.
+              {t('systemRulesDesc')}
             </div>
           </div>
 
           <button className="btn-primary" onClick={handleSave} style={{ gap: '6px' }}>
             <Save size={14} />
-            <span>Save System Parameters</span>
+            <span>{t('saveSystemParams')}</span>
           </button>
         </div>
 
         {saved && (
           <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', padding: '10px 14px', borderRadius: '6px', fontSize: '12px', display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
             <CheckCircle size={16} />
-            <span>Configuration parameters successfully updated and active system-wide!</span>
+            <span>{t('paramsSavedSuccess')}</span>
           </div>
         )}
 
@@ -59,13 +55,13 @@ export const AdminSystemRules = ({ onShowToast }) => {
           <div className="side-panel-card" style={{ padding: '14px', gap: '10px' }}>
             <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-forest-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Percent size={15} />
-              <span>Max Seller Discount Ceiling</span>
+              <span>{t('maxSellerDiscount')}</span>
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              Maximum discount percentage a field seller can apply without Manager approval override.
+              {t('maxDiscountDesc')}
             </div>
             <div className="form-group" style={{ marginTop: '4px' }}>
-              <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>Permitted Seller Ceiling (%)</label>
+              <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{t('permittedDiscountLabel')}</label>
               <input 
                 type="number" 
                 className="form-input"
@@ -75,7 +71,7 @@ export const AdminSystemRules = ({ onShowToast }) => {
               />
             </div>
             <div style={{ fontSize: '11px', backgroundColor: '#fffbeb', border: '1px solid #fde68a', color: '#92400e', padding: '6px 8px', borderRadius: '4px' }}>
-              System Rule: Disciplinary alert triggered if seller exceeds this ceiling.
+              {t('discountRuleNote')}
             </div>
           </div>
 
@@ -83,13 +79,13 @@ export const AdminSystemRules = ({ onShowToast }) => {
           <div className="side-panel-card" style={{ padding: '14px', gap: '10px' }}>
             <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-forest-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <DollarSign size={15} />
-              <span>Seller Daily Cash Ceiling (SAR)</span>
+              <span>{t('dailyCashCeiling')}</span>
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              Maximum un-deposited cash balance a seller can hold before system blocks POS sales.
+              {t('maxCashDesc')}
             </div>
             <div className="form-group" style={{ marginTop: '4px' }}>
-              <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>Max Cash Limit (SAR)</label>
+              <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{t('maxCashLimitLabel')}</label>
               <input 
                 type="number" 
                 className="form-input"
@@ -99,7 +95,7 @@ export const AdminSystemRules = ({ onShowToast }) => {
               />
             </div>
             <div style={{ fontSize: '11px', backgroundColor: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', padding: '6px 8px', borderRadius: '4px' }}>
-              System Rule: Automatic POS lock active when cash exceeds ceiling.
+              {t('cashLockNote')}
             </div>
           </div>
 
@@ -107,13 +103,13 @@ export const AdminSystemRules = ({ onShowToast }) => {
           <div className="side-panel-card" style={{ padding: '14px', gap: '10px' }}>
             <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-forest-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Lock size={15} />
-              <span>Store Credit Grace Period (Days)</span>
+              <span>{t('storeCreditGrace')}</span>
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              Days permitted past credit cycle due date before store account is automatically credit-blocked.
+              {t('creditGraceDesc')}
             </div>
             <div className="form-group" style={{ marginTop: '4px' }}>
-              <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>Grace Period (Days)</label>
+              <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{t('graceDaysLabel')}</label>
               <input 
                 type="number" 
                 className="form-input"
@@ -123,7 +119,7 @@ export const AdminSystemRules = ({ onShowToast }) => {
               />
             </div>
             <div style={{ fontSize: '11px', backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', color: '#166534', padding: '6px 8px', borderRadius: '4px' }}>
-              System Rule: Stores past grace period require Manager credit override.
+              {t('creditLockNote')}
             </div>
           </div>
 
@@ -131,13 +127,13 @@ export const AdminSystemRules = ({ onShowToast }) => {
           <div className="side-panel-card" style={{ padding: '14px', gap: '10px' }}>
             <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-forest-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
               <Clock size={15} />
-              <span>FEFO Expiry Clearance Window (Days)</span>
+              <span>{t('expiryWarningWindow')}</span>
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
-              Threshold window to flag stock batches for mandatory FEFO clearance priority.
+              {t('expiryWindowDesc')}
             </div>
             <div className="form-group" style={{ marginTop: '4px' }}>
-              <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>Expiry Clearance Window (Days)</label>
+              <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{t('warningDaysLabel')}</label>
               <input 
                 type="number" 
                 className="form-input"
@@ -147,16 +143,16 @@ export const AdminSystemRules = ({ onShowToast }) => {
               />
             </div>
             <div style={{ fontSize: '11px', backgroundColor: '#fffbeb', border: '1px solid #fde68a', color: '#92400e', padding: '6px 8px', borderRadius: '4px' }}>
-              System Rule: Batches expiring within this window are prioritized for dispatch.
+              {t('fefoAlertNote')}
             </div>
           </div>
         </form>
 
         <div style={{ marginTop: '16px', paddingTop: '12px', borderTop: '1px solid var(--border-color)', fontSize: '11.5px', color: 'var(--text-muted)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>Governance Record: Last updated by <strong>{config.lastUpdatedBy}</strong> on {config.lastUpdatedAt}</div>
+          <div>{language === 'ar' ? `سجل الحوكمة: آخر تحديث بواسطة ${config.lastUpdatedBy}` : `Governance Record: Last updated by ${config.lastUpdatedBy}`}</div>
           <span className="badge badge-success">
             <ShieldAlert size={12} />
-            Master Governance Active
+            {language === 'ar' ? 'الحوكمة العامة نشطة' : 'Master Governance Active'}
           </span>
         </div>
       </div>

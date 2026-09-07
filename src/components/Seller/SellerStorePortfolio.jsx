@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Store, Plus, Lock, CheckCircle, Search } from 'lucide-react';
+import { Store, Plus, Lock, CheckCircle } from 'lucide-react';
 import { useManagerContext } from '../../context/ManagerContext';
+import { useLanguage } from '../../context/LanguageContext';
 import { NewStoreModal } from './Modals/NewStoreModal';
 
 export const SellerStorePortfolio = ({ onNavigate }) => {
   const { stores, onboardStore, currentSeller } = useManagerContext();
+  const { t } = useLanguage();
   const [showNewStoreModal, setShowNewStoreModal] = useState(false);
   const [search, setSearch] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -32,17 +34,17 @@ export const SellerStorePortfolio = ({ onNavigate }) => {
         <div>
           <div className="topbar-title">
             <Store size={18} />
-            <span>My Store Portfolio ({sellerInfo.assignedStoresCount || storeList.length} Stores)</span>
+            <span>{t('myStorePortfolio')} ({sellerInfo.assignedStoresCount || storeList.length} {t('storesOnboarded')})</span>
           </div>
           <div className="topbar-subtitle">
-            Assigned stores in route {sellerInfo.route}
+            {t('assignedStoresInRoute')} {sellerInfo.route}
           </div>
         </div>
 
         <div className="topbar-actions">
           <button className="btn-primary" onClick={() => setShowNewStoreModal(true)}>
             <Plus size={14} />
-            <span>+ Onboard New Store</span>
+            <span>+ {t('onboardNewStore')}</span>
           </button>
         </div>
       </div>
@@ -60,11 +62,11 @@ export const SellerStorePortfolio = ({ onNavigate }) => {
             <input
               type="text"
               className="table-search-input seller-search-input"
-              placeholder="Search store name, owner, city..."
+              placeholder={t('searchStoresPlaceholder')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
-            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Showing {filteredStores.length} Stores</span>
+            <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{t('showingStores')}: {filteredStores.length}</span>
           </div>
         </div>
 
@@ -72,13 +74,13 @@ export const SellerStorePortfolio = ({ onNavigate }) => {
           <table className="erp-table">
             <thead>
               <tr>
-                <th>Store & Owner</th>
-                <th>City</th>
-                <th>Credit Cycle Terms</th>
-                <th>Credit Limit</th>
-                <th>Outstanding Balance</th>
-                <th>Status</th>
-                <th>Action</th>
+                <th>{t('storeAndOwner')}</th>
+                <th>{t('cityCol')}</th>
+                <th>{t('creditCycleTerms')}</th>
+                <th>{t('creditLimit')}</th>
+                <th>{t('outstandingBalanceCol')}</th>
+                <th>{t('status')}</th>
+                <th>{t('action')}</th>
               </tr>
             </thead>
             <tbody>
@@ -100,18 +102,18 @@ export const SellerStorePortfolio = ({ onNavigate }) => {
                     {store.blocked ? (
                       <span className="badge badge-danger">
                         <Lock size={10} />
-                        BLOCKED (Past Due)
+                        {t('blockedPastDue')}
                       </span>
                     ) : (
                       <span className="badge badge-success">
                         <CheckCircle size={10} />
-                        Active
+                        {t('active')}
                       </span>
                     )}
                   </td>
                   <td>
                     <button className="btn-sm-primary" onClick={() => onNavigate('new-sale')}>
-                      <span>Create Sale</span>
+                      <span>{t('createSaleBtn')}</span>
                     </button>
                   </td>
                 </tr>

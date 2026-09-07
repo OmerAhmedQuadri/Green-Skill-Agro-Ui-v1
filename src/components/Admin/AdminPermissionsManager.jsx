@@ -1,8 +1,10 @@
 import React from 'react';
 import { Shield, UserCheck, AlertTriangle } from 'lucide-react';
 import { useManagerContext } from '../../context/ManagerContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const AdminPermissionsManager = ({ onShowToast }) => {
+  const { language, t } = useLanguage();
   const { userPermissions, updateUserPermission, updateUserStatus } = useManagerContext();
   const users = userPermissions || [];
 
@@ -10,7 +12,7 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
     const updatedVal = !currentVal;
     await updateUserPermission(userId, field, updatedVal);
     if (onShowToast) {
-      onShowToast(`Updated permission for ${userName}: set ${field} to ${updatedVal ? 'GRANTED' : 'REVOKED'}.`);
+      onShowToast(language === 'ar' ? `تم تحديث صلاحية ${userName}: تم تعيين ${field} إلى ${updatedVal ? 'ممنوح' : 'ملغى'}.` : `Updated permission for ${userName}: set ${field} to ${updatedVal ? 'GRANTED' : 'REVOKED'}.`);
     }
   };
 
@@ -18,7 +20,7 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
     const newStatus = currentStatus === 'Active' ? 'Suspended' : 'Active';
     await updateUserStatus(userId, newStatus);
     if (onShowToast) {
-      onShowToast(`User account status for ${userName} changed to ${newStatus}.`);
+      onShowToast(language === 'ar' ? `تغيرت حالة حساب المستخدم ${userName} إلى ${newStatus === 'Active' ? 'نشط' : 'معلق'}.` : `User account status for ${userName} changed to ${newStatus}.`);
     }
   };
 
@@ -28,10 +30,10 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
         <div className="panel-header-toolbar">
           <div className="panel-main-title">
             <Shield size={16} />
-            <span>User Accounts & Operational Permission Set Grants</span>
+            <span>{language === 'ar' ? 'حسابات المستخدمين ومنح مجموعات الصلاحيات التشغيلية' : 'User Accounts & Operational Permission Set Grants'}</span>
           </div>
           <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
-            Granular action-level permissions assigned by Admin to Managers and Sellers.
+            {language === 'ar' ? 'صلاحيات تفصيلية على مستوى الإجراءات يمنحها الأدمن للمدراء والمندوبين.' : 'Granular action-level permissions assigned by Admin to Managers and Sellers.'}
           </div>
         </div>
 
@@ -39,15 +41,15 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
           <table className="erp-table">
             <thead>
               <tr>
-                <th>User ID</th>
-                <th>Name & Role</th>
-                <th>Assigned Location / Vehicle</th>
-                <th>Credit Override</th>
-                <th>Write-Off Approve</th>
-                <th>Release Dispatch</th>
-                <th>Verify Cash</th>
-                <th>Setup Product</th>
-                <th>Account Status</th>
+                <th>{language === 'ar' ? 'معرف المستخدم' : 'User ID'}</th>
+                <th>{language === 'ar' ? 'الاسم والدور' : 'Name & Role'}</th>
+                <th>{language === 'ar' ? 'الموقع / الشاحنة المخصصة' : 'Assigned Location / Vehicle'}</th>
+                <th>{language === 'ar' ? 'تجاوز الائتمان' : 'Credit Override'}</th>
+                <th>{language === 'ar' ? 'اعتماد الإسقاط' : 'Write-Off Approve'}</th>
+                <th>{language === 'ar' ? 'إصدار التوزيع' : 'Release Dispatch'}</th>
+                <th>{language === 'ar' ? 'تأكيد النقدية' : 'Verify Cash'}</th>
+                <th>{language === 'ar' ? 'إعداد المنتجات' : 'Setup Product'}</th>
+                <th>{language === 'ar' ? 'حالة الحساب' : 'Account Status'}</th>
               </tr>
             </thead>
             <tbody>
@@ -56,7 +58,7 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
                   <td><span className="code-cell">{u.userId}</span></td>
                   <td>
                     <div style={{ fontWeight: 600, color: 'var(--color-forest-dark)' }}>{u.userName}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{u.role}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{u.role === 'Manager' ? (language === 'ar' ? 'مدير عمليات' : 'Manager') : u.role === 'Seller' ? (language === 'ar' ? 'مندوب مبيعات' : 'Seller') : u.role}</div>
                   </td>
                   <td style={{ fontSize: '12px' }}>{u.assignedLocation}</td>
 
@@ -70,7 +72,7 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
                         onChange={() => handleTogglePermission(u.userId, 'canOverrideCredit', u.canOverrideCredit, u.userName)}
                       />
                       <span style={{ fontSize: '11.5px', fontWeight: u.canOverrideCredit ? 700 : 400 }}>
-                        {u.canOverrideCredit ? 'Granted' : 'Locked'}
+                        {u.canOverrideCredit ? (language === 'ar' ? 'ممنوح' : 'Granted') : (language === 'ar' ? 'مقفل' : 'Locked')}
                       </span>
                     </label>
                   </td>
@@ -84,7 +86,7 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
                         onChange={() => handleTogglePermission(u.userId, 'canApproveWriteOff', u.canApproveWriteOff, u.userName)}
                       />
                       <span style={{ fontSize: '11.5px', fontWeight: u.canApproveWriteOff ? 700 : 400 }}>
-                        {u.canApproveWriteOff ? 'Granted' : 'Locked'}
+                        {u.canApproveWriteOff ? (language === 'ar' ? 'ممنوح' : 'Granted') : (language === 'ar' ? 'مقفل' : 'Locked')}
                       </span>
                     </label>
                   </td>
@@ -98,7 +100,7 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
                         onChange={() => handleTogglePermission(u.userId, 'canReleaseDispatch', u.canReleaseDispatch, u.userName)}
                       />
                       <span style={{ fontSize: '11.5px', fontWeight: u.canReleaseDispatch ? 700 : 400 }}>
-                        {u.canReleaseDispatch ? 'Granted' : 'Locked'}
+                        {u.canReleaseDispatch ? (language === 'ar' ? 'ممنوح' : 'Granted') : (language === 'ar' ? 'مقفل' : 'Locked')}
                       </span>
                     </label>
                   </td>
@@ -112,7 +114,7 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
                         onChange={() => handleTogglePermission(u.userId, 'canVerifyCash', u.canVerifyCash, u.userName)}
                       />
                       <span style={{ fontSize: '11.5px', fontWeight: u.canVerifyCash ? 700 : 400 }}>
-                        {u.canVerifyCash ? 'Granted' : 'Locked'}
+                        {u.canVerifyCash ? (language === 'ar' ? 'ممنوح' : 'Granted') : (language === 'ar' ? 'مقفل' : 'Locked')}
                       </span>
                     </label>
                   </td>
@@ -126,7 +128,7 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
                         onChange={() => handleTogglePermission(u.userId, 'canCreateProduct', u.canCreateProduct, u.userName)}
                       />
                       <span style={{ fontSize: '11.5px', fontWeight: u.canCreateProduct ? 700 : 400 }}>
-                        {u.canCreateProduct ? 'Granted' : 'Locked'}
+                        {u.canCreateProduct ? (language === 'ar' ? 'ممنوح' : 'Granted') : (language === 'ar' ? 'مقفل' : 'Locked')}
                       </span>
                     </label>
                   </td>
@@ -138,7 +140,7 @@ export const AdminPermissionsManager = ({ onShowToast }) => {
                       onClick={() => handleToggleStatus(u.userId, u.status, u.userName)}
                     >
                       {u.status === 'Active' ? <UserCheck size={11} /> : <AlertTriangle size={11} />}
-                      <span>{u.status}</span>
+                      <span>{u.status === 'Active' ? (language === 'ar' ? 'نشط' : 'Active') : (language === 'ar' ? 'معلق' : 'Suspended')}</span>
                     </button>
                   </td>
                 </tr>

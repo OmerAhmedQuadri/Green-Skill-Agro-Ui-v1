@@ -9,19 +9,27 @@ import {
   ShieldCheck
 } from 'lucide-react';
 
+import { Logo } from '../Logo';
+import { useLanguage } from '../../context/LanguageContext';
+
 export const AdminSidebar = ({ activeTab, setActiveTab }) => {
+  const { language, t } = useLanguage();
+
   const navItems = [
-    { id: 'admin-rules', label: 'System Rules & Ceilings', icon: Sliders },
-    { id: 'admin-catalog', label: 'Product Templates & Catalog', icon: Tag },
-    { id: 'admin-vendors', label: 'Vendor Directory & PO Approvals', icon: Building2, badge: '1 PO Draft' },
-    { id: 'admin-permissions', label: 'User Roles & Permissions', icon: Shield },
-    { id: 'admin-features', label: 'Return Rules & Feature Toggles', icon: ToggleLeft },
-    { id: 'admin-audit', label: 'System Audit & Activity Trail', icon: FileSpreadsheet }
+    { id: 'admin-rules', label: t('systemRulesCeilings'), icon: Sliders },
+    { id: 'admin-catalog', label: t('productTemplatesCatalog'), icon: Tag },
+    { id: 'admin-vendors', label: t('vendorDirectoryPO'), icon: Building2, badge: language === 'ar' ? '1 مسودة' : '1 PO Draft' },
+    { id: 'admin-permissions', label: t('userRolesPermissions'), icon: Shield },
+    { id: 'admin-features', label: t('returnRulesFeatures'), icon: ToggleLeft },
+    { id: 'admin-audit', label: t('systemAuditTrail'), icon: FileSpreadsheet }
   ];
 
   return (
     <aside className="erp-sidebar admin-sidebar">
-      <div className="sidebar-section-title">Admin Configuration</div>
+      <div style={{ padding: '0 16px 14px 16px' }}>
+        <Logo height={30} />
+      </div>
+      <div className="sidebar-section-title">{t('adminConfiguration')}</div>
       <nav>
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -44,8 +52,8 @@ export const AdminSidebar = ({ activeTab, setActiveTab }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--text-muted)' }}>
           <ShieldCheck size={16} className="text-emerald-700" />
           <div>
-            <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Admin Master Access</div>
-            <div>Full system configuration enabled.</div>
+            <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{language === 'ar' ? 'صلاحيات الأدمن الكاملة' : 'Admin Master Access'}</div>
+            <div>{language === 'ar' ? 'تهيئة وإدارية النظام مفعلة' : 'Full system configuration enabled.'}</div>
           </div>
         </div>
       </div>

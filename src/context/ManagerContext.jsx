@@ -15,15 +15,17 @@ export const ManagerProvider = ({ children }) => {
   const [featureToggles, setFeatureToggles] = useState([]);
   const [auditTrail, setAuditTrail] = useState([]);
   const [currentSeller, setCurrentSeller] = useState(null);
+  const [branches, setBranches] = useState([]);
+  const [killSwitches, setKillSwitches] = useState([]);
+  const [vendors, setVendors] = useState([]);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   const loadAllData = async () => {
     try {
-      setLoading(true);
       setError(null);
-      const [m, a, f, i, o, s, sys, perm, feat, audit, sel] = await Promise.all([
+      const [m, a, f, i, o, s, sys, perm, feat, audit, sel, br, ks, vnd] = await Promise.all([
         apiService.getMetrics(),
         apiService.getApprovalQueue(),
         apiService.getFleetData(),
@@ -34,7 +36,10 @@ export const ManagerProvider = ({ children }) => {
         apiService.getUserPermissions(),
         apiService.getFeatureToggles(),
         apiService.getAuditTrail(),
-        apiService.getCurrentSeller()
+        apiService.getCurrentSeller(),
+        apiService.getBranches(),
+        apiService.getKillSwitches(),
+        apiService.getVendors()
       ]);
       setMetrics(m);
       setApprovals(a || { writeOffs: [], dispatchRequests: [], cashHandovers: [], storeOverrides: [], newStores: [] });
@@ -47,6 +52,9 @@ export const ManagerProvider = ({ children }) => {
       setFeatureToggles(feat || []);
       setAuditTrail(audit || []);
       setCurrentSeller(sel);
+      setBranches(br || []);
+      setKillSwitches(ks || []);
+      setVendors(vnd || []);
     } catch (err) {
       console.error('Failed to load ERP data:', err);
       setError(err.message || 'Failed to connect to API');
@@ -186,6 +194,43 @@ export const ManagerProvider = ({ children }) => {
     return res;
   };
 
+  // 18. Super Admin Actions
+  const createAdminUser = async (userData) => {
+    const res = await apiService.createAdminUser(userData);
+    await loadAllData();
+    return res;
+  };
+
+  const updateUserRole = async (userId, newRole) => {
+    const res = await apiService.updateUserRole(userId, newRole);
+    await loadAllData();
+    return res;
+  };
+
+  const addVendor = async (vendorData) => {
+    const res = await apiService.addVendor(vendorData);
+    await loadAllData();
+    return res;
+  };
+
+  const toggleKillSwitch = async (switchId) => {
+    const res = await apiService.toggleKillSwitch(switchId);
+    await loadAllData();
+    return res;
+  };
+
+  const updateBranchStatus = async (branchId, status) => {
+    const res = await apiService.updateBranchStatus(branchId, status);
+    await loadAllData();
+    return res;
+  };
+
+  const updateBranchDetails = async (branchId, branchData) => {
+    const res = await apiService.updateBranchDetails(branchId, branchData);
+    await loadAllData();
+    return res;
+  };
+
   const value = {
     metrics,
     approvals,
@@ -198,6 +243,9 @@ export const ManagerProvider = ({ children }) => {
     featureToggles,
     auditTrail,
     currentSeller,
+    branches,
+    killSwitches,
+    vendors,
     loading,
     error,
     refreshData: loadAllData,
@@ -218,7 +266,13 @@ export const ManagerProvider = ({ children }) => {
     createProduct,
     convertSku,
     submitVehicleAudit,
-    issueVehicleLoadout
+    issueVehicleLoadout,
+    createAdminUser,
+    updateUserRole,
+    toggleKillSwitch,
+    addVendor,
+    updateBranchStatus,
+    updateBranchDetails
   };
 
   return (

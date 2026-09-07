@@ -1,14 +1,16 @@
 import React from 'react';
 import { X } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const PhotoViewerModal = ({ photoUrl, title, onClose }) => {
+  const { language, t } = useLanguage();
   if (!photoUrl) return null;
 
   return (
     <div className="modal-overlay">
       <div className="modal-card" style={{ maxWidth: '640px' }}>
         <div className="modal-header">
-          <span className="modal-title">{title || 'Audit Photo Evidence'}</span>
+          <span className="modal-title">{title || (language === 'ar' ? 'صورة إثبات الجرد والرقابة' : 'Audit Photo Evidence')}</span>
           <button className="modal-close-btn" onClick={onClose}>
             <X size={18} />
           </button>
@@ -23,7 +25,7 @@ export const PhotoViewerModal = ({ photoUrl, title, onClose }) => {
           </div>
         </div>
         <div className="modal-footer">
-          <button className="btn-secondary" onClick={onClose}>Close Viewer</button>
+          <button className="btn-secondary" onClick={onClose}>{language === 'ar' ? 'إغلاق المعاينة' : 'Close Viewer'}</button>
         </div>
       </div>
     </div>

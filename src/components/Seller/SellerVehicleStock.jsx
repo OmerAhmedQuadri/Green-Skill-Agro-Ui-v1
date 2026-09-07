@@ -1,9 +1,11 @@
 import React from 'react';
 import { Package, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useManagerContext } from '../../context/ManagerContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const SellerVehicleStock = () => {
   const { inventory, currentSeller } = useManagerContext();
+  const { t } = useLanguage();
   const stockList = inventory || [];
   const seller = currentSeller || { assignedVehicle: { id: 'VH-01', stockValue: 84200 } };
 
@@ -13,10 +15,10 @@ export const SellerVehicleStock = () => {
         <div>
           <div className="topbar-title">
             <Package size={18} />
-            <span>Vehicle Inventory Register (Van #{seller.assignedVehicle?.id})</span>
+            <span>{t('vehicleInventoryRegister')} (Van #{seller.assignedVehicle?.id})</span>
           </div>
           <div className="topbar-subtitle">
-            Unsold stock remains on vehicle &bull; Total Valuation: SAR {seller.assignedVehicle?.stockValue?.toLocaleString()}
+            {t('unsoldStockSubtitle')}: SAR {seller.assignedVehicle?.stockValue?.toLocaleString()}
           </div>
         </div>
       </div>
@@ -26,14 +28,14 @@ export const SellerVehicleStock = () => {
           <table className="erp-table">
             <thead>
               <tr>
-                <th>SKU Code</th>
-                <th>Product Name</th>
-                <th>Category</th>
-                <th>Pack Size</th>
-                <th>Van Quantity</th>
-                <th>Batch / LOT</th>
-                <th>Expiry Date</th>
-                <th>FEFO Clearance Status</th>
+                <th>{t('skuCode')}</th>
+                <th>{t('productName')}</th>
+                <th>{t('category')}</th>
+                <th>{t('packSize')}</th>
+                <th>{t('vanQty')}</th>
+                <th>{t('batchLot')}</th>
+                <th>{t('expiryDate')}</th>
+                <th>{t('fefoStatus')}</th>
               </tr>
             </thead>
             <tbody>
@@ -42,23 +44,23 @@ export const SellerVehicleStock = () => {
                   <td><span className="code-cell">{item.sku}</span></td>
                   <td>
                     <div style={{ fontWeight: 600 }}>{item.productName}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>Vendor: {item.vendorCode}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t('vendorLabel')}: {item.vendorCode}</div>
                   </td>
                   <td>{item.category}</td>
                   <td>{item.packSize}</td>
-                  <td><strong style={{ fontSize: '13px', color: 'var(--color-forest-dark)' }}>{item.fleetQty} units</strong></td>
+                  <td><strong style={{ fontSize: '13px', color: 'var(--color-forest-dark)' }}>{item.fleetQty} {t('unitsLabel')}</strong></td>
                   <td><span className="badge badge-info">LOT: {item.lotNumber}</span></td>
                   <td>{item.expiryDate}</td>
                   <td>
                     {item.expiryStatus === 'Warning' ? (
                       <span className="badge badge-danger">
                         <AlertTriangle size={10} />
-                        {item.expiryFlag}
+                        {t('expiringSoon')}
                       </span>
                     ) : (
                       <span className="badge badge-success">
                         <CheckCircle size={10} />
-                        Healthy Stock
+                        {t('healthyStock')}
                       </span>
                     )}
                   </td>

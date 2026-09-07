@@ -10,26 +10,33 @@ import {
   ArrowRightLeft,
   UserCheck,
   AlertTriangle,
-  ChevronRight
+  ChevronRight,
+  ChevronLeft
 } from 'lucide-react';
 import { CURRENT_SELLER } from '../../data/mockData';
+import { Logo } from '../Logo';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const SellerDrawer = ({ isOpen, onClose, activeTab, setActiveTab, onSwitchRole }) => {
+  const { t, isRtl } = useLanguage();
+
   if (!isOpen) return null;
 
   const menuItems = [
-    { id: 'home', label: 'Route & Shift Overview', icon: Home },
-    { id: 'new-sale', label: '+ Record New Sale (POS)', icon: ShoppingCart, highlight: true },
-    { id: 'van-stock', label: 'Vehicle Inventory & FEFO', icon: Package, badge: '4 SKUs' },
-    { id: 'stores', label: 'My Store Portfolio', icon: Store, badge: `${CURRENT_SELLER.assignedStoresCount}` },
-    { id: 'cash', label: 'Cash & Bank Deposits', icon: Banknote, alert: CURRENT_SELLER.cashBreachWarning },
-    { id: 'attendance', label: 'Shift Attendance & Odometer', icon: Clock }
+    { id: 'home', label: t('routeShiftOverview'), icon: Home },
+    { id: 'new-sale', label: t('recordNewSalePos'), icon: ShoppingCart, highlight: true },
+    { id: 'van-stock', label: t('vehicleInventoryFefo'), icon: Package, badge: '4 SKUs' },
+    { id: 'stores', label: t('myStorePortfolioNav'), icon: Store, badge: `${CURRENT_SELLER.assignedStoresCount}` },
+    { id: 'cash', label: t('cashBankDepositsNav'), icon: Banknote, alert: CURRENT_SELLER.cashBreachWarning },
+    { id: 'attendance', label: t('shiftAttendanceNav'), icon: Clock }
   ];
 
   const handleSelect = (tabId) => {
     setActiveTab(tabId);
     onClose();
   };
+
+  const ChevronIcon = isRtl ? ChevronLeft : ChevronRight;
 
   return (
     <div 
@@ -38,7 +45,8 @@ export const SellerDrawer = ({ isOpen, onClose, activeTab, setActiveTab, onSwitc
         inset: 0,
         backgroundColor: 'rgba(15, 26, 20, 0.65)',
         zIndex: 200,
-        display: 'flex'
+        display: 'flex',
+        justifyContent: isRtl ? 'flex-end' : 'flex-start'
       }}
       onClick={onClose}
     >
@@ -50,20 +58,14 @@ export const SellerDrawer = ({ isOpen, onClose, activeTab, setActiveTab, onSwitc
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '4px 0 20px rgba(0,0,0,0.2)',
+          boxShadow: isRtl ? '-4px 0 20px rgba(0,0,0,0.2)' : '4px 0 20px rgba(0,0,0,0.2)',
           zIndex: 201
         }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Header */}
         <div style={{ backgroundColor: '#1b4332', color: '#ffffff', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <div className="brand-icon" style={{ backgroundColor: '#5d7c4a', fontSize: '11px' }}>GSA</div>
-            <div>
-              <div style={{ fontSize: '15px', fontWeight: 700 }}>Green Skill Agro Field</div>
-              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.7)' }}>Van #{CURRENT_SELLER.assignedVehicle.id}</div>
-            </div>
-          </div>
+          <Logo height={28} />
           <button style={{ background: 'transparent', border: 'none', color: '#ffffff', cursor: 'pointer' }} onClick={onClose}>
             <X size={20} />
           </button>
@@ -82,7 +84,7 @@ export const SellerDrawer = ({ isOpen, onClose, activeTab, setActiveTab, onSwitc
           {CURRENT_SELLER.cashBreachWarning && (
             <div style={{ backgroundColor: '#fee2e2', color: '#991b1b', padding: '4px 8px', borderRadius: '4px', fontSize: '10.5px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px' }}>
               <AlertTriangle size={12} />
-              <span>Cash Limit Exceeded: SAR {CURRENT_SELLER.cashInHand.toLocaleString()}</span>
+              <span>{t('cashLimitCeiling')}: SAR {CURRENT_SELLER.cashInHand.toLocaleString()}</span>
             </div>
           )}
         </div>
@@ -105,7 +107,8 @@ export const SellerDrawer = ({ isOpen, onClose, activeTab, setActiveTab, onSwitc
                   fontWeight: isActive ? 700 : 500,
                   color: item.highlight ? '#ffffff' : (isActive ? 'var(--color-forest-dark)' : 'var(--text-main)'),
                   backgroundColor: item.highlight ? 'var(--color-agro-green)' : (isActive ? 'var(--color-agro-green-light)' : 'transparent'),
-                  borderLeft: isActive && !item.highlight ? '4px solid var(--color-agro-green)' : '4px solid transparent',
+                  borderLeft: !isRtl && isActive && !item.highlight ? '4px solid var(--color-agro-green)' : '4px solid transparent',
+                  borderRight: isRtl && isActive && !item.highlight ? '4px solid var(--color-agro-green)' : '4px solid transparent',
                   cursor: 'pointer',
                   margin: item.highlight ? '4px 16px 8px 16px' : '0',
                   borderRadius: item.highlight ? '4px' : '0'
@@ -120,10 +123,10 @@ export const SellerDrawer = ({ isOpen, onClose, activeTab, setActiveTab, onSwitc
                 )}
                 {item.alert && (
                   <span style={{ backgroundColor: '#fee2e2', color: '#991b1b', fontSize: '10px', fontWeight: 700, padding: '2px 6px', borderRadius: '4px' }}>
-                    Alert
+                    {t('alert')}
                   </span>
                 )}
-                <ChevronRight size={14} style={{ opacity: 0.4 }} />
+                <ChevronIcon size={14} style={{ opacity: 0.4 }} />
               </div>
             );
           })}
@@ -140,7 +143,7 @@ export const SellerDrawer = ({ isOpen, onClose, activeTab, setActiveTab, onSwitc
             }}
           >
             <ArrowRightLeft size={14} />
-            <span>Switch Role: Manager View</span>
+            <span>{t('switchRole')}</span>
           </button>
         </div>
       </div>

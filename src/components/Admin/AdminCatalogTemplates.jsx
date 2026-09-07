@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { Tag, Plus, Search, CheckCircle, Package, FileText } from 'lucide-react';
+import { Tag, Plus, Search, CheckCircle } from 'lucide-react';
 import { PRODUCT_CATEGORIES_DATA } from '../../data/mockData';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const AdminCatalogTemplates = ({ onShowToast }) => {
+  const { language, t } = useLanguage();
   const [categories, setCategories] = useState([...PRODUCT_CATEGORIES_DATA]);
   const [searchTerm, setSearchTerm] = useState('');
   const [modalOpen, setModalOpen] = useState(false);
@@ -30,13 +32,13 @@ export const AdminCatalogTemplates = ({ onShowToast }) => {
       taxRatePct: Number(newCategory.taxRatePct),
       skusCount: 0,
       fefoPolicy: newCategory.fefoPolicy,
-      status: 'Active Master Category'
+      status: language === 'ar' ? 'فئة رئيسية نشطة' : 'Active Master Category'
     };
     setCategories(prev => [...prev, catObj]);
     setModalOpen(false);
     setNewCategory({ categoryName: '', codePrefix: '', defaultUom: '1KG Pack', taxRatePct: 15, fefoPolicy: 'Strict 30-Day FEFO Clearance' });
     if (onShowToast) {
-      onShowToast(`Created Product Category "${catObj.categoryName}" (Prefix: ${catObj.codePrefix})`);
+      onShowToast(language === 'ar' ? `تم إنشاء فئة المنتجات "${catObj.categoryName}" (البادئة: ${catObj.codePrefix})` : `Created Product Category "${catObj.categoryName}" (Prefix: ${catObj.codePrefix})`);
     }
   };
 
@@ -46,7 +48,7 @@ export const AdminCatalogTemplates = ({ onShowToast }) => {
         <div className="panel-header-toolbar">
           <div className="panel-main-title">
             <Tag size={16} />
-            <span>Product Type Templates & Master Categories Setup</span>
+            <span>{language === 'ar' ? 'إعداد قوالب أنواع المنتجات والفئات الرئيسية' : 'Product Type Templates & Master Categories Setup'}</span>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -55,7 +57,7 @@ export const AdminCatalogTemplates = ({ onShowToast }) => {
               <input 
                 type="text" 
                 className="form-input pos-search-input" 
-                placeholder="Search category or prefix..."
+                placeholder={language === 'ar' ? 'ابحث عن فئة أو كود...' : 'Search category or prefix...'}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
@@ -63,7 +65,7 @@ export const AdminCatalogTemplates = ({ onShowToast }) => {
 
             <button className="btn-primary" onClick={() => setModalOpen(true)} style={{ gap: '6px' }}>
               <Plus size={14} />
-              <span>+ Add Product Category</span>
+              <span>{language === 'ar' ? '+ إضافة فئة منتج' : '+ Add Product Category'}</span>
             </button>
           </div>
         </div>
@@ -72,14 +74,14 @@ export const AdminCatalogTemplates = ({ onShowToast }) => {
           <table className="erp-table">
             <thead>
               <tr>
-                <th>Category ID</th>
-                <th>Category Name</th>
-                <th>Code Prefix</th>
-                <th>Default UOM</th>
-                <th>VAT Tax Rate</th>
-                <th>Active SKUs</th>
-                <th>FEFO / Warehousing Policy</th>
-                <th>Status</th>
+                <th>{language === 'ar' ? 'معرف الفئة' : 'Category ID'}</th>
+                <th>{language === 'ar' ? 'اسم الفئة' : 'Category Name'}</th>
+                <th>{language === 'ar' ? 'بادئة الكود' : 'Code Prefix'}</th>
+                <th>{language === 'ar' ? 'وحدة القياس الافتراضية' : 'Default UOM'}</th>
+                <th>{language === 'ar' ? 'نسبة ضريبة القيمة المضافة' : 'VAT Tax Rate'}</th>
+                <th>{language === 'ar' ? 'الأصناف النشطة' : 'Active SKUs'}</th>
+                <th>{language === 'ar' ? 'سياسة FEFO / التخزين' : 'FEFO / Warehousing Policy'}</th>
+                <th>{language === 'ar' ? 'الحالة' : 'Status'}</th>
               </tr>
             </thead>
             <tbody>
@@ -112,18 +114,18 @@ export const AdminCatalogTemplates = ({ onShowToast }) => {
             <div className="modal-header">
               <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--color-forest-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <Tag size={16} />
-                <span>Add Master Product Category</span>
+                <span>{language === 'ar' ? 'إضافة فئة منتج رئيسية جديدة' : 'Add Master Product Category'}</span>
               </div>
             </div>
 
             <form onSubmit={handleAddCategory}>
               <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <div className="form-group">
-                  <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>Category Name</label>
+                  <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{language === 'ar' ? 'اسم الفئة' : 'Category Name'}</label>
                   <input 
                     type="text" 
                     className="form-input" 
-                    placeholder="e.g. Organic Crop Boosters"
+                    placeholder={language === 'ar' ? 'مثال: محفزات المحاصيل العضوية' : 'e.g. Organic Crop Boosters'}
                     value={newCategory.categoryName}
                     onChange={(e) => setNewCategory({ ...newCategory, categoryName: e.target.value })}
                     required
@@ -132,11 +134,11 @@ export const AdminCatalogTemplates = ({ onShowToast }) => {
 
                 <div className="modal-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                   <div className="form-group">
-                    <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>SKU Code Prefix</label>
+                    <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{language === 'ar' ? 'بادئة كود SKU' : 'SKU Code Prefix'}</label>
                     <input 
                       type="text" 
                       className="form-input" 
-                      placeholder="e.g. ORG-BOOST"
+                      placeholder={language === 'ar' ? 'مثال: ORG-BOOST' : 'e.g. ORG-BOOST'}
                       value={newCategory.codePrefix}
                       onChange={(e) => setNewCategory({ ...newCategory, codePrefix: e.target.value })}
                       required
@@ -144,38 +146,38 @@ export const AdminCatalogTemplates = ({ onShowToast }) => {
                   </div>
 
                   <div className="form-group">
-                    <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>Default Unit of Measure</label>
+                    <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{language === 'ar' ? 'وحدة القياس الافتراضية' : 'Default Unit of Measure'}</label>
                     <select 
                       className="form-select"
                       value={newCategory.defaultUom}
                       onChange={(e) => setNewCategory({ ...newCategory, defaultUom: e.target.value })}
                     >
-                      <option value="1KG Pack">1KG Pack</option>
-                      <option value="5KG Bag">5KG Bag</option>
-                      <option value="Roll (50m)">Roll (50m)</option>
-                      <option value="5L Canister">5L Canister</option>
-                      <option value="25KG SACK">25KG SACK</option>
+                      <option value="1KG Pack">{language === 'ar' ? 'عبوة 1 كجم' : '1KG Pack'}</option>
+                      <option value="5KG Bag">{language === 'ar' ? 'كيس 5 كجم' : '5KG Bag'}</option>
+                      <option value="Roll (50m)">{language === 'ar' ? 'لفة (50 متر)' : 'Roll (50m)'}</option>
+                      <option value="5L Canister">{language === 'ar' ? 'جالون 5 لتر' : '5L Canister'}</option>
+                      <option value="25KG SACK">{language === 'ar' ? 'كيس 25 كجم' : '25KG SACK'}</option>
                     </select>
                   </div>
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>Warehousing FEFO Policy</label>
+                  <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{language === 'ar' ? 'سياسة FEFO / التخزين بالمستودع' : 'Warehousing FEFO Policy'}</label>
                   <select 
                     className="form-select"
                     value={newCategory.fefoPolicy}
                     onChange={(e) => setNewCategory({ ...newCategory, fefoPolicy: e.target.value })}
                   >
-                    <option value="Strict 30-Day FEFO Clearance">Strict 30-Day FEFO Clearance</option>
-                    <option value="Standard FIFO Warehousing">Standard FIFO Warehousing</option>
-                    <option value="Batch Expiry Tracked">Batch Expiry Tracked</option>
+                    <option value="Strict 30-Day FEFO Clearance">{language === 'ar' ? 'تصفية FEFO صارمة (30 يوماً)' : 'Strict 30-Day FEFO Clearance'}</option>
+                    <option value="Standard FIFO Warehousing">{language === 'ar' ? 'تخزين قياسي (الوارد أولاً يخرج أولاً FIFO)' : 'Standard FIFO Warehousing'}</option>
+                    <option value="Batch Expiry Tracked">{language === 'ar' ? 'تتبع تاريخ انتهاء التشغيلة' : 'Batch Expiry Tracked'}</option>
                   </select>
                 </div>
               </div>
 
               <div className="modal-footer">
-                <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn-primary">Create Category</button>
+                <button type="button" className="btn-secondary" onClick={() => setModalOpen(false)}>{t('cancel')}</button>
+                <button type="submit" className="btn-primary">{language === 'ar' ? 'إنشاء الفئة' : 'Create Category'}</button>
               </div>
             </form>
           </div>

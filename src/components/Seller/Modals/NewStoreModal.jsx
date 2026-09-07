@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
-import { X, Camera, MapPin, Store, CheckCircle } from 'lucide-react';
+import { X, MapPin, Store } from 'lucide-react';
+import { useLanguage } from '../../../context/LanguageContext';
 
 export const NewStoreModal = ({ onClose, onConfirm }) => {
+  const { t } = useLanguage();
   const [storeName, setStoreName] = useState('');
   const [ownerName, setOwnerName] = useState('');
   const [phone, setPhone] = useState('');
@@ -34,7 +36,7 @@ export const NewStoreModal = ({ onClose, onConfirm }) => {
     <div className="modal-overlay">
       <div className="modal-card">
         <div className="modal-header">
-          <span className="modal-title">Workflow H: Onboard New Store</span>
+          <span className="modal-title">{t('onboardNewStoreTitle')}</span>
           <button className="modal-close-btn" onClick={onClose}>
             <X size={18} />
           </button>
@@ -42,27 +44,27 @@ export const NewStoreModal = ({ onClose, onConfirm }) => {
 
         <form onSubmit={handleSubmit} className="modal-body">
           <div style={{ backgroundColor: '#f0f4ee', padding: '10px 12px', borderRadius: '4px', fontSize: '11.5px', color: '#1b4332' }}>
-            <strong>System Rule:</strong> Storefront photo and auto-detected GPS coordinates are captured. CR/VAT numbers are optional. New stores require Manager approval before first sale.
+            {t('systemRuleNewStore')}
           </div>
 
           <div className="modal-form-grid">
             <div className="form-group">
-              <span className="form-label">Store Name</span>
-              <input type="text" className="form-input" placeholder="e.g. Al-Waha Agricultural Store" value={storeName} onChange={(e) => setStoreName(e.target.value)} required />
+              <span className="form-label">{t('storeNameLabel')}</span>
+              <input type="text" className="form-input" placeholder={t('storeNamePlaceholder')} value={storeName} onChange={(e) => setStoreName(e.target.value)} required />
             </div>
 
             <div className="form-group">
-              <span className="form-label">Owner / Contact Person</span>
-              <input type="text" className="form-input" placeholder="Owner Full Name" value={ownerName} onChange={(e) => setOwnerName(e.target.value)} required />
+              <span className="form-label">{t('ownerNameLabel')}</span>
+              <input type="text" className="form-input" placeholder={t('ownerNamePlaceholder')} value={ownerName} onChange={(e) => setOwnerName(e.target.value)} required />
             </div>
 
             <div className="form-group">
-              <span className="form-label">Phone Number</span>
-              <input type="text" className="form-input" placeholder="+966 50 XXX XXXX" value={phone} onChange={(e) => setPhone(e.target.value)} />
+              <span className="form-label">{t('phoneLabel')}</span>
+              <input type="text" className="form-input" placeholder={t('phonePlaceholder')} value={phone} onChange={(e) => setPhone(e.target.value)} />
             </div>
 
             <div className="form-group">
-              <span className="form-label">City / Region</span>
+              <span className="form-label">{t('cityRegionLabel')}</span>
               <select className="form-select" value={city} onChange={(e) => setCity(e.target.value)}>
                 <option value="Riyadh">Riyadh</option>
                 <option value="Al-Qassim">Al-Qassim</option>
@@ -72,46 +74,46 @@ export const NewStoreModal = ({ onClose, onConfirm }) => {
             </div>
 
             <div className="form-group">
-              <span className="form-label">CR Number (Optional)</span>
+              <span className="form-label">{t('crNumberLabel')}</span>
               <input type="text" className="form-input" placeholder="1010XXXXXX" value={crNumber} onChange={(e) => setCrNumber(e.target.value)} />
             </div>
 
             <div className="form-group">
-              <span className="form-label">VAT Number (Optional)</span>
+              <span className="form-label">{t('vatNumberLabel')}</span>
               <input type="text" className="form-input" placeholder="300XXXXXXXXX" value={vatNumber} onChange={(e) => setVatNumber(e.target.value)} />
             </div>
 
             <div className="form-group">
-              <span className="form-label">Proposed Credit Cycle</span>
+              <span className="form-label">{t('proposedCreditCycleLabel')}</span>
               <select className="form-select" value={proposedCycle} onChange={(e) => setProposedCycle(e.target.value)}>
-                <option value="Weekly Cycle">Weekly Cycle</option>
-                <option value="Monthly Cycle (30-Day)">Monthly Cycle (30-Day)</option>
-                <option value="Bill to Bill">Bill to Bill (Pay-on-Delivery)</option>
+                <option value="Weekly Cycle">{t('weeklyCycle')}</option>
+                <option value="Monthly Cycle (30-Day)">{t('monthlyCycle')}</option>
+                <option value="Bill to Bill">{t('billToBill')}</option>
               </select>
             </div>
 
             <div className="form-group">
-              <span className="form-label">Proposed Credit Limit (SAR)</span>
+              <span className="form-label">{t('proposedCreditLimitLabel')}</span>
               <input type="number" className="form-input" value={proposedLimit} onChange={(e) => setProposedLimit(e.target.value)} />
             </div>
           </div>
 
           <div className="form-group">
-            <span className="form-label">Storefront Photographic Evidence</span>
+            <span className="form-label">{t('storefrontEvidenceLabel')}</span>
             <div className="photo-preview-box">
               <img src={storefrontPhoto} alt="Storefront" />
             </div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '4px' }}>
               <MapPin size={12} />
-              <span>GPS Captured: 24.7136° N, 46.6753° E</span>
+              <span>{t('gpsVerifiedLabel')}: 24.7136° N, 46.6753° E</span>
             </div>
           </div>
 
           <div className="modal-footer" style={{ margin: '10px -16px -16px -16px' }}>
-            <button type="button" className="btn-secondary" onClick={onClose}>Cancel</button>
+            <button type="button" className="btn-secondary" onClick={onClose}>{t('cancel')}</button>
             <button type="submit" className="btn-primary">
               <Store size={14} />
-              <span>Submit Store for Manager Approval</span>
+              <span>{t('submitStoreForApprovalBtn')}</span>
             </button>
           </div>
         </form>

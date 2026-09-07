@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { FileSpreadsheet, Search, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { useManagerContext } from '../../context/ManagerContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const AdminAuditTrail = () => {
+  const { language, t } = useLanguage();
   const { auditTrail } = useManagerContext();
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -21,7 +23,7 @@ export const AdminAuditTrail = () => {
         <div className="panel-header-toolbar">
           <div className="panel-main-title">
             <FileSpreadsheet size={16} />
-            <span>Master System Audit Trail & Compliance Log</span>
+            <span>{language === 'ar' ? 'سجل الرقابة والتدقيق الرئيسي للنظام ومتابعة الامتثال' : 'Master System Audit Trail & Compliance Log'}</span>
           </div>
 
           <div className="pos-search-box" style={{ width: '240px' }}>
@@ -29,7 +31,7 @@ export const AdminAuditTrail = () => {
             <input 
               type="text" 
               className="form-input pos-search-input" 
-              placeholder="Search audit trail..."
+              placeholder={language === 'ar' ? 'ابحث في سجل التدقيق...' : 'Search audit trail...'}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -40,13 +42,13 @@ export const AdminAuditTrail = () => {
           <table className="erp-table">
             <thead>
               <tr>
-                <th>Audit ID</th>
-                <th>Timestamp</th>
-                <th>User Account</th>
-                <th>Role</th>
-                <th>Action Type</th>
-                <th>Details & Execution Impact</th>
-                <th>Risk Classification</th>
+                <th>{language === 'ar' ? 'معرف التدقيق' : 'Audit ID'}</th>
+                <th>{language === 'ar' ? 'الوقت والتاريخ' : 'Timestamp'}</th>
+                <th>{language === 'ar' ? 'حساب المستخدم' : 'User Account'}</th>
+                <th>{language === 'ar' ? 'الدور' : 'Role'}</th>
+                <th>{language === 'ar' ? 'نوع الإجراء' : 'Action Type'}</th>
+                <th>{language === 'ar' ? 'التفاصيل وأثر التنفيذ' : 'Details & Execution Impact'}</th>
+                <th>{language === 'ar' ? 'تصنيف المخاطر' : 'Risk Classification'}</th>
               </tr>
             </thead>
             <tbody>
@@ -62,12 +64,12 @@ export const AdminAuditTrail = () => {
                     {log.riskLevel === 'High Risk' ? (
                       <span className="badge badge-danger">
                         <AlertTriangle size={11} />
-                        {log.riskLevel}
+                        {language === 'ar' ? 'مخاطر عالية' : log.riskLevel}
                       </span>
                     ) : (
                       <span className="badge badge-success">
                         <ShieldCheck size={11} />
-                        {log.riskLevel}
+                        {language === 'ar' ? 'امتثال عادي' : log.riskLevel}
                       </span>
                     )}
                   </td>

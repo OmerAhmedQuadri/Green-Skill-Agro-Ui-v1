@@ -11,6 +11,7 @@ import {
   Camera
 } from 'lucide-react';
 import { useManagerContext } from '../context/ManagerContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export const ApprovalQueue = ({ 
   onViewPhoto, 
@@ -20,17 +21,20 @@ export const ApprovalQueue = ({
   onOverrideCredit,
   onApproveStore
 }) => {
-  const { approvals } = useManagerContext();
+  const { approvals, killSwitches = [] } = useManagerContext();
+  const { t } = useLanguage();
   const queueData = approvals || { writeOffs: [], dispatchRequests: [], cashHandovers: [], storeOverrides: [], newStores: [] };
+
+  const isCreditOverrideLocked = killSwitches.some(k => (k.id === 'KILL-02' || (k.name && k.name.includes('Credit Block Bypass Override'))) && (k.active || k.enabled));
 
   const [activeQueueTab, setActiveQueueTab] = useState('writeOffs');
 
   const tabs = [
-    { id: 'writeOffs', label: 'Stock Write-Offs', count: queueData.writeOffs?.length || 0, icon: AlertOctagon, urgent: true },
-    { id: 'dispatches', label: 'Warehouse Dispatches', count: queueData.dispatchRequests?.length || 0, icon: Send },
-    { id: 'cash', label: 'Cash & Deposits', count: queueData.cashHandovers?.length || 0, icon: Banknote },
-    { id: 'credit', label: 'Credit Overrides', count: queueData.storeOverrides?.length || 0, icon: Lock },
-    { id: 'stores', label: 'Store Onboarding', count: queueData.newStores?.length || 0, icon: Store }
+    { id: 'writeOffs', label: t('stockWriteOffsTab'), count: queueData.writeOffs?.length || 0, icon: AlertOctagon, urgent: true },
+    { id: 'dispatches', label: t('dispatchesTab'), count: queueData.dispatchRequests?.length || 0, icon: Send },
+    { id: 'cash', label: t('cashTab'), count: queueData.cashHandovers?.length || 0, icon: Banknote },
+    { id: 'credit', label: t('creditTab'), count: queueData.storeOverrides?.length || 0, icon: Lock },
+    { id: 'stores', label: t('storesTab'), count: queueData.newStores?.length || 0, icon: Store }
   ];
 
   return (
@@ -38,7 +42,7 @@ export const ApprovalQueue = ({
       <div className="queue-header">
         <div className="queue-title-group">
           <Clock size={15} className="text-amber-700" />
-          <span className="queue-title">Manager Approval & Operational Action Queue</span>
+          <span className="queue-title">{t('managerApprovalQueue')}</span>
         </div>
         <div className="queue-tabs">
           {tabs.map((tab) => {
@@ -76,7 +80,7 @@ export const ApprovalQueue = ({
                       <span className="badge badge-danger">LOT: {item.lotNumber}</span>
                     </div>
                     <div className="approval-subtext">
-                      <strong>Quantity:</strong> {item.quantity} | <strong>Location:</strong> {item.holdingLocation} | <strong>Submitted by:</strong> {item.submittedBy}
+                      <strong>{t('qty')}:</strong> {item.quantity} | <strong>Location:</strong> {item.holdingLocation} | <strong>Submitted by:</strong> {item.submittedBy}
                     </div>
                     <div className="approval-meta">
                       <span><strong>Reason:</strong> {item.reason}</span>
@@ -87,22 +91,22 @@ export const ApprovalQueue = ({
                 <div className="approval-actions">
                   <div style={{ textAlign: 'right', marginRight: '8px' }}>
                     <div style={{ fontSize: '13px', fontWeight: 700, color: '#991b1b' }}>SAR {item.totalValue?.toLocaleString()}</div>
-                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Loss Value</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{t('lossValue')}</div>
                   </div>
                   <button className="btn-sm-secondary" onClick={() => onViewPhoto(item.photoEvidence, `Photo Evidence: ${item.id}`)}>
                     <Camera size={11} />
-                    <span>View Evidence</span>
+                    <span>{t('viewEvidence')}</span>
                   </button>
                   <button className="btn-sm-primary" onClick={() => onApproveWriteOff(item)}>
                     <CheckCircle size={11} />
-                    <span>Approve Write-off</span>
+                    <span>{t('approveWriteOff')}</span>
                   </button>
                 </div>
               </div>
             ))}
             {(queueData.writeOffs || []).length === 0 && (
               <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px' }}>
-                No pending stock write-off requests.
+                {t('noDataFound')}
               </div>
             )}
           </div>
@@ -134,18 +138,18 @@ export const ApprovalQueue = ({
                 <div className="approval-actions">
                   <div style={{ textAlign: 'right', marginRight: '8px' }}>
                     <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--color-forest-dark)' }}>SAR {item.orderValue?.toLocaleString()}</div>
-                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Order Value</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{t('orderValue')}</div>
                   </div>
                   <button className="btn-sm-primary" onClick={() => onHandleDispatch(item)}>
                     <Send size={11} />
-                    <span>Process Dispatch</span>
+                    <span>{t('processDispatch')}</span>
                   </button>
                 </div>
               </div>
             ))}
             {(queueData.dispatchRequests || []).length === 0 && (
               <div style={{ padding: '16px', textAlign: 'center', color: 'var(--text-muted)', fontSize: '12px' }}>
-                No pending warehouse dispatch requests.
+                {t('noDataFound')}
               </div>
             )}
           </div>
@@ -176,15 +180,15 @@ export const ApprovalQueue = ({
                 <div className="approval-actions">
                   <div style={{ textAlign: 'right', marginRight: '8px' }}>
                     <div style={{ fontSize: '13px', fontWeight: 700, color: '#166534' }}>SAR {item.declaredAmount?.toLocaleString()}</div>
-                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Declared Cash</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{t('declaredCash')}</div>
                   </div>
                   <button className="btn-sm-secondary" onClick={() => onViewPhoto(item.proofImage, `Deposit Proof: ${item.id}`)}>
                     <Eye size={11} />
-                    <span>View Slip</span>
+                    <span>{t('viewSlip')}</span>
                   </button>
                   <button className="btn-sm-primary" onClick={() => onVerifyCash(item)}>
                     <CheckCircle size={11} />
-                    <span>Verify Handover</span>
+                    <span>{t('verifyHandover')}</span>
                   </button>
                 </div>
               </div>
@@ -204,7 +208,7 @@ export const ApprovalQueue = ({
                   <div className="approval-info">
                     <div className="approval-headline">
                       <span>{item.storeName}</span>
-                      <span className="badge badge-danger">BLOCKED (Over Due Limit)</span>
+                      <span className="badge badge-danger">{t('blockedPastDue')}</span>
                     </div>
                     <div className="approval-subtext">
                       <strong>Seller:</strong> {item.sellerName} | <strong>Cycle:</strong> {item.creditCycle} | <strong>Days Overdue:</strong> {item.daysOverdue} Days
@@ -215,11 +219,16 @@ export const ApprovalQueue = ({
                 <div className="approval-actions">
                   <div style={{ textAlign: 'right', marginRight: '8px' }}>
                     <div style={{ fontSize: '13px', fontWeight: 700, color: '#92400e' }}>SAR {item.requestedSaleValue?.toLocaleString()}</div>
-                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>Sale Value</div>
+                    <div style={{ fontSize: '10px', color: 'var(--text-muted)' }}>{t('saleValue')}</div>
                   </div>
-                  <button className="btn-sm-primary" onClick={() => onOverrideCredit(item)}>
+                  <button 
+                    className="btn-sm-primary" 
+                    disabled={isCreditOverrideLocked}
+                    onClick={() => onOverrideCredit(item)}
+                    title={isCreditOverrideLocked ? 'Credit override locked by Super Admin kill-switch' : 'Grant Override'}
+                  >
                     <Lock size={11} />
-                    <span>Grant Override</span>
+                    <span>{isCreditOverrideLocked ? t('lockedBySuperAdmin') : t('grantOverride')}</span>
                   </button>
                 </div>
               </div>
@@ -251,11 +260,11 @@ export const ApprovalQueue = ({
                 <div className="approval-actions">
                   <button className="btn-sm-secondary" onClick={() => onViewPhoto(item.storefrontPhoto, `Storefront: ${item.storeName}`)}>
                     <Camera size={11} />
-                    <span>Storefront Photo</span>
+                    <span>{t('storefrontPhotoBtn')}</span>
                   </button>
                   <button className="btn-sm-primary" onClick={() => onApproveStore(item)}>
                     <CheckCircle size={11} />
-                    <span>Approve Store</span>
+                    <span>{t('approveStoreBtn')}</span>
                   </button>
                 </div>
               </div>

@@ -12,23 +12,30 @@ import {
   AlertTriangle
 } from 'lucide-react';
 import { METRICS } from '../data/mockData';
+import { Logo } from './Logo';
+import { useLanguage } from '../context/LanguageContext';
 
 export const Sidebar = ({ activeTab, setActiveTab }) => {
+  const { language, t } = useLanguage();
+
   const navItems = [
-    { id: 'overview', label: 'Executive Dashboard', icon: LayoutDashboard },
-    { id: 'fleet', label: 'Vehicle Fleet & Sellers', icon: Truck, badge: METRICS.cashCeilingBreaches > 0 ? `${METRICS.cashCeilingBreaches} Alert` : null },
-    { id: 'inventory', label: 'Warehouse & Stock', icon: Package, badge: `${METRICS.expiryRiskCount} Expiry` },
-    { id: 'orders', label: 'Purchase Orders (PO)', icon: FileText, badge: '1 Draft' },
-    { id: 'dispatch', label: 'Warehouse Dispatches', icon: Send, badge: `${METRICS.activeDispatchesPending} Pending` },
-    { id: 'stores', label: 'Stores & Credit Ledger', icon: Store, badge: `${METRICS.overdueStoresCount} Blocked` },
-    { id: 'cash', label: 'Cash & Handovers', icon: Banknote, badge: '2 Review' },
-    { id: 'attendance', label: 'Attendance & Routes', icon: Users },
-    { id: 'analytics', label: 'Reorder Forecasting', icon: TrendingUp }
+    { id: 'overview', label: t('executiveDashboard'), icon: LayoutDashboard },
+    { id: 'fleet', label: t('vehicleFleetSellers'), icon: Truck, badge: METRICS.cashCeilingBreaches > 0 ? (language === 'ar' ? `${METRICS.cashCeilingBreaches} تنبيه` : `${METRICS.cashCeilingBreaches} Alert`) : null },
+    { id: 'inventory', label: t('warehouseStock'), icon: Package, badge: language === 'ar' ? `${METRICS.expiryRiskCount} صلاحية` : `${METRICS.expiryRiskCount} Expiry` },
+    { id: 'orders', label: t('purchaseOrdersPO'), icon: FileText, badge: language === 'ar' ? '1 مسودة' : '1 Draft' },
+    { id: 'dispatch', label: t('warehouseDispatches'), icon: Send, badge: language === 'ar' ? `${METRICS.activeDispatchesPending} معلق` : `${METRICS.activeDispatchesPending} Pending` },
+    { id: 'stores', label: t('storesCreditLedger'), icon: Store, badge: language === 'ar' ? `${METRICS.overdueStoresCount} محظور` : `${METRICS.overdueStoresCount} Blocked` },
+    { id: 'cash', label: t('cashHandovers'), icon: Banknote, badge: language === 'ar' ? '2 مراجعة' : '2 Review' },
+    { id: 'attendance', label: t('attendanceRoutes'), icon: Users },
+    { id: 'analytics', label: t('reorderForecasting'), icon: TrendingUp }
   ];
 
   return (
     <aside className="erp-sidebar">
-      <div className="sidebar-section-title">Operational Control</div>
+      <div style={{ padding: '0 16px 14px 16px' }}>
+        <Logo height={30} />
+      </div>
+      <div className="sidebar-section-title">{t('operationalControl')}</div>
       <nav>
         {navItems.map((item) => {
           const Icon = item.icon;
@@ -51,8 +58,8 @@ export const Sidebar = ({ activeTab, setActiveTab }) => {
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: 'var(--text-muted)' }}>
           <AlertTriangle size={14} className="text-amber-600" />
           <div>
-            <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>Central Warehouse</div>
-            <div>All managers access WH-01 global data.</div>
+            <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{language === 'ar' ? 'المستودع المركزي' : 'Central Warehouse'}</div>
+            <div>{language === 'ar' ? 'جميع المدراء يصلون لبيانات WH-01' : 'All managers access WH-01 global data.'}</div>
           </div>
         </div>
       </div>

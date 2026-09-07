@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useManagerContext } from './context/ManagerContext';
+import { useLanguage } from './context/LanguageContext';
 
 // Common Components
 import { Header } from './components/Header';
@@ -19,6 +20,7 @@ import { PhotoViewerModal } from './components/Modals/PhotoViewerModal';
 
 import { ProductSetupModal } from './components/Modals/ProductSetupModal';
 import { CreatePoModal } from './components/Modals/CreatePoModal';
+import { PoDetailsModal } from './components/Modals/PoDetailsModal';
 import { SkuConversionModal } from './components/Modals/SkuConversionModal';
 import { VehicleAuditModal } from './components/Modals/VehicleAuditModal';
 import { VehicleLoadoutModal } from './components/Modals/VehicleLoadoutModal';
@@ -43,6 +45,16 @@ import { AdminPermissionsManager } from './components/Admin/AdminPermissionsMana
 import { AdminFeatureToggles } from './components/Admin/AdminFeatureToggles';
 import { AdminAuditTrail } from './components/Admin/AdminAuditTrail';
 
+// Super Admin Components
+import { SuperAdminSidebar } from './components/SuperAdmin/SuperAdminSidebar';
+import { SuperAdminDrawer } from './components/SuperAdmin/SuperAdminDrawer';
+import { SuperAdminOverview } from './components/SuperAdmin/SuperAdminOverview';
+import { SuperAdminUserGovernance } from './components/SuperAdmin/SuperAdminUserGovernance';
+import { SuperAdminPermissionsMatrix } from './components/SuperAdmin/SuperAdminPermissionsMatrix';
+import { SuperAdminBranchManager } from './components/SuperAdmin/SuperAdminBranchManager';
+import { SuperAdminSecurityAudit } from './components/SuperAdmin/SuperAdminSecurityAudit';
+import { CreateAdminModal } from './components/SuperAdmin/Modals/CreateAdminModal';
+
 import { 
   CheckCircle2, 
   Download, 
@@ -57,11 +69,13 @@ import {
   ClipboardCheck,
   Truck,
   ArrowRightLeft,
-  Sliders
+  Crown,
+  UserPlus
 } from 'lucide-react';
 
 export function App() {
   const { 
+    loading,
     approveWriteOff, 
     releaseDispatch, 
     overrideCredit, 
@@ -69,14 +83,17 @@ export function App() {
     approveStore, 
     createProduct, 
     createPurchaseOrder, 
+    approvePurchaseOrder,
     convertSku, 
     submitVehicleAudit, 
     issueVehicleLoadout,
     completeSale
   } = useManagerContext();
 
-  // Role State: 'admin' | 'manager' | 'seller'
-  const [currentRole, setCurrentRole] = useState('admin');
+  const { language, t } = useLanguage();
+
+  // Role State: 'superadmin' | 'admin' | 'manager' | 'seller'
+  const [currentRole, setCurrentRole] = useState('superadmin');
 
   // Drawer State
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -85,9 +102,13 @@ export function App() {
   const [activeTab, setActiveTab] = useState('overview'); // Manager tabs
   const [sellerTab, setSellerTab] = useState('home'); // Seller tabs
   const [adminTab, setAdminTab] = useState('admin-rules'); // Admin tabs
+  const [superAdminTab, setSuperAdminTab] = useState('superadmin-overview'); // Super Admin tabs
 
   const [searchQuery, setSearchQuery] = useState('');
   const [toastMessage, setToastMessage] = useState(null);
+
+  // Modal states
+  const [createAdminModalOpen, setCreateAdminModalOpen] = useState(false);
 
   // Modal states
   const [photoModal, setPhotoModal] = useState({ open: false, url: '', title: '' });
@@ -98,6 +119,7 @@ export function App() {
   // Workflow Modal states
   const [productSetupModal, setProductSetupModal] = useState(false);
   const [createPoModal, setCreatePoModal] = useState(false);
+  const [poDetailsModal, setPoDetailsModal] = useState({ open: false, item: null });
   const [skuConversionModal, setSkuConversionModal] = useState(false);
   const [vehicleAuditModal, setVehicleAuditModal] = useState(false);
   const [vehicleLoadoutModal, setVehicleLoadoutModal] = useState(false);
@@ -111,95 +133,196 @@ export function App() {
   const handleApproveWriteOff = async (item, notes) => {
     setWriteOffModal({ open: false, item: null });
     await approveWriteOff(item, notes);
-    showToast(`Approved Stock Write-off ${item.id} (${item.quantity}). Write-off ledger updated.`);
+    showToast(language === 'ar' ? `تمت الموافقة على إسقاط المخزون ${item.id} (${item.quantity}). تم تحديث السجل.` : `Approved Stock Write-off ${item.id} (${item.quantity}). Write-off ledger updated.`);
   };
 
   const handleProcessDispatch = async (item, transporter, driver) => {
     setDispatchModal({ open: false, item: null });
     await releaseDispatch(item, transporter, driver);
-    showToast(`Dispatch ${item.id} released via ${transporter} (Driver: ${driver}). Order status set to In-Transit.`);
+    showToast(language === 'ar' ? `تم إصدار أمر التوزيع ${item.id} عبر ${transporter} (السائق: ${driver}).` : `Dispatch ${item.id} released via ${transporter} (Driver: ${driver}). Order status set to In-Transit.`);
   };
 
   const handleConfirmOverride = async (item, reason) => {
     setOverrideModal({ open: false, item: null });
     await overrideCredit(item, reason);
-    showToast(`Manager credit block override granted for ${item.storeName}. Audit log recorded.`);
+    showToast(language === 'ar' ? `تم منح تجاوز حظر الائتمان لـ ${item.storeName}. تم تسجيل السجل.` : `Manager credit block override granted for ${item.storeName}. Audit log recorded.`);
   };
 
   const handleVerifyCash = async (item) => {
     await verifyCash(item);
-    showToast(`Cash Handover ${item.id} (${item.declaredAmount.toLocaleString()} SAR) verified & released.`);
+    showToast(language === 'ar' ? `تم تأكيد واختتام تسليم النقدية ${item.id} (${item.declaredAmount?.toLocaleString()} ريال).` : `Cash Handover ${item.id} (${item.declaredAmount.toLocaleString()} SAR) verified & released.`);
   };
 
   const handleApproveStore = async (item) => {
     await approveStore(item);
-    showToast(`Store ${item.storeName} approved for field sales under ${item.proposedCycle}.`);
+    showToast(language === 'ar' ? `تمت الموافقة على متجر ${item.storeName} للمبيعات الميدانية.` : `Store ${item.storeName} approved for field sales under ${item.proposedCycle}.`);
   };
 
   // Workflow Handlers
   const handleCreateProduct = async (data) => {
     setProductSetupModal(false);
     await createProduct(data);
-    showToast(`Workflow A: Created Product "${data.productName}" -> SKU ${data.sku} generated.`);
+    showToast(language === 'ar' ? `تم إنشاء المنتج "${data.productName}" -> الرمز ${data.sku}.` : `Created Product "${data.productName}" -> SKU ${data.sku} generated.`);
   };
 
   const handleCreatePo = async (data) => {
     setCreatePoModal(false);
     await createPurchaseOrder(data);
-    showToast(`Workflow C/O: Purchase Order ${data.poNumber} saved as Draft and sent to Admin for approval.`);
+    showToast(language === 'ar' ? `تم حفظ أمر الشراء ${data.poNumber} كمسودة وإرساله للأدمن.` : `Purchase Order ${data.poNumber} saved as Draft and sent to Admin for approval.`);
   };
 
   const handleSkuConversion = async (data) => {
     setSkuConversionModal(false);
     await convertSku(data);
-    showToast(`Workflow D: Converted ${data.sourceQty} units of ${data.sourceSku} to ${data.targetQty} units of ${data.targetSku}. ${data.lossQty} kg loss logged.`);
+    showToast(language === 'ar' ? `تم تحويل الأصناف وتعبئتها بنجاح.` : `Converted ${data.sourceQty} units of ${data.sourceSku} to ${data.targetQty} units of ${data.targetSku}. ${data.lossQty} kg loss logged.`);
   };
 
   const handleVehicleAudit = async (data) => {
     setVehicleAuditModal(false);
     await submitVehicleAudit(data);
-    showToast(`Workflow N: Saved Physical Audit for ${data.vehicleId}. Variance: ${data.variance} units logged.`);
+    showToast(language === 'ar' ? `تم حفظ الجرد الفعلي للشاحنة ${data.vehicleId}.` : `Saved Physical Audit for ${data.vehicleId}. Variance: ${data.variance} units logged.`);
   };
 
   const handleVehicleLoadout = async (data) => {
     setVehicleLoadoutModal(false);
     await issueVehicleLoadout(data);
-    showToast(`Workflow F: Issued ${data.quantity} units of ${data.sku} to ${data.vehicle}. Awaiting seller confirmation.`);
+    showToast(language === 'ar' ? `تم صرف ${data.quantity} وحدة من ${data.sku} للشاحنة ${data.vehicle}.` : `Issued ${data.quantity} units of ${data.sku} to ${data.vehicle}. Awaiting seller confirmation.`);
   };
 
   const handleCompleteSale = async (saleData) => {
     await completeSale(saleData);
-    showToast(`Sale Completed! Delivery document issued for ${saleData.storeName} (SAR ${saleData.totalAmount.toLocaleString()}).`);
+    showToast(language === 'ar' ? `تمت عملية البيع بنجاح! تم إصدار سند التسليم لـ ${saleData.storeName} (${saleData.totalAmount?.toLocaleString()} ريال).` : `Sale Completed! Delivery document issued for ${saleData.storeName} (SAR ${saleData.totalAmount.toLocaleString()}).`);
     setSellerTab('home');
   };
 
+  if (loading) {
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100vh',
+        backgroundColor: '#1b4332',
+        color: '#ffffff'
+      }}>
+        <div className="brand-icon" style={{ backgroundColor: '#5d7c4a', fontSize: '18px', padding: '12px 20px', borderRadius: '6px', fontWeight: 800, marginBottom: '16px' }}>
+          GSA
+        </div>
+        <div style={{ fontSize: '16px', fontWeight: 700 }}>Green Skill Agro ERP</div>
+        <div style={{ fontSize: '12px', color: 'rgba(255,255,255,0.7)', marginTop: '6px' }}>{language === 'ar' ? 'جاري تحميل بيانات المنشأة وعناصر الأمان...' : 'Loading Enterprise Data & Security Controls...'}</div>
+      </div>
+    );
+  }
+
   return (
     <div className="app-container">
-      {/* Toast Notification Banner */}
+      {/* Toast Notification Banner - Centered Top */}
       {toastMessage && (
         <div className="toast-banner" style={{
           position: 'fixed',
-          top: '64px',
-          right: '24px',
+          top: '70px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          maxWidth: 'calc(100vw - 32px)',
+          width: 'max-content',
           backgroundColor: '#1b4332',
           color: '#ffffff',
           padding: '10px 16px',
-          borderRadius: '4px',
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+          borderRadius: '6px',
+          boxShadow: '0 4px 16px rgba(0,0,0,0.25)',
           fontSize: '12.5px',
           fontWeight: 600,
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'center',
           gap: '8px',
-          zIndex: 999
+          zIndex: 10000,
+          textAlign: 'center',
+          boxSizing: 'border-box'
         }}>
-          <CheckCircle2 size={16} style={{ color: '#4ade80' }} />
-          <span>{toastMessage}</span>
+          <CheckCircle2 size={16} style={{ color: '#4ade80', flexShrink: 0 }} />
+          <span style={{ wordBreak: 'break-word' }}>{toastMessage}</span>
         </div>
       )}
 
       {/* RENDER BASED ON CURRENT ACTIVE ROLE */}
-      {currentRole === 'seller' ? (
+      {currentRole === 'superadmin' ? (
+        /* SUPER ADMIN EXECUTIVE GOVERNANCE CONSOLE */
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
+          <Header 
+            onSearch={setSearchQuery} 
+            searchQuery={searchQuery} 
+            currentRole={currentRole}
+            onSwitchRole={setCurrentRole} 
+            onOpenDrawer={() => setIsDrawerOpen(true)}
+          />
+
+          <SuperAdminDrawer 
+            isOpen={isDrawerOpen}
+            onClose={() => setIsDrawerOpen(false)}
+            activeTab={superAdminTab}
+            setActiveTab={setSuperAdminTab}
+            onSwitchRole={setCurrentRole}
+          />
+
+          <div className="app-main-layout">
+            <SuperAdminSidebar activeTab={superAdminTab} setActiveTab={setSuperAdminTab} />
+
+            <main className="erp-content">
+              <div className="dashboard-topbar">
+                <div>
+                  <div className="topbar-title">
+                    <span>{language === 'ar' ? 'منصة تحكم المشرف العام للحوكمة' : 'Super Admin Platform Governance Console'}</span>
+                    <span className="badge badge-success" style={{ backgroundColor: '#1b4332', color: '#fff' }}>
+                      <Crown size={12} />
+                      {language === 'ar' ? 'السلطة التنفيذية العليا' : 'Supreme Executive Authority'}
+                    </span>
+                  </div>
+                  <div className="topbar-subtitle">
+                    {language === 'ar' ? 'الرقابة العامة للمنشأة • إدارة المستخدمين والأدمن • مصفوفة التسلسل وأزرار الطوارئ' : 'Phase 1 Enterprise Oversight • Platform Users & Admin Governance • Master Hierarchy & Security Kill-Switches'}
+                  </div>
+                </div>
+
+                <div className="topbar-actions">
+                  <button className="btn-secondary" onClick={() => setCurrentRole('admin')}>
+                    <ArrowRightLeft size={14} />
+                    <span>{t('adminRole')}</span>
+                  </button>
+                  <button className="btn-secondary" onClick={() => setCurrentRole('manager')}>
+                    <ArrowRightLeft size={14} />
+                    <span>{t('managerRole')}</span>
+                  </button>
+                  <button 
+                    className="btn-primary" 
+                    style={{ backgroundColor: '#1b4332', borderColor: '#1b4332' }}
+                    onClick={() => setCreateAdminModalOpen(true)}
+                  >
+                    <UserPlus size={14} />
+                    <span>{t('provisionAdmin')}</span>
+                  </button>
+                </div>
+              </div>
+
+              {superAdminTab === 'superadmin-overview' && (
+                <SuperAdminOverview 
+                  onOpenCreateAdmin={() => setCreateAdminModalOpen(true)} 
+                  onNavigateTab={setSuperAdminTab} 
+                />
+              )}
+              {superAdminTab === 'superadmin-governance' && (
+                <SuperAdminUserGovernance 
+                  onOpenCreateAdmin={() => setCreateAdminModalOpen(true)} 
+                  onShowToast={showToast} 
+                />
+              )}
+              {superAdminTab === 'superadmin-permissions' && <SuperAdminPermissionsMatrix />}
+              {superAdminTab === 'superadmin-branches' && <SuperAdminBranchManager onShowToast={showToast} />}
+              {superAdminTab === 'superadmin-security' && <SuperAdminSecurityAudit onShowToast={showToast} />}
+            </main>
+          </div>
+        </div>
+      ) : currentRole === 'seller' ? (
         /* SELLER FIELD EXPERIENCE WITH DRAWER MENU */
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
           <SellerHeader 
@@ -252,25 +375,25 @@ export function App() {
               <div className="dashboard-topbar">
                 <div>
                   <div className="topbar-title">
-                    <span>Admin System Governance Console</span>
+                    <span>{language === 'ar' ? 'منصة إدارة وتكوين النظام' : 'Admin System Governance Console'}</span>
                     <span className="badge badge-success">
                       <ShieldCheck size={12} />
-                      Master Configuration
+                      {language === 'ar' ? 'التهيئة العامة' : 'Master Configuration'}
                     </span>
                   </div>
                   <div className="topbar-subtitle">
-                    Company System Ceilings, Vendor Master Directory, Category Templates & Permission Set Grants
+                    {language === 'ar' ? 'سقوف النظام، دليل الموردين، قوالب الفئات، ومنح الصلاحيات' : 'Company System Ceilings, Vendor Master Directory, Category Templates & Permission Set Grants'}
                   </div>
                 </div>
 
                 <div className="topbar-actions">
                   <button className="btn-secondary" onClick={() => setCurrentRole('manager')}>
                     <ArrowRightLeft size={14} />
-                    <span>Manager View</span>
+                    <span>{t('managerRole')}</span>
                   </button>
                   <button className="btn-secondary" onClick={() => setCurrentRole('seller')}>
                     <ArrowRightLeft size={14} />
-                    <span>Seller View</span>
+                    <span>{t('sellerRole')}</span>
                   </button>
                 </div>
               </div>
@@ -312,14 +435,14 @@ export function App() {
               <div className="dashboard-topbar">
                 <div>
                   <div className="topbar-title">
-                    <span>Manager Operational Control Center</span>
+                    <span>{language === 'ar' ? 'مركز التحكم التشغيلي للمدير' : 'Manager Operational Control Center'}</span>
                     <span className="badge badge-success">
                       <ShieldCheck size={12} />
-                      Active System
+                      {language === 'ar' ? 'متصل بالكامل' : 'Active System'}
                     </span>
                   </div>
                   <div className="topbar-subtitle">
-                    Riyadh Central Distribution Center (WH-01) &bull; Kingdom of Saudi Arabia Wholesale Operations
+                    {t('warehouseName')} &bull; {language === 'ar' ? 'عمليات الجملة والتوزيع بالمملكة العربية السعودية' : 'Kingdom of Saudi Arabia Wholesale Operations'}
                   </div>
                 </div>
 
@@ -330,20 +453,20 @@ export function App() {
                     onClick={() => setCurrentRole('seller')}
                   >
                     <ArrowRightLeft size={14} />
-                    <span>Switch to Field Seller View</span>
+                    <span>{t('switchToSeller')}</span>
                   </button>
 
                   <button className="btn-secondary" onClick={() => setProductSetupModal(true)}>
                     <PackagePlus size={14} />
-                    <span>+ Setup Product / SKU</span>
+                    <span>+ {t('setupProductSku')}</span>
                   </button>
                   <button className="btn-secondary" onClick={() => setCreatePoModal(true)}>
                     <FilePlus size={14} />
-                    <span>+ Raise Draft PO</span>
+                    <span>+ {t('draftPurchaseOrder')}</span>
                   </button>
-                  <button className="btn-primary" onClick={() => showToast('Exporting Manager Operational Report (PDF/Excel)...')}>
+                  <button className="btn-primary" onClick={() => showToast(language === 'ar' ? 'تصدير التقرير التشغيلي (PDF/Excel)...' : 'Exporting Manager Operational Report (PDF/Excel)...')}>
                     <Download size={14} />
-                    <span>Export Report</span>
+                    <span>{language === 'ar' ? 'تصدير التقرير' : 'Export Report'}</span>
                   </button>
                 </div>
               </div>
@@ -366,7 +489,7 @@ export function App() {
                       activeTab="overview"
                       searchQuery={searchQuery}
                       onOverrideCredit={(item) => setOverrideModal({ open: true, item })}
-                      onViewPoDetails={(po) => showToast(`Viewing details for PO ${po.poNumber}`)}
+                      onViewPoDetails={(po) => setPoDetailsModal({ open: true, item: po })}
                     />
                   </div>
 
@@ -374,38 +497,38 @@ export function App() {
                     <div className="side-panel-card">
                       <div className="side-panel-title">
                         <AlertTriangle size={15} className="text-amber-700" />
-                        <span>Operational Alerts Watch</span>
+                        <span>{language === 'ar' ? 'مراقبة التنبيهات التشغيلية' : 'Operational Alerts Watch'}</span>
                       </div>
 
                       <div className="side-alert-item alert-danger">
                         <AlertTriangle size={16} className="shrink-0 mt-0.5" />
                         <div>
-                          <strong>2 Cash Ceiling Breaches</strong>
-                          <div style={{ fontSize: '11px', marginTop: '2px' }}>Sellers Omar & Faisal exceeded cash limits.</div>
+                          <strong>{language === 'ar' ? 'تجاوز حد النقدية (حالتان)' : '2 Cash Ceiling Breaches'}</strong>
+                          <div style={{ fontSize: '11px', marginTop: '2px' }}>{language === 'ar' ? 'المندوبان عمر وفيصل تجاووزا حد النقدية المسموح به.' : 'Sellers Omar & Faisal exceeded cash limits.'}</div>
                         </div>
                       </div>
 
                       <div className="side-alert-item alert-warning">
                         <Clock size={16} className="shrink-0 mt-0.5" />
                         <div>
-                          <strong>1 Overdue Vehicle Audit</strong>
-                          <div style={{ fontSize: '11px', marginTop: '2px' }}>Van #VH-02 (Khalid) past 35-day audit window.</div>
+                          <strong>{language === 'ar' ? 'جرد شاحنة متأخر (حالة واحدة)' : '1 Overdue Vehicle Audit'}</strong>
+                          <div style={{ fontSize: '11px', marginTop: '2px' }}>{language === 'ar' ? 'الشاحنة #VH-02 (خالد) تجاوزت فترة الجرد 35 يوماً.' : 'Van #VH-02 (Khalid) past 35-day audit window.'}</div>
                         </div>
                       </div>
 
                       <div className="side-alert-item alert-warning">
                         <Clock size={16} className="shrink-0 mt-0.5" />
                         <div>
-                          <strong>3 Expiry FEFO Clearance Flags</strong>
-                          <div style={{ fontSize: '11px', marginTop: '2px' }}>Okra Parbhani Kranti expires in 25 days.</div>
+                          <strong>{language === 'ar' ? 'تنبهيات قُرب الصلاحية (FEFO)' : '3 Expiry FEFO Clearance Flags'}</strong>
+                          <div style={{ fontSize: '11px', marginTop: '2px' }}>{language === 'ar' ? 'صنف بامية باربهاني كرانتي ينتهي خلال 25 يوماً.' : 'Okra Parbhani Kranti expires in 25 days.'}</div>
                         </div>
                       </div>
 
                       <div className="side-alert-item alert-info">
                         <Lock size={16} className="shrink-0 mt-0.5" />
                         <div>
-                          <strong>4 Stores Credit Blocked</strong>
-                          <div style={{ fontSize: '11px', marginTop: '2px' }}>Overdue balances past credit cycle.</div>
+                          <strong>{language === 'ar' ? 'حظر ائتمان المتاجر (4 متاجر)' : '4 Stores Credit Blocked'}</strong>
+                          <div style={{ fontSize: '11px', marginTop: '2px' }}>{language === 'ar' ? 'مبالغ متأخرة تجاوزت دورة الائتمان.' : 'Overdue balances past credit cycle.'}</div>
                         </div>
                       </div>
                     </div>
@@ -413,32 +536,32 @@ export function App() {
                     <div className="side-panel-card">
                       <div className="side-panel-title">
                         <Send size={15} />
-                        <span>Manager Workflows</span>
+                        <span>{language === 'ar' ? 'إجراءات سير العمل للمدير' : 'Manager Workflows'}</span>
                       </div>
 
                       <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setVehicleLoadoutModal(true)}>
                         <Truck size={14} />
-                        <span>Workflow F: Issue Vehicle Loadout</span>
+                        <span>{t('issueVehicleLoadout')}</span>
                       </button>
 
                       <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setVehicleAuditModal(true)}>
                         <ClipboardCheck size={14} />
-                        <span>Workflow N: Audit Vehicle Stock</span>
+                        <span>{t('auditVehicleStock')}</span>
                       </button>
 
                       <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setSkuConversionModal(true)}>
                         <RepeatIcon size={14} />
-                        <span>Workflow D: Convert SKU / Repackage</span>
+                        <span>{t('convertSkuRepackage')}</span>
                       </button>
 
                       <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setCreatePoModal(true)}>
                         <FilePlus size={14} />
-                        <span>Workflow C/O: Draft Purchase Order</span>
+                        <span>{t('draftPurchaseOrder')}</span>
                       </button>
 
                       <button className="btn-secondary" style={{ width: '100%', justifyContent: 'flex-start' }} onClick={() => setProductSetupModal(true)}>
                         <PackagePlus size={14} />
-                        <span>Workflow A: Setup Product / SKU</span>
+                        <span>{t('setupProductSku')}</span>
                       </button>
                     </div>
                   </div>
@@ -448,7 +571,7 @@ export function App() {
                   activeTab={activeTab}
                   searchQuery={searchQuery}
                   onOverrideCredit={(item) => setOverrideModal({ open: true, item })}
-                  onViewPoDetails={(po) => showToast(`Viewing details for Purchase Order ${po.poNumber} (${po.vendorName})`)}
+                  onViewPoDetails={(po) => setPoDetailsModal({ open: true, item: po })}
                 />
               )}
             </main>
@@ -457,6 +580,13 @@ export function App() {
       )}
 
       {/* Workflow Modals */}
+      {createAdminModalOpen && (
+        <CreateAdminModal
+          onClose={() => setCreateAdminModalOpen(false)}
+          onShowToast={showToast}
+        />
+      )}
+
       {productSetupModal && (
         <ProductSetupModal
           onClose={() => setProductSetupModal(false)}
@@ -522,6 +652,17 @@ export function App() {
           item={overrideModal.item}
           onClose={() => setOverrideModal({ open: false, item: null })}
           onConfirm={handleConfirmOverride}
+        />
+      )}
+
+      {poDetailsModal.open && (
+        <PoDetailsModal
+          po={poDetailsModal.item}
+          onClose={() => setPoDetailsModal({ open: false, item: null })}
+          onApprovePo={async (poNumber) => {
+            await approvePurchaseOrder(poNumber);
+            showToast(`Purchase Order ${poNumber} approved & issued.`);
+          }}
         />
       )}
     </div>

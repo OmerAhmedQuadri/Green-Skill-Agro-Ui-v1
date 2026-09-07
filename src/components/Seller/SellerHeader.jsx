@@ -1,17 +1,20 @@
 import React from 'react';
-import { Menu, ArrowLeft, AlertTriangle, ArrowRightLeft, ShoppingCart } from 'lucide-react';
+import { Menu, ArrowLeft, AlertTriangle, ArrowRightLeft, ShoppingCart, Globe } from 'lucide-react';
 import { useManagerContext } from '../../context/ManagerContext';
+import { Logo } from '../Logo';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const SellerHeader = ({ onOpenDrawer, onSwitchRole, onNavigate, activeTab = 'home' }) => {
   const { currentSeller } = useManagerContext();
+  const { language, toggleLanguage, t } = useLanguage();
   const seller = currentSeller || { assignedVehicle: { id: 'VH-01' }, cashInHand: 14500, cashBreachWarning: true };
 
   const pageTitles = {
-    'new-sale': 'POS Sale',
-    'van-stock': 'Van Stock',
-    'stores': 'Store Portfolio',
-    'cash': 'Cash Settlement',
-    'attendance': 'Shift & Odometer'
+    'new-sale': t('posSale'),
+    'van-stock': t('vanStock'),
+    'stores': t('storePortfolio'),
+    'cash': t('cashSettlement'),
+    'attendance': t('shiftOdometer')
   };
 
   const isSubPage = activeTab !== 'home';
@@ -61,7 +64,7 @@ export const SellerHeader = ({ onOpenDrawer, onSwitchRole, onNavigate, activeTab
               title="Return to Seller Dashboard"
             >
               <ArrowLeft size={14} />
-              <span>Dashboard</span>
+              <span>{t('dashboard')}</span>
             </button>
 
             <div 
@@ -83,15 +86,7 @@ export const SellerHeader = ({ onOpenDrawer, onSwitchRole, onNavigate, activeTab
         ) : (
           /* DASHBOARD HEADER: Main Brand Title */
           <div className="header-brand" style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
-            <div className="brand-icon" style={{ backgroundColor: '#5d7c4a', width: '26px', height: '26px', fontSize: '10px', flexShrink: 0 }}>GSA</div>
-            <div style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-              <span style={{ fontSize: '13.5px', fontWeight: 700, color: '#ffffff', lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                Green Skill Agro Field
-              </span>
-              <span className="desktop-only-inline" style={{ fontSize: '10.5px', color: 'rgba(255, 255, 255, 0.7)', whiteSpace: 'nowrap' }}>
-                Van #{seller.assignedVehicle?.id}
-              </span>
-            </div>
+            <Logo height={24} />
           </div>
         )}
       </div>
@@ -127,19 +122,43 @@ export const SellerHeader = ({ onOpenDrawer, onSwitchRole, onNavigate, activeTab
             onClick={() => onNavigate('new-sale')}
           >
             <ShoppingCart size={13} />
-            <span className="desktop-only-inline">+ POS Sale</span>
-            <span className="mobile-only-inline">+ POS</span>
+            <span className="desktop-only-inline">{t('newSaleBtn')}</span>
+            <span className="mobile-only-inline">{t('newSaleBtn')}</span>
           </button>
         )}
+
+        {/* Language Switcher Button */}
+        <button
+          onClick={toggleLanguage}
+          style={{
+            backgroundColor: 'rgba(255,255,255,0.15)',
+            border: '1px solid rgba(255,255,255,0.3)',
+            color: '#ffffff',
+            fontSize: '11.5px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            padding: '5px 8px',
+            height: '30px',
+            borderRadius: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            whiteSpace: 'nowrap'
+          }}
+          title={language === 'en' ? 'Switch to Saudi Arabic (RTL)' : 'التغيير إلى الإنجليزية'}
+        >
+          <Globe size={12} style={{ color: '#4ade80' }} />
+          <span>{t('langName')}</span>
+        </button>
 
         <button 
           className="btn-secondary" 
           style={{ backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.3)', color: '#fff', padding: '5px 8px', fontSize: '11.5px', height: '30px' }}
           onClick={onSwitchRole}
-          title="Switch to Manager View"
+          title={t('switchRole')}
         >
           <ArrowRightLeft size={12} />
-          <span className="desktop-only-inline">Manager</span>
+          <span className="desktop-only-inline">{t('switchToManager')}</span>
         </button>
       </div>
     </header>

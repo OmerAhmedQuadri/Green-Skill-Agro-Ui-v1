@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { ToggleLeft, ToggleRight, RotateCcw } from 'lucide-react';
 import { useManagerContext } from '../../context/ManagerContext';
+import { useLanguage } from '../../context/LanguageContext';
 
 export const AdminFeatureToggles = ({ onShowToast }) => {
+  const { language, t } = useLanguage();
   const { featureToggles, toggleFeature } = useManagerContext();
   const toggles = featureToggles || [];
 
@@ -17,14 +19,14 @@ export const AdminFeatureToggles = ({ onShowToast }) => {
     const updated = !currentEnabled;
     await toggleFeature(id);
     if (onShowToast) {
-      onShowToast(`Feature "${featureName}" set to ${updated ? 'ENABLED' : 'DISABLED'}.`);
+      onShowToast(language === 'ar' ? `تم تعيين الميزة "${featureName}" إلى ${updated ? 'مفعل' : 'معطل'}.` : `Feature "${featureName}" set to ${updated ? 'ENABLED' : 'DISABLED'}.`);
     }
   };
 
   const handleSaveReturnPolicy = (e) => {
     e.preventDefault();
     if (onShowToast) {
-      onShowToast(`Return Policy Rules updated! Max Return Window: ${returnPolicy.maxReturnDays} Days, Restocking Fee: ${returnPolicy.restockingFeePct}%.`);
+      onShowToast(language === 'ar' ? `تم تحديث قواعد سياسة الإرجاع! نافذة الإرجاع القصوى: ${returnPolicy.maxReturnDays} يوماً، رسوم إعادة التخزين: ${returnPolicy.restockingFeePct}%.` : `Return Policy Rules updated! Max Return Window: ${returnPolicy.maxReturnDays} Days, Restocking Fee: ${returnPolicy.restockingFeePct}%.`);
     }
   };
 
@@ -36,10 +38,10 @@ export const AdminFeatureToggles = ({ onShowToast }) => {
         <div className="panel-header-toolbar">
           <div className="panel-main-title">
             <ToggleLeft size={16} />
-            <span>System Feature Toggles & Operational Policies</span>
+            <span>{language === 'ar' ? 'مفاتيح تفعيل ميزات النظام والسياسات التشغيلية' : 'System Feature Toggles & Operational Policies'}</span>
           </div>
           <div style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>
-            Enable or disable platform features and automated governance locks across Green Skill Agro.
+            {language === 'ar' ? 'تفعيل أو تعطيل ميزات المنصة وأقفال الحوكمة الآلية عبر جرين سكيل أقرو.' : 'Enable or disable platform features and automated governance locks across Green Skill Agro.'}
           </div>
         </div>
 
@@ -62,7 +64,7 @@ export const AdminFeatureToggles = ({ onShowToast }) => {
                 onClick={() => handleToggle(t.id, t.featureName, t.enabled)}
               >
                 {t.enabled ? <ToggleRight size={18} /> : <ToggleLeft size={18} />}
-                <span>{t.enabled ? 'Active' : 'Disabled'}</span>
+                <span>{t.enabled ? (language === 'ar' ? 'مفعل' : 'Active') : (language === 'ar' ? 'معطل' : 'Disabled')}</span>
               </button>
             </div>
           ))}
@@ -73,12 +75,12 @@ export const AdminFeatureToggles = ({ onShowToast }) => {
       <div className="data-panel" style={{ padding: '16px', minHeight: 'auto' }}>
         <div style={{ fontWeight: 700, fontSize: '14px', color: 'var(--color-forest-dark)', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
           <RotateCcw size={16} />
-          <span>Product Return Policy & Restocking Rules</span>
+          <span>{language === 'ar' ? 'سياسة إرجاع المنتجات وقواعد إعادة التخزين' : 'Product Return Policy & Restocking Rules'}</span>
         </div>
 
         <form onSubmit={handleSaveReturnPolicy} className="modal-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
           <div className="form-group">
-            <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>Max Allowable Return Window (Days)</label>
+            <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{language === 'ar' ? 'الحد الأقصى المسموح به لنافذة الإرجاع (أيام)' : 'Max Allowable Return Window (Days)'}</label>
             <input 
               type="number" 
               className="form-input"
@@ -88,7 +90,7 @@ export const AdminFeatureToggles = ({ onShowToast }) => {
           </div>
 
           <div className="form-group">
-            <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>Restocking Fee (%)</label>
+            <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{language === 'ar' ? 'نسبة رسوم إعادة التخزين (%)' : 'Restocking Fee (%)'}</label>
             <input 
               type="number" 
               className="form-input"
@@ -99,7 +101,7 @@ export const AdminFeatureToggles = ({ onShowToast }) => {
 
           <div className="form-group" style={{ gridColumn: 'span 2' }}>
             <button type="submit" className="btn-primary" style={{ height: '38px', justifyContent: 'center' }}>
-              <span>Update Return Policy Rules</span>
+              <span>{language === 'ar' ? 'تحديث قواعد سياسة الإرجاع' : 'Update Return Policy Rules'}</span>
             </button>
           </div>
         </form>

@@ -15,11 +15,12 @@ import {
   STORE_CREDIT_DATA,
   SYSTEM_CONFIG_RULES,
   VENDORS_MASTER_DATA,
-  PRODUCT_CATEGORIES_DATA,
   USER_PERMISSIONS_DATA,
   FEATURE_TOGGLES_DATA,
   ADMIN_AUDIT_TRAIL,
-  CURRENT_SELLER
+  CURRENT_SELLER,
+  BRANCHES_MASTER_DATA,
+  SYSTEM_KILL_SWITCHES
 } from '../data/mockData';
 
 const USE_MOCK = import.meta.env.VITE_USE_MOCK !== 'false';
@@ -34,11 +35,12 @@ let dbPurchaseOrders = JSON.parse(JSON.stringify(PURCHASE_ORDERS));
 let dbStores = JSON.parse(JSON.stringify(STORE_CREDIT_DATA));
 let dbSystemRules = { ...SYSTEM_CONFIG_RULES };
 let dbVendors = JSON.parse(JSON.stringify(VENDORS_MASTER_DATA));
-let dbCategories = JSON.parse(JSON.stringify(PRODUCT_CATEGORIES_DATA));
 let dbUserPermissions = JSON.parse(JSON.stringify(USER_PERMISSIONS_DATA));
 let dbFeatureToggles = JSON.parse(JSON.stringify(FEATURE_TOGGLES_DATA));
 let dbAuditTrail = JSON.parse(JSON.stringify(ADMIN_AUDIT_TRAIL));
 let dbCurrentSeller = { ...CURRENT_SELLER };
+let dbBranches = JSON.parse(JSON.stringify(BRANCHES_MASTER_DATA));
+let dbKillSwitches = JSON.parse(JSON.stringify(SYSTEM_KILL_SWITCHES));
 
 // Helper for real HTTP requests (FETCH / REST API)
 async function request(endpoint, options = {}) {
@@ -258,6 +260,18 @@ export const apiService = {
       if (saleData.paymentMode === 'Immediate Cash') {
         dbCurrentSeller.cashInHand += totalAmt;
         dbCurrentSeller.cashBreachWarning = dbCurrentSeller.cashInHand > dbSystemRules.maxSellerCashCeiling;
+
+        dbFleet = dbFleet.map(f => {
+          if (f.assignedSeller === dbCurrentSeller.name || (dbCurrentSeller.assignedVehicle && f.vehicleId === dbCurrentSeller.assignedVehicle.id)) {
+            const newCash = f.cashInHand + totalAmt;
+            return {
+              ...f,
+              cashInHand: newCash,
+              cashBreach: newCash > dbSystemRules.maxSellerCashCeiling
+            };
+          }
+          return f;
+        });
       }
 
       if (saleData.paymentMode !== 'Immediate Cash' && saleData.storeId) {
@@ -420,9 +434,15 @@ export const apiService = {
     if (USE_MOCK) {
       dbSystemRules = { ...dbSystemRules, ...newRules, lastUpdatedAt: new Date().toISOString().replace('T', ' ').substring(0, 16) };
       
-      if (newRules.maxSellerCashCeiling) {
-        dbCurrentSeller.cashLimit = newRules.maxSellerCashCeiling;
-        dbCurrentSeller.cashBreachWarning = dbCurrentSeller.cashInHand > newRules.maxSellerCashCeiling;
+      const newCashCeiling = dbSystemRules.maxSellerCashCeiling;
+      if (newCashCeiling) {
+        dbCurrentSeller.cashLimit = newCashCeiling;
+        dbCurrentSeller.cashBreachWarning = dbCurrentSeller.cashInHand > newCashCeiling;
+
+        dbFleet = dbFleet.map(f => ({
+          ...f,
+          cashBreach: f.cashInHand > newCashCeiling
+        }));
       }
       logAudit('Admin System Owner', 'Admin', 'UPDATE_SYSTEM_RULES', `Updated master system rules and operational ceilings`);
       return { success: true, rules: dbSystemRules };
@@ -433,11 +453,41 @@ export const apiService = {
     });
   },
 
+  // Master Vendor Directory Endpoints
+  async getVendors() {
+    if (USE_MOCK) return dbVendors;
+    return request('/admin/vendors');
+  },
+
+  async addVendor(vendorData) {
+    if (USE_MOCK) {
+      const vendorObj = {
+        vendorCode: vendorData.vendorCode || `VND-${vendorData.vendorName.substring(0, 5).toUpperCase()}`,
+        vendorName: vendorData.vendorName,
+        taxNumber: vendorData.taxNumber,
+        category: vendorData.category || 'Seeds & Hybrids',
+        paymentTerms: vendorData.paymentTerms || '30 Days Net',
+        contactPerson: vendorData.contactPerson || 'Procurement Desk',
+        phone: vendorData.phone || '+966 50 000 0000',
+        email: vendorData.email || 'vendor@agri.com.sa',
+        status: 'Active Authorized Vendor',
+        activePOsCount: 0
+      };
+      dbVendors = [vendorObj, ...dbVendors];
+      logAudit('Admin System Owner', 'Admin', 'ADD_VENDOR', `Registered new master vendor ${vendorObj.vendorName}`);
+      return { success: true, data: vendorObj };
+    }
+    return request('/admin/vendors', {
+      method: 'POST',
+      body: JSON.stringify(vendorData)
+    });
+  },
+
   // Admin Permission Sets: Update User Permission (Admin Action)
   async updateUserPermission(userId, field, value) {
     if (USE_MOCK) {
       dbUserPermissions = dbUserPermissions.map(u => {
-        if (u.userId === userId) {
+        if (u.userId === userId || u.id === userId) {
           return { ...u, [field]: value };
         }
         return u;
@@ -454,7 +504,7 @@ export const apiService = {
   async updateUserStatus(userId, status) {
     if (USE_MOCK) {
       dbUserPermissions = dbUserPermissions.map(u => {
-        if (u.userId === userId) {
+        if (u.userId === userId || u.id === userId) {
           return { ...u, status };
         }
         return u;
@@ -583,5 +633,111 @@ export const apiService = {
       method: 'POST',
       body: JSON.stringify(loadoutData),
     });
+  },
+
+  // --- SUPER ADMIN MASTER ENDPOINTS ---
+  async getBranches() {
+    if (USE_MOCK) return dbBranches;
+    return request('/superadmin/branches');
+  },
+
+  async updateBranchStatus(branchId, status) {
+    if (USE_MOCK) {
+      dbBranches = dbBranches.map(b => {
+        if (b.branchId === branchId || b.id === branchId) {
+          return { ...b, status };
+        }
+        return b;
+      });
+      logAudit('Abdulaziz Al-Saud', 'Super Admin', 'UPDATE_BRANCH_STATUS', `Updated branch ${branchId} status to ${status}`, 'High Risk');
+      return { success: true, branchId, status };
+    }
+    return request(`/superadmin/branches/${branchId}/status`, {
+      method: 'POST',
+      body: JSON.stringify({ status })
+    });
+  },
+
+  async updateBranchDetails(branchId, branchData) {
+    if (USE_MOCK) {
+      dbBranches = dbBranches.map(b => {
+        if (b.branchId === branchId || b.id === branchId) {
+          return { ...b, ...branchData };
+        }
+        return b;
+      });
+      logAudit('Abdulaziz Al-Saud', 'Super Admin', 'UPDATE_BRANCH_DETAILS', `Updated branch details for ${branchId}`);
+      return { success: true, branchId, branchData };
+    }
+    return request(`/superadmin/branches/${branchId}`, {
+      method: 'PUT',
+      body: JSON.stringify(branchData)
+    });
+  },
+
+  async getKillSwitches() {
+    if (USE_MOCK) return dbKillSwitches;
+    return request('/superadmin/kill-switches');
+  },
+
+  async createAdminUser(userData) {
+    if (USE_MOCK) {
+      const newUser = {
+        userId: userData.userId || `USR-${userData.role.substring(0, 3).toUpperCase()}-0${dbUserPermissions.length + 1}`,
+        userName: userData.userName,
+        role: userData.role || 'Admin',
+        assignedLocation: userData.assignedLocation || 'Platform Master Operations',
+        status: 'Active',
+        canOverrideCredit: true,
+        canApproveWriteOff: true,
+        canReleaseDispatch: true,
+        canVerifyCash: true,
+        canCreateProduct: true,
+        canDraftPo: true,
+        canManageAdmins: userData.role === 'Super Admin'
+      };
+      dbUserPermissions = [newUser, ...dbUserPermissions];
+      logAudit('Abdulaziz Al-Saud', 'Super Admin', 'CREATE_USER_ACCOUNT', `Created new ${userData.role} user account for ${userData.userName}`);
+      return { success: true, data: newUser };
+    }
+    return request('/superadmin/users', {
+      method: 'POST',
+      body: JSON.stringify(userData)
+    });
+  },
+
+  async updateUserRole(userId, newRole) {
+    if (USE_MOCK) {
+      dbUserPermissions = dbUserPermissions.map(u => {
+        if (u.userId === userId || u.id === userId) {
+          return {
+            ...u,
+            role: newRole,
+            canManageAdmins: newRole === 'Super Admin'
+          };
+        }
+        return u;
+      });
+      logAudit('Abdulaziz Al-Saud', 'Super Admin', 'ESCALATE_USER_ROLE', `Updated role for user ${userId} to ${newRole}`, 'High Risk');
+      return { success: true, userId, newRole };
+    }
+    return request(`/superadmin/users/${userId}/role`, {
+      method: 'POST',
+      body: JSON.stringify({ role: newRole })
+    });
+  },
+
+  async toggleKillSwitch(switchId) {
+    if (USE_MOCK) {
+      dbKillSwitches = dbKillSwitches.map(k => {
+        if (k.id === switchId) {
+          return { ...k, active: !k.active };
+        }
+        return k;
+      });
+      logAudit('Abdulaziz Al-Saud', 'Super Admin', 'TOGGLE_EMERGENCY_KILLSWITCH', `Toggled emergency kill-switch ${switchId}`, 'Critical');
+      return { success: true, switchId };
+    }
+    return request(`/superadmin/kill-switches/${switchId}/toggle`, { method: 'POST' });
   }
 };

@@ -588,6 +588,34 @@ export const PRODUCT_CATEGORIES_DATA = [
 
 export const USER_PERMISSIONS_DATA = [
   {
+    userId: "USR-SUP-01",
+    userName: "Abdulaziz Al-Saud",
+    role: "Super Admin",
+    assignedLocation: "Platform Master Operations",
+    status: "Active",
+    canOverrideCredit: true,
+    canApproveWriteOff: true,
+    canReleaseDispatch: true,
+    canVerifyCash: true,
+    canCreateProduct: true,
+    canDraftPo: true,
+    canManageAdmins: true
+  },
+  {
+    userId: "USR-ADM-01",
+    userName: "Admin System Owner",
+    role: "Admin",
+    assignedLocation: "Master Governance Desk",
+    status: "Active",
+    canOverrideCredit: true,
+    canApproveWriteOff: true,
+    canReleaseDispatch: true,
+    canVerifyCash: true,
+    canCreateProduct: true,
+    canDraftPo: true,
+    canManageAdmins: false
+  },
+  {
     userId: "USR-MNG-01",
     userName: "Sami Al-Mansoor",
     role: "Manager",
@@ -598,7 +626,8 @@ export const USER_PERMISSIONS_DATA = [
     canReleaseDispatch: true,
     canVerifyCash: true,
     canCreateProduct: true,
-    canDraftPo: true
+    canDraftPo: true,
+    canManageAdmins: false
   },
   {
     userId: "USR-MNG-02",
@@ -611,7 +640,8 @@ export const USER_PERMISSIONS_DATA = [
     canReleaseDispatch: true,
     canVerifyCash: true,
     canCreateProduct: false,
-    canDraftPo: true
+    canDraftPo: true,
+    canManageAdmins: false
   },
   {
     userId: "USR-SEL-01",
@@ -624,7 +654,8 @@ export const USER_PERMISSIONS_DATA = [
     canReleaseDispatch: false,
     canVerifyCash: false,
     canCreateProduct: false,
-    canDraftPo: false
+    canDraftPo: false,
+    canManageAdmins: false
   },
   {
     userId: "USR-SEL-02",
@@ -637,7 +668,75 @@ export const USER_PERMISSIONS_DATA = [
     canReleaseDispatch: false,
     canVerifyCash: false,
     canCreateProduct: false,
-    canDraftPo: false
+    canDraftPo: false,
+    canManageAdmins: false
+  }
+];
+
+export const BRANCHES_MASTER_DATA = [
+  {
+    branchId: "WH-01",
+    branchName: "Riyadh Central Distribution Center",
+    region: "Central Region (Riyadh)",
+    manager: "Sami Al-Mansoor",
+    activeSellersCount: 4,
+    inventoryValue: 1420000,
+    dailyTargetSales: 150000,
+    status: "Active Hub"
+  },
+  {
+    branchId: "WH-02",
+    branchName: "Al-Qassim Regional Hub",
+    region: "Agricultural Belt (Buraydah)",
+    manager: "Tariq Al-Rashid",
+    activeSellersCount: 3,
+    inventoryValue: 890000,
+    dailyTargetSales: 95000,
+    status: "Active Hub"
+  },
+  {
+    branchId: "WH-03",
+    branchName: "Eastern Province Distribution Center",
+    region: "Eastern Region (Dammam)",
+    manager: "Fahad Al-Zahrani",
+    activeSellersCount: 2,
+    inventoryValue: 640000,
+    dailyTargetSales: 70000,
+    status: "Active Hub"
+  },
+  {
+    branchId: "WH-04",
+    branchName: "Southern Agriculture Depot",
+    region: "Southern Region (Abha)",
+    manager: "Youssef Al-Qarni",
+    activeSellersCount: 2,
+    inventoryValue: 420000,
+    dailyTargetSales: 50000,
+    status: "Active Hub"
+  }
+];
+
+export const SYSTEM_KILL_SWITCHES = [
+  {
+    id: "KILL-01",
+    name: "Global POS Sales Freeze",
+    description: "Emergency freeze on all field POS sales transactions across all branches.",
+    active: false,
+    risk: "Critical"
+  },
+  {
+    id: "KILL-02",
+    name: "Credit Block Bypass Override",
+    description: "Master override allowing platform-wide temporary sale releases for credit-blocked stores.",
+    active: false,
+    risk: "High"
+  },
+  {
+    id: "KILL-03",
+    name: "System Maintenance & Read-Only Mode",
+    description: "Restrict platform writes to Super Admin only during scheduled system maintenance.",
+    active: false,
+    risk: "High"
   }
 ];
 

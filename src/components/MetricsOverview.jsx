@@ -1,9 +1,11 @@
 import React from 'react';
 import { Package, Banknote, ShoppingCart, Truck } from 'lucide-react';
 import { useManagerContext } from '../context/ManagerContext';
+import { useLanguage } from '../context/LanguageContext';
 
 export const MetricsOverview = () => {
   const { metrics } = useManagerContext();
+  const { t } = useLanguage();
   const data = metrics || {};
 
   const formatSAR = (val) => {
@@ -17,7 +19,7 @@ export const MetricsOverview = () => {
       <div className="metric-card">
         <div>
           <div className="metric-card-header">
-            <span className="metric-title">System Stock Position</span>
+            <span className="metric-title">{t('systemStockPosition')}</span>
             <div className="metric-icon-box">
               <Package size={15} />
             </div>
@@ -26,19 +28,19 @@ export const MetricsOverview = () => {
         </div>
         <div className="metric-sub-breakdown">
           <div className="breakdown-row">
-            <span>Warehouse (WH-01):</span>
+            <span>{t('warehouseHub')}:</span>
             <span className="breakdown-val">{formatSAR(data.warehouseValue)}</span>
           </div>
           <div className="breakdown-row">
-            <span>Vehicle Fleet (4 Vans):</span>
+            <span>{t('vehicleFleetVans')}:</span>
             <span className="breakdown-val">{formatSAR(data.fleetValue)}</span>
           </div>
           <div className="breakdown-row">
-            <span>In-Transit (PO Pipeline):</span>
+            <span>{t('inTransitPipeline')}:</span>
             <span className="breakdown-val">{formatSAR(data.inTransitValue)}</span>
           </div>
           <div className="breakdown-row" style={{ marginTop: '2px', paddingTop: '2px', borderTop: '1px dashed #e8ede6' }}>
-            <span style={{ color: '#b91c1c' }}>Expiry At Risk (30d):</span>
+            <span style={{ color: '#b91c1c' }}>{t('expiryAtRisk')}:</span>
             <span className="breakdown-val alert">{formatSAR(data.expiryRiskValue)} ({data.expiryRiskCount} SKUs)</span>
           </div>
         </div>
@@ -48,7 +50,7 @@ export const MetricsOverview = () => {
       <div className="metric-card">
         <div>
           <div className="metric-card-header">
-            <span className="metric-title">Collections & Cash Handover</span>
+            <span className="metric-title">{t('collectionsCashHandover')}</span>
             <div className="metric-icon-box">
               <Banknote size={15} />
             </div>
@@ -57,16 +59,16 @@ export const MetricsOverview = () => {
         </div>
         <div className="metric-sub-breakdown">
           <div className="breakdown-row">
-            <span>Approved Deposits:</span>
+            <span>{t('approvedDeposits')}:</span>
             <span className="breakdown-val" style={{ color: '#15803d' }}>{formatSAR(data.collectionsApproved)}</span>
           </div>
           <div className="breakdown-row">
-            <span>Pending Review:</span>
+            <span>{t('pendingReview')}:</span>
             <span className="breakdown-val" style={{ color: '#b45309' }}>{formatSAR(data.collectionsPending)}</span>
           </div>
           <div className="breakdown-row">
-            <span>Overdue Balances:</span>
-            <span className="breakdown-val alert">{formatSAR(data.overdueAmount)} ({data.overdueStoresCount} Stores)</span>
+            <span>{t('overdueBalances')}:</span>
+            <span className="breakdown-val alert">{formatSAR(data.overdueAmount)} ({data.overdueStoresCount} {t('storesOnboarded')})</span>
           </div>
         </div>
       </div>
@@ -75,7 +77,7 @@ export const MetricsOverview = () => {
       <div className="metric-card">
         <div>
           <div className="metric-card-header">
-            <span className="metric-title">Today's Revenue & Dispatches</span>
+            <span className="metric-title">{t('todaysRevenueDispatches')}</span>
             <div className="metric-icon-box">
               <ShoppingCart size={15} />
             </div>
@@ -84,15 +86,15 @@ export const MetricsOverview = () => {
         </div>
         <div className="metric-sub-breakdown">
           <div className="breakdown-row">
-            <span>Field Van Sales:</span>
+            <span>{t('fieldVanSales')}:</span>
             <span className="breakdown-val">{formatSAR(data.vehicleSales)}</span>
           </div>
           <div className="breakdown-row">
-            <span>Direct WH Dispatches:</span>
+            <span>{t('directWhDispatches')}:</span>
             <span className="breakdown-val">{formatSAR(data.dispatchSales)}</span>
           </div>
           <div className="breakdown-row">
-            <span>Pending Dispatch Release:</span>
+            <span>{t('pendingDispatchRelease')}:</span>
             <span className="breakdown-val" style={{ color: '#1d4ed8' }}>{data.activeDispatchesPending} Orders</span>
           </div>
         </div>
@@ -102,24 +104,24 @@ export const MetricsOverview = () => {
       <div className="metric-card">
         <div>
           <div className="metric-card-header">
-            <span className="metric-title">Field Workforce & Fleet</span>
+            <span className="metric-title">{t('fieldWorkforceFleet')}</span>
             <div className="metric-icon-box">
               <Truck size={15} />
             </div>
           </div>
-          <div className="metric-value">{data.sellersCheckedIn || 0} / {data.activeSellersCount || 0} Sellers</div>
+          <div className="metric-value">{data.sellersCheckedIn || 0} / {data.activeSellersCount || 0} {t('sellerRole')}</div>
         </div>
         <div className="metric-sub-breakdown">
           <div className="breakdown-row">
-            <span>Active Shifts (Selfie Verified):</span>
+            <span>{t('activeShiftsSelfie')}:</span>
             <span className="breakdown-val" style={{ color: '#15803d' }}>5 Active</span>
           </div>
           <div className="breakdown-row">
-            <span>Cash Limit Breaches:</span>
+            <span>{t('cashLimitBreaches')}:</span>
             <span className="breakdown-val alert">{data.cashCeilingBreaches} Vehicles Exceeded</span>
           </div>
           <div className="breakdown-row">
-            <span>Overdue Vehicle Audits:</span>
+            <span>{t('overdueVehicleAudits')}:</span>
             <span className="breakdown-val alert">1 Van (VH-02)</span>
           </div>
         </div>
