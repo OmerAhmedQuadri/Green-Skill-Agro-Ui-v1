@@ -144,78 +144,80 @@ export const SuperAdminUserGovernance = ({ onOpenCreateAdmin, onShowToast }) => 
 
       {/* Users Table */}
       <div className="panel-card" style={{ padding: '0', overflow: 'hidden' }}>
-        <table className="erp-table" style={{ width: '100%', tableLayout: 'auto' }}>
-          <thead>
-            <tr>
-              <th style={{ width: '105px', whiteSpace: 'nowrap' }}>{t('userId')}</th>
-              <th style={{ minWidth: '160px' }}>{t('userNameContact')}</th>
-              <th style={{ width: '125px', whiteSpace: 'nowrap' }}>{t('roleHierarchy')}</th>
-              <th style={{ width: '160px' }}>{t('assignedHubScope')}</th>
-              <th style={{ width: '100px', textAlign: 'center' }}>{t('status')}</th>
-              <th style={{ textAlign: 'right', width: '190px' }}>{t('governanceActions')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredUsers.map((user) => {
-              const uId = user.userId || user.id;
-              const uName = user.userName || user.name;
-              const uEmail = user.email || `${uName.toLowerCase().replace(/\s+/g, '.')}@greenskillagro.sa`;
-              const uLocation = user.assignedLocation || user.branchId || 'Enterprise';
-              const uStatus = user.status || 'Active';
+        <div className="erp-table-wrapper">
+          <table className="erp-table" style={{ width: '100%', tableLayout: 'auto' }}>
+            <thead>
+              <tr>
+                <th style={{ width: '105px', whiteSpace: 'nowrap' }}>{t('userId')}</th>
+                <th style={{ minWidth: '160px' }}>{t('userNameContact')}</th>
+                <th style={{ width: '125px', whiteSpace: 'nowrap' }}>{t('roleHierarchy')}</th>
+                <th style={{ width: '160px' }}>{t('assignedHubScope')}</th>
+                <th style={{ width: '100px', textAlign: 'center' }}>{t('status')}</th>
+                <th style={{ textAlign: 'right', width: '190px' }}>{t('governanceActions')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredUsers.map((user) => {
+                const uId = user.userId || user.id;
+                const uName = user.userName || user.name;
+                const uEmail = user.email || `${uName.toLowerCase().replace(/\s+/g, '.')}@greenskillagro.sa`;
+                const uLocation = user.assignedLocation || user.branchId || 'Enterprise';
+                const uStatus = user.status || 'Active';
 
-              return (
-                <tr key={uId}>
-                  <td style={{ fontWeight: 700, fontFamily: 'monospace', fontSize: '11.5px', whiteSpace: 'nowrap', width: '105px' }}>{uId}</td>
-                  <td style={{ minWidth: '160px' }}>
-                    <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{uName}</div>
-                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.3' }}>{uEmail}</div>
-                    <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', lineHeight: '1.3' }}>+966 50 000 0000</div>
-                  </td>
-                  <td style={{ width: '125px', whiteSpace: 'nowrap' }}>{getRoleBadge(user.role)}</td>
-                  <td style={{ width: '160px' }}>
-                    <span style={{ fontSize: '12px', fontWeight: 500 }}>{uLocation}</span>
-                  </td>
-                  <td style={{ width: '100px', textAlign: 'center' }}>
-                    <span 
-                      className={`badge ${uStatus === 'Active' ? 'badge-success' : 'badge-danger'}`}
-                      style={{ minWidth: '76px', justifyContent: 'center', textAlign: 'center', display: 'inline-flex' }}
-                    >
-                      {uStatus === 'Active' ? t('active') : uStatus}
-                    </span>
-                  </td>
-                  <td style={{ textAlign: 'right', width: '190px' }}>
-                    {user.role === 'Super Admin' ? (
-                      <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('rootAuthority')}</span>
-                    ) : (
-                      <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px', alignItems: 'center' }}>
-                        <select
-                          className="form-select"
-                          style={{ padding: '3px 6px', fontSize: '11px', width: '95px', flexShrink: 0 }}
-                          value={user.role}
-                          onChange={(e) => handleRoleChange(user, e.target.value)}
-                        >
-                          <option value="Admin">Admin</option>
-                          <option value="Manager">Manager</option>
-                          <option value="Seller">Seller</option>
-                        </select>
+                return (
+                  <tr key={uId}>
+                    <td style={{ fontWeight: 700, fontFamily: 'monospace', fontSize: '11.5px', whiteSpace: 'nowrap', width: '105px' }}>{uId}</td>
+                    <td style={{ minWidth: '160px' }}>
+                      <div style={{ fontWeight: 600, color: 'var(--text-main)' }}>{uName}</div>
+                      <div style={{ fontSize: '11px', color: 'var(--text-muted)', lineHeight: '1.3' }}>{uEmail}</div>
+                      <div style={{ fontSize: '10.5px', color: 'var(--text-muted)', lineHeight: '1.3' }}>+966 50 000 0000</div>
+                    </td>
+                    <td style={{ width: '125px', whiteSpace: 'nowrap' }}>{getRoleBadge(user.role)}</td>
+                    <td style={{ width: '160px' }}>
+                      <span style={{ fontSize: '12px', fontWeight: 500 }}>{uLocation}</span>
+                    </td>
+                    <td style={{ width: '100px', textAlign: 'center' }}>
+                      <span 
+                        className={`badge ${uStatus === 'Active' ? 'badge-success' : 'badge-danger'}`}
+                        style={{ minWidth: '76px', justifyContent: 'center', textAlign: 'center', display: 'inline-flex' }}
+                      >
+                        {uStatus === 'Active' ? t('active') : uStatus}
+                      </span>
+                    </td>
+                    <td style={{ textAlign: 'right', width: '190px' }}>
+                      {user.role === 'Super Admin' ? (
+                        <span style={{ fontSize: '11px', color: 'var(--text-muted)', fontStyle: 'italic' }}>{t('rootAuthority')}</span>
+                      ) : (
+                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '6px', alignItems: 'center' }}>
+                          <select
+                            className="form-select"
+                            style={{ padding: '3px 6px', fontSize: '11px', width: '95px', flexShrink: 0 }}
+                            value={user.role}
+                            onChange={(e) => handleRoleChange(user, e.target.value)}
+                          >
+                            <option value="Admin">Admin</option>
+                            <option value="Manager">Manager</option>
+                            <option value="Seller">Seller</option>
+                          </select>
 
-                        <button 
-                          className={uStatus === 'Active' ? 'btn-secondary' : 'btn-primary'}
-                          style={{ padding: '3px 8px', fontSize: '11px', minWidth: '80px', justifyContent: 'center', flexShrink: 0 }}
-                          onClick={() => handleToggleStatus(user)}
-                          title={uStatus === 'Active' ? 'Suspend Account' : 'Reactivate Account'}
-                        >
-                          {uStatus === 'Active' ? <Lock size={11} /> : <Unlock size={11} />}
-                          <span>{uStatus === 'Active' ? t('suspend') : t('activate')}</span>
-                        </button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+                          <button 
+                            className={uStatus === 'Active' ? 'btn-secondary' : 'btn-primary'}
+                            style={{ padding: '3px 8px', fontSize: '11px', minWidth: '80px', justifyContent: 'center', flexShrink: 0 }}
+                            onClick={() => handleToggleStatus(user)}
+                            title={uStatus === 'Active' ? 'Suspend Account' : 'Reactivate Account'}
+                          >
+                            {uStatus === 'Active' ? <Lock size={11} /> : <Unlock size={11} />}
+                            <span>{uStatus === 'Active' ? t('suspend') : t('activate')}</span>
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

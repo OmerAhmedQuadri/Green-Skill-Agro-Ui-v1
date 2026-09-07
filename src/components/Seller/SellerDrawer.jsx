@@ -7,7 +7,7 @@ import {
   Store, 
   Banknote, 
   Clock, 
-  ArrowRightLeft,
+  LogOut,
   UserCheck,
   AlertTriangle,
   ChevronRight,
@@ -17,9 +17,11 @@ import {
 import { CURRENT_SELLER } from '../../data/mockData';
 import { Logo } from '../Logo';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 
-export const SellerDrawer = ({ isOpen, onClose, activeTab, setActiveTab, onSwitchRole }) => {
+export const SellerDrawer = ({ isOpen, onClose, activeTab, setActiveTab }) => {
   const { t, isRtl } = useLanguage();
+  const { currentUser, logout } = useAuth();
 
   if (!isOpen) return null;
 
@@ -77,7 +79,7 @@ export const SellerDrawer = ({ isOpen, onClose, activeTab, setActiveTab, onSwitc
         <div style={{ padding: '14px 20px', backgroundColor: '#f8faf7', borderBottom: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', gap: '6px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 600, color: 'var(--color-forest-dark)' }}>
             <UserCheck size={16} className="text-green-700" />
-            <span>{CURRENT_SELLER.name}</span>
+            <span>{currentUser?.name || CURRENT_SELLER.name}</span>
           </div>
           <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
             {CURRENT_SELLER.route} &bull; {CURRENT_SELLER.shiftStatus}
@@ -134,18 +136,18 @@ export const SellerDrawer = ({ isOpen, onClose, activeTab, setActiveTab, onSwitc
           })}
         </nav>
 
-        {/* Switch to Manager Role Footer */}
+        {/* Logout Footer */}
         <div style={{ padding: '16px', borderTop: '1px solid var(--border-color)', backgroundColor: '#fafcf9' }}>
           <button 
             className="btn-secondary" 
-            style={{ width: '100%', justifyContent: 'center', padding: '9px', fontSize: '12px' }}
+            style={{ width: '100%', justifyContent: 'center', padding: '9px', fontSize: '12px', backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' }}
             onClick={() => {
               onClose();
-              onSwitchRole();
+              logout();
             }}
           >
-            <ArrowRightLeft size={14} />
-            <span>{t('switchRole')}</span>
+            <LogOut size={14} />
+            <span>{t('logout')}</span>
           </button>
         </div>
       </div>

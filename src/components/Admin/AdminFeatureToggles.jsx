@@ -78,7 +78,7 @@ export const AdminFeatureToggles = ({ onShowToast }) => {
           <span>{language === 'ar' ? 'سياسة إرجاع المنتجات وقواعد إعادة التخزين' : 'Product Return Policy & Restocking Rules'}</span>
         </div>
 
-        <form onSubmit={handleSaveReturnPolicy} className="modal-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+        <form onSubmit={handleSaveReturnPolicy} className="modal-form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '14px' }}>
           <div className="form-group">
             <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{language === 'ar' ? 'الحد الأقصى المسموح به لنافذة الإرجاع (أيام)' : 'Max Allowable Return Window (Days)'}</label>
             <input 

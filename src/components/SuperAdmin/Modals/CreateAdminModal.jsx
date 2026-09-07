@@ -83,7 +83,7 @@ export const CreateAdminModal = ({ onClose, onShowToast }) => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
               <div>
                 <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{language === 'ar' ? 'الاسم الكامل *' : 'Full Name *'}</label>
                 <input 
@@ -108,7 +108,7 @@ export const CreateAdminModal = ({ onClose, onShowToast }) => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
               <div>
                 <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{language === 'ar' ? 'البريد الإلكتروني للشركة *' : 'Corporate Email *'}</label>
                 <input 
@@ -131,7 +131,7 @@ export const CreateAdminModal = ({ onClose, onShowToast }) => {
               </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
               <div>
                 <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{language === 'ar' ? 'المستودع المخصص' : 'Assigned Warehouse'}</label>
                 <input 
@@ -161,7 +161,7 @@ export const CreateAdminModal = ({ onClose, onShowToast }) => {
               <label className="form-label" style={{ fontWeight: 600, fontSize: '12px', marginBottom: '8px', display: 'block' }}>
                 {language === 'ar' ? 'الصلاحيات الممنوحة للأدمن' : 'Granted Admin Permissions'}
               </label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '8px' }}>
                 {['PO Approvals', 'Ceiling Modification', 'User Governance', 'Audit Trail', 'Return Rules', 'Vendor Catalog'].map((perm) => (
                   <label key={perm} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', cursor: 'pointer', padding: '6px 10px', backgroundColor: '#f8faf7', border: '1px solid var(--border-color)', borderRadius: '4px' }}>
                     <input 

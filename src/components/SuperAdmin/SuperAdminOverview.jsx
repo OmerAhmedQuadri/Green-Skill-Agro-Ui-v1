@@ -23,7 +23,7 @@ export const SuperAdminOverview = ({ onOpenCreateAdmin, onNavigateTab }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Top Metric Cards */}
-      <div className="metrics-grid" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+      <div className="metrics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '14px' }}>
         <div className="metric-card">
           <div className="metric-header">
             <span className="metric-title">{language === 'ar' ? 'مستودعات المنشأة' : 'Enterprise Warehouses'}</span>

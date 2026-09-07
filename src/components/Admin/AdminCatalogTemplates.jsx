@@ -132,7 +132,7 @@ export const AdminCatalogTemplates = ({ onShowToast }) => {
                   />
                 </div>
 
-                <div className="modal-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div className="modal-form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
                   <div className="form-group">
                     <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{language === 'ar' ? 'بادئة كود SKU' : 'SKU Code Prefix'}</label>
                     <input 

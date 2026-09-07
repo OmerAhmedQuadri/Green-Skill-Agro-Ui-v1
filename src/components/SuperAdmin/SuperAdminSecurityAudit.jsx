@@ -57,7 +57,7 @@ export const SuperAdminSecurityAudit = ({ onShowToast }) => {
           </span>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '14px', marginTop: '16px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '14px', marginTop: '16px' }}>
           {(killSwitches || []).map((ks) => {
             const isActive = ks.active || ks.enabled || false;
             return (
@@ -110,7 +110,7 @@ export const SuperAdminSecurityAudit = ({ onShowToast }) => {
 
       {/* Enterprise Master Audit Log */}
       <div className="panel-card" style={{ padding: '0', overflow: 'hidden' }}>
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color)', backgroundColor: '#fafcf9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border-color)', backgroundColor: '#fafcf9', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
           <div>
             <h3 style={{ margin: 0, fontSize: '15px', color: 'var(--color-forest-dark)', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
               <FileSpreadsheet size={18} className="text-emerald-800" />
@@ -121,7 +121,7 @@ export const SuperAdminSecurityAudit = ({ onShowToast }) => {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
             <div className="header-search" style={{ width: '220px', margin: 0 }}>
               <Search size={14} className="search-icon-pos" />
               <input 
@@ -146,38 +146,40 @@ export const SuperAdminSecurityAudit = ({ onShowToast }) => {
           </div>
         </div>
 
-        <table className="erp-table">
-          <thead>
-            <tr>
-              <th>{t('logId')}</th>
-              <th>{t('timestamp')}</th>
-              <th>{t('userExec')}</th>
-              <th>{t('actionEvent')}</th>
-              <th>{t('details')}</th>
-              <th>{t('riskTier')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredLogs.map((log) => (
-              <tr key={log.id}>
-                <td style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '12px' }}>{log.id}</td>
-                <td style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>{log.timestamp}</td>
-                <td style={{ fontWeight: 600, color: 'var(--text-main)' }}>{log.user}</td>
-                <td style={{ fontWeight: 600 }}>{log.action}</td>
-                <td style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{log.details}</td>
-                <td>
-                  <span className={`badge ${
-                    log.risk === 'Critical' ? 'badge-danger' : 
-                    log.risk === 'Sensitive' ? 'badge-warning' : 
-                    'badge-success'
-                  }`}>
-                    {log.risk}
-                  </span>
-                </td>
+        <div className="erp-table-wrapper">
+          <table className="erp-table">
+            <thead>
+              <tr>
+                <th>{t('logId')}</th>
+                <th>{t('timestamp')}</th>
+                <th>{t('userExec')}</th>
+                <th>{t('actionEvent')}</th>
+                <th>{t('details')}</th>
+                <th>{t('riskTier')}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filteredLogs.map((log) => (
+                <tr key={log.id}>
+                  <td style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '12px' }}>{log.id}</td>
+                  <td style={{ fontSize: '11.5px', color: 'var(--text-muted)' }}>{log.timestamp}</td>
+                  <td style={{ fontWeight: 600, color: 'var(--text-main)' }}>{log.user}</td>
+                  <td style={{ fontWeight: 600 }}>{log.action}</td>
+                  <td style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{log.details}</td>
+                  <td>
+                    <span className={`badge ${
+                      log.risk === 'Critical' ? 'badge-danger' : 
+                      log.risk === 'Sensitive' ? 'badge-warning' : 
+                      'badge-success'
+                    }`}>
+                      {log.risk}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

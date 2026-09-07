@@ -1,11 +1,18 @@
 import React from 'react';
-import { Search, Building2, ChevronDown, ArrowRightLeft, Menu, Globe } from 'lucide-react';
-import { SYSTEM_INFO } from '../data/mockData';
+import { Search, Building2, Menu, Globe, LogOut, User } from 'lucide-react';
 import { Logo } from './Logo';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 
-export const Header = ({ onSearch, searchQuery, currentRole = 'manager', onSwitchRole, onOpenDrawer, onNavigateProfile }) => {
+export const Header = ({ onSearch, searchQuery, onOpenDrawer, onNavigateProfile }) => {
   const { language, toggleLanguage, t } = useLanguage();
+  const { currentUser, logout } = useAuth();
+
+  const activeUser = currentUser || {
+    name: 'User',
+    role: 'Staff',
+    roleKey: 'manager'
+  };
 
   return (
     <header className="erp-header">
@@ -62,31 +69,7 @@ export const Header = ({ onSearch, searchQuery, currentRole = 'manager', onSwitc
           <span>{t('langName')}</span>
         </button>
 
-        {/* Multi-role Switcher Dropdown */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <ArrowRightLeft size={13} style={{ color: 'rgba(255,255,255,0.7)' }} />
-          <select
-            className="form-select role-switcher-select"
-            style={{ 
-              backgroundColor: 'rgba(255,255,255,0.15)', 
-              borderColor: 'rgba(255,255,255,0.3)', 
-              color: '#ffffff', 
-              fontSize: '12px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              padding: '4px 8px',
-              borderRadius: '4px'
-            }}
-            value={currentRole}
-            onChange={(e) => onSwitchRole(e.target.value)}
-          >
-            <option value="superadmin" style={{ color: '#000' }}>{t('superadminRole')}</option>
-            <option value="admin" style={{ color: '#000' }}>{t('adminRole')}</option>
-            <option value="manager" style={{ color: '#000' }}>{t('managerRole')}</option>
-            <option value="seller" style={{ color: '#000' }}>{t('sellerRole')}</option>
-          </select>
-        </div>
-
+        {/* User Profile Badge */}
         <div 
           className="user-profile-badge cursor-pointer hover:bg-white/20 transition-colors"
           onClick={() => onNavigateProfile && onNavigateProfile()}
@@ -94,18 +77,40 @@ export const Header = ({ onSearch, searchQuery, currentRole = 'manager', onSwitc
           style={{ cursor: 'pointer' }}
         >
           <div className="avatar-initials">
-            {currentRole === 'superadmin' ? 'SU' : (currentRole === 'admin' ? 'AD' : (currentRole === 'manager' ? 'SA' : 'OF'))}
+            {activeUser.name ? activeUser.name.substring(0, 2).toUpperCase() : 'US'}
           </div>
           <div className="user-info">
             <span className="user-name">
-              {currentRole === 'superadmin' ? (language === 'ar' ? 'عبدالعزيز آل سعود' : 'Abdulaziz Al-Saud') : (currentRole === 'admin' ? (language === 'ar' ? 'مدير النظام' : 'Admin System Owner') : (currentRole === 'manager' ? (language === 'ar' ? 'سامي المنصور' : SYSTEM_INFO.currentUser.name) : (language === 'ar' ? 'عمر فاروق' : 'Omar Farooq')))}
+              {activeUser.name}
             </span>
             <span className="user-role">
-              {currentRole === 'superadmin' ? t('superadminTitle') : (currentRole === 'admin' ? t('adminTitle') : (currentRole === 'manager' ? t('managerTitle') : t('sellerTitle')))}
+              {activeUser.role}
             </span>
           </div>
-          <ChevronDown size={14} className="text-white/60" />
         </div>
+
+        {/* Logout Button */}
+        <button
+          onClick={logout}
+          style={{
+            backgroundColor: 'rgba(239, 68, 68, 0.2)',
+            border: '1px solid rgba(248, 113, 113, 0.4)',
+            color: '#ffffff',
+            fontSize: '11.5px',
+            fontWeight: 700,
+            cursor: 'pointer',
+            padding: '5px 10px',
+            borderRadius: '4px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '4px',
+            whiteSpace: 'nowrap'
+          }}
+          title={t('logoutBtn')}
+        >
+          <LogOut size={13} style={{ color: '#f87171' }} />
+          <span>{t('logoutBtn')}</span>
+        </button>
       </div>
     </header>
   );

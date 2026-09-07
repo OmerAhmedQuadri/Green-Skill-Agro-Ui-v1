@@ -50,7 +50,7 @@ export const AdminSystemRules = ({ onShowToast }) => {
           </div>
         )}
 
-        <form onSubmit={handleSave} className="modal-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+        <form onSubmit={handleSave} className="modal-form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
           {/* Card 1: Seller Discount Ceiling */}
           <div className="side-panel-card" style={{ padding: '14px', gap: '10px' }}>
             <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-forest-dark)', display: 'flex', alignItems: 'center', gap: '6px' }}>

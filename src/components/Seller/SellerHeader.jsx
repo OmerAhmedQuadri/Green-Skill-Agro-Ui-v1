@@ -1,12 +1,14 @@
 import React from 'react';
-import { Menu, ArrowLeft, AlertTriangle, ArrowRightLeft, ShoppingCart, Globe } from 'lucide-react';
+import { Menu, ArrowLeft, AlertTriangle, LogOut, ShoppingCart, Globe } from 'lucide-react';
 import { useManagerContext } from '../../context/ManagerContext';
 import { Logo } from '../Logo';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 
-export const SellerHeader = ({ onOpenDrawer, onSwitchRole, onNavigate, activeTab = 'home' }) => {
+export const SellerHeader = ({ onOpenDrawer, onNavigate, activeTab = 'home' }) => {
   const { currentSeller } = useManagerContext();
   const { language, toggleLanguage, t } = useLanguage();
+  const { logout } = useAuth();
   const seller = currentSeller || { assignedVehicle: { id: 'VH-01' }, cashInHand: 14500, cashBreachWarning: true };
 
   const pageTitles = {
@@ -153,12 +155,12 @@ export const SellerHeader = ({ onOpenDrawer, onSwitchRole, onNavigate, activeTab
 
         <button 
           className="btn-secondary" 
-          style={{ backgroundColor: 'rgba(255,255,255,0.15)', borderColor: 'rgba(255,255,255,0.3)', color: '#fff', padding: '5px 8px', fontSize: '11.5px', height: '30px' }}
-          onClick={onSwitchRole}
-          title={t('switchRole')}
+          style={{ backgroundColor: 'rgba(239, 68, 68, 0.2)', borderColor: 'rgba(239, 68, 68, 0.4)', color: '#fff', padding: '5px 8px', fontSize: '11.5px', height: '30px' }}
+          onClick={logout}
+          title={t('logout')}
         >
-          <ArrowRightLeft size={12} />
-          <span className="desktop-only-inline">{t('switchToManager')}</span>
+          <LogOut size={12} />
+          <span className="desktop-only-inline">{t('logout')}</span>
         </button>
       </div>
     </header>

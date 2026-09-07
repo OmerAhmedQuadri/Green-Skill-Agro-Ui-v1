@@ -1,6 +1,12 @@
 import React, { useState } from 'react';
 import { useManagerContext } from './context/ManagerContext';
 import { useLanguage } from './context/LanguageContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
+
+// Auth Components
+import { LoginPage } from './components/Auth/LoginPage';
+import { SignupPage } from './components/Auth/SignupPage';
+import { ForgotPasswordPage } from './components/Auth/ForgotPasswordPage';
 
 // Common Components
 import { Header } from './components/Header';
@@ -69,12 +75,11 @@ import {
   RepeatIcon,
   ClipboardCheck,
   Truck,
-  ArrowRightLeft,
   Crown,
   UserPlus
 } from 'lucide-react';
 
-export function App() {
+function AppContent() {
   const { 
     loading,
     approveWriteOff, 
@@ -92,9 +97,10 @@ export function App() {
   } = useManagerContext();
 
   const { language, t } = useLanguage();
+  const { isAuthenticated, currentUser, authView, setAuthView } = useAuth();
 
-  // Role State: 'superadmin' | 'admin' | 'manager' | 'seller'
-  const [currentRole, setCurrentRole] = useState('superadmin');
+  // Role comes directly from authenticated user profile
+  const currentRole = currentUser?.roleKey || 'superadmin';
 
   // Drawer State
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -216,6 +222,23 @@ export function App() {
     );
   }
 
+  // 1. UNAUTHENTICATED AUTH FLOW (Login / Signup / Forgot Password)
+  if (!isAuthenticated) {
+    if (authView === 'signup') {
+      return <SignupPage onNavigateLogin={() => setAuthView('login')} />;
+    }
+    if (authView === 'forgot-password' || authView === 'forgot') {
+      return <ForgotPasswordPage onNavigateLogin={() => setAuthView('login')} />;
+    }
+    return (
+      <LoginPage 
+        onNavigateSignup={() => setAuthView('signup')} 
+        onNavigateForgot={() => setAuthView('forgot-password')} 
+      />
+    );
+  }
+
+  // 2. AUTHENTICATED ROLE ROUTING
   return (
     <div className="app-container">
       {/* Toast Notification Banner - Centered Top */}
@@ -247,7 +270,7 @@ export function App() {
         </div>
       )}
 
-      {/* RENDER BASED ON CURRENT ACTIVE ROLE */}
+      {/* RENDER BASED ON AUTHENTICATED USER'S ROLE */}
       {currentRole === 'superadmin' ? (
         /* SUPER ADMIN EXECUTIVE GOVERNANCE CONSOLE */
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
@@ -255,7 +278,6 @@ export function App() {
             onSearch={setSearchQuery} 
             searchQuery={searchQuery} 
             currentRole={currentRole}
-            onSwitchRole={setCurrentRole} 
             onOpenDrawer={() => setIsDrawerOpen(true)}
             onNavigateProfile={() => setSuperAdminTab('profile')}
           />
@@ -265,7 +287,6 @@ export function App() {
             onClose={() => setIsDrawerOpen(false)}
             activeTab={superAdminTab}
             setActiveTab={setSuperAdminTab}
-            onSwitchRole={setCurrentRole}
           />
 
           <div className="app-main-layout">
@@ -287,14 +308,6 @@ export function App() {
                 </div>
 
                 <div className="topbar-actions">
-                  <button className="btn-secondary" onClick={() => setCurrentRole('admin')}>
-                    <ArrowRightLeft size={14} />
-                    <span>{t('adminRole')}</span>
-                  </button>
-                  <button className="btn-secondary" onClick={() => setCurrentRole('manager')}>
-                    <ArrowRightLeft size={14} />
-                    <span>{t('managerRole')}</span>
-                  </button>
                   <button 
                     className="btn-primary" 
                     style={{ backgroundColor: '#1b4332', borderColor: '#1b4332' }}
@@ -330,7 +343,6 @@ export function App() {
         <div style={{ display: 'flex', flexDirection: 'column', flex: 1, overflow: 'hidden' }}>
           <SellerHeader 
             onOpenDrawer={() => setIsDrawerOpen(true)}
-            onSwitchRole={() => setCurrentRole('manager')}
             onNavigate={setSellerTab}
             activeTab={sellerTab}
           />
@@ -340,7 +352,6 @@ export function App() {
             onClose={() => setIsDrawerOpen(false)}
             activeTab={sellerTab}
             setActiveTab={setSellerTab}
-            onSwitchRole={() => setCurrentRole('manager')}
           />
           
           <main className="erp-content" style={{ paddingBottom: '32px' }}>
@@ -360,7 +371,6 @@ export function App() {
             onSearch={setSearchQuery} 
             searchQuery={searchQuery} 
             currentRole={currentRole}
-            onSwitchRole={setCurrentRole} 
             onOpenDrawer={() => setIsDrawerOpen(true)}
             onNavigateProfile={() => setAdminTab('profile')}
           />
@@ -370,7 +380,6 @@ export function App() {
             onClose={() => setIsDrawerOpen(false)}
             activeTab={adminTab}
             setActiveTab={setAdminTab}
-            onSwitchRole={setCurrentRole}
           />
 
           <div className="app-main-layout">
@@ -389,17 +398,6 @@ export function App() {
                   <div className="topbar-subtitle">
                     {language === 'ar' ? 'سقوف النظام، دليل الموردين، قوالب الفئات، ومنح الصلاحيات' : 'Company System Ceilings, Vendor Master Directory, Category Templates & Permission Set Grants'}
                   </div>
-                </div>
-
-                <div className="topbar-actions">
-                  <button className="btn-secondary" onClick={() => setCurrentRole('manager')}>
-                    <ArrowRightLeft size={14} />
-                    <span>{t('managerRole')}</span>
-                  </button>
-                  <button className="btn-secondary" onClick={() => setCurrentRole('seller')}>
-                    <ArrowRightLeft size={14} />
-                    <span>{t('sellerRole')}</span>
-                  </button>
                 </div>
               </div>
 
@@ -420,7 +418,6 @@ export function App() {
             onSearch={setSearchQuery} 
             searchQuery={searchQuery} 
             currentRole={currentRole}
-            onSwitchRole={setCurrentRole} 
             onOpenDrawer={() => setIsDrawerOpen(true)}
             onNavigateProfile={() => setActiveTab('profile')}
           />
@@ -430,7 +427,6 @@ export function App() {
             onClose={() => setIsDrawerOpen(false)}
             activeTab={activeTab}
             setActiveTab={setActiveTab}
-            onSwitchRole={() => setCurrentRole('seller')}
             onOpenProductSetup={() => setProductSetupModal(true)}
             onOpenCreatePo={() => setCreatePoModal(true)}
           />
@@ -454,15 +450,6 @@ export function App() {
                 </div>
 
                 <div className="topbar-actions">
-                  <button 
-                    className="btn-secondary" 
-                    style={{ backgroundColor: '#1b4332', color: '#fff', borderColor: '#1b4332' }}
-                    onClick={() => setCurrentRole('seller')}
-                  >
-                    <ArrowRightLeft size={14} />
-                    <span>{t('switchToSeller')}</span>
-                  </button>
-
                   <button className="btn-secondary" onClick={() => setProductSetupModal(true)}>
                     <PackagePlus size={14} />
                     <span>+ {t('setupProductSku')}</span>
@@ -679,6 +666,14 @@ export function App() {
         />
       )}
     </div>
+  );
+}
+
+export function App() {
+  return (
+    <AuthProvider>
+      <AppContent />
+    </AuthProvider>
   );
 }
 

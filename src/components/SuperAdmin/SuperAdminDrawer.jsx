@@ -6,7 +6,7 @@ import {
   GitMerge, 
   Building2, 
   ShieldAlert, 
-  ArrowRightLeft, 
+  LogOut, 
   ShieldCheck, 
   ChevronRight,
   ChevronLeft,
@@ -14,15 +14,16 @@ import {
 } from 'lucide-react';
 import { Logo } from '../Logo';
 import { useLanguage } from '../../context/LanguageContext';
+import { useAuth } from '../../context/AuthContext';
 
 export const SuperAdminDrawer = ({ 
   isOpen, 
   onClose, 
   activeTab, 
-  setActiveTab, 
-  onSwitchRole 
+  setActiveTab
 }) => {
   const { t, isRtl } = useLanguage();
+  const { currentUser, logout } = useAuth();
 
   if (!isOpen) return null;
 
@@ -78,7 +79,7 @@ export const SuperAdminDrawer = ({
         {/* Profile Header */}
         <div style={{ padding: '12px 18px', backgroundColor: '#f8faf7', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-forest-dark)' }}>{t('superadminTitle')}</div>
+            <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-forest-dark)' }}>{currentUser?.name || t('superadminTitle')}</div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t('superadminRole')}</div>
           </div>
           <span className="badge badge-success" style={{ fontSize: '10px' }}>
@@ -134,18 +135,18 @@ export const SuperAdminDrawer = ({
           })}
         </nav>
 
-        {/* Role Switcher Footer */}
+        {/* Logout Footer */}
         <div style={{ padding: '14px 16px', borderTop: '1px solid var(--border-color)', backgroundColor: '#fafcf9', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <button 
             className="btn-secondary" 
-            style={{ width: '100%', justifyContent: 'center', padding: '9px', fontSize: '12px', backgroundColor: '#1b4332', color: '#ffffff', borderColor: '#1b4332' }}
+            style={{ width: '100%', justifyContent: 'center', padding: '9px', fontSize: '12px', backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' }}
             onClick={() => {
               onClose();
-              onSwitchRole('admin');
+              logout();
             }}
           >
-            <ArrowRightLeft size={14} />
-            <span>{t('switchRole')}</span>
+            <LogOut size={14} />
+            <span>{t('logout')}</span>
           </button>
         </div>
       </div>

@@ -10,7 +10,7 @@ import {
   Banknote, 
   Users, 
   TrendingUp, 
-  ArrowRightLeft,
+  LogOut,
   ShieldCheck,
   PackagePlus,
   FilePlus,
@@ -20,18 +20,19 @@ import {
 } from 'lucide-react';
 import { Logo } from './Logo';
 import { useLanguage } from '../context/LanguageContext';
-import { METRICS, SYSTEM_INFO } from '../data/mockData';
+import { METRICS } from '../data/mockData';
+import { useAuth } from '../context/AuthContext';
 
 export const ManagerDrawer = ({ 
   isOpen, 
   onClose, 
   activeTab, 
   setActiveTab, 
-  onSwitchRole,
   onOpenProductSetup,
   onOpenCreatePo
 }) => {
   const { t, isRtl } = useLanguage();
+  const { currentUser, logout } = useAuth();
 
   if (!isOpen) return null;
 
@@ -91,7 +92,7 @@ export const ManagerDrawer = ({
         {/* Manager User Info */}
         <div style={{ padding: '12px 18px', backgroundColor: '#f8faf7', borderBottom: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div>
-            <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-forest-dark)' }}>{SYSTEM_INFO.currentUser.name}</div>
+            <div style={{ fontWeight: 700, fontSize: '13px', color: 'var(--color-forest-dark)' }}>{currentUser?.name || 'Manager'}</div>
             <div style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t('managerRole')} &bull; WH-01</div>
           </div>
           <span className="badge badge-success" style={{ fontSize: '10px' }}>
@@ -101,22 +102,22 @@ export const ManagerDrawer = ({
         </div>
 
         {/* Quick Action Shortcuts */}
-        <div style={{ padding: '12px 16px', borderBottom: '1px solid var(--border-color-light)', display: 'flex', gap: '8px' }}>
+        <div style={{ padding: '10px 16px', borderBottom: '1px solid var(--border-color-light)', display: 'flex', flexDirection: 'column', gap: '8px', boxSizing: 'border-box' }}>
           <button 
             className="btn-sm-primary" 
-            style={{ flex: 1, padding: '7px 8px', fontSize: '11px', justifyContent: 'center' }}
+            style={{ width: '100%', padding: '8px 12px', fontSize: '11.5px', justifyContent: 'flex-start', boxSizing: 'border-box', whiteSpace: 'normal', overflow: 'hidden', textAlign: isRtl ? 'right' : 'left' }}
             onClick={() => { onClose(); onOpenProductSetup(); }}
           >
-            <PackagePlus size={13} />
-            <span>+ {t('setupProductSku')}</span>
+            <PackagePlus size={14} style={{ flexShrink: 0 }} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>+ {t('setupProductSku')}</span>
           </button>
           <button 
             className="btn-sm-secondary" 
-            style={{ flex: 1, padding: '7px 8px', fontSize: '11px', justifyContent: 'center' }}
+            style={{ width: '100%', padding: '8px 12px', fontSize: '11.5px', justifyContent: 'flex-start', boxSizing: 'border-box', whiteSpace: 'normal', overflow: 'hidden', textAlign: isRtl ? 'right' : 'left' }}
             onClick={() => { onClose(); onOpenCreatePo(); }}
           >
-            <FilePlus size={13} />
-            <span>+ {t('draftPurchaseOrder')}</span>
+            <FilePlus size={14} style={{ flexShrink: 0 }} />
+            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>+ {t('draftPurchaseOrder')}</span>
           </button>
         </div>
 
@@ -167,18 +168,18 @@ export const ManagerDrawer = ({
           })}
         </nav>
 
-        {/* Role Switcher Footer */}
+        {/* Logout Footer */}
         <div style={{ padding: '14px 16px', borderTop: '1px solid var(--border-color)', backgroundColor: '#fafcf9' }}>
           <button 
             className="btn-secondary" 
-            style={{ width: '100%', justifyContent: 'center', padding: '9px', fontSize: '12px', backgroundColor: '#1b4332', color: '#ffffff', borderColor: '#1b4332' }}
+            style={{ width: '100%', justifyContent: 'center', padding: '9px', fontSize: '12px', backgroundColor: '#dc2626', color: '#ffffff', borderColor: '#dc2626' }}
             onClick={() => {
               onClose();
-              onSwitchRole();
+              logout();
             }}
           >
-            <ArrowRightLeft size={14} />
-            <span>{t('switchToSeller')}</span>
+            <LogOut size={14} />
+            <span>{t('logout')}</span>
           </button>
         </div>
       </div>

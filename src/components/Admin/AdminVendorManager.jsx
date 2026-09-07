@@ -187,7 +187,7 @@ export const AdminVendorManager = ({ onShowToast }) => {
                   />
                 </div>
 
-                <div className="modal-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div className="modal-form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
                   <div className="form-group">
                     <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{language === 'ar' ? 'الرقم الضريبي / السجل التجاري *' : 'VAT Tax ID / Commercial Reg. *'}</label>
                     <input 
@@ -205,7 +205,7 @@ export const AdminVendorManager = ({ onShowToast }) => {
                     <select 
                       className="form-select"
                       value={newVendor.category}
-                      onChange={(e) => setNewCategory({ ...newVendor, category: e.target.value })}
+                      onChange={(e) => setNewVendor({ ...newVendor, category: e.target.value })}
                     >
                       <option value="Hybrid Seeds">{language === 'ar' ? 'بذور هجينة' : 'Hybrid Seeds'}</option>
                       <option value="Shade Nets & Protective MESH">{language === 'ar' ? 'شبك تظليل ومناخل حماية' : 'Shade Nets & Protective MESH'}</option>
@@ -215,7 +215,7 @@ export const AdminVendorManager = ({ onShowToast }) => {
                   </div>
                 </div>
 
-                <div className="modal-form-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+                <div className="modal-form-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '10px' }}>
                   <div className="form-group">
                     <label className="form-label" style={{ fontWeight: 600, fontSize: '12px' }}>{language === 'ar' ? 'شروط السداد' : 'Payment Terms'}</label>
                     <select 

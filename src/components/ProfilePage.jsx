@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useManagerContext } from '../context/ManagerContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { 
   User, 
   Mail, 
@@ -20,7 +21,8 @@ import {
 } from 'lucide-react';
 
 export function ProfilePage({ currentRole = 'superadmin' }) {
-  const { getUserProfile, updateProfilePhoto, updateUserProfile, resetUserPassword } = useManagerContext();
+  const { getUserProfile, updateUserProfile, resetUserPassword } = useManagerContext();
+  const { currentUser, updateProfilePhoto: updateAuthPhoto } = useAuth();
   const { t, isRtl } = useLanguage();
   
   const [profile, setProfile] = useState(null);
@@ -49,20 +51,32 @@ export function ProfilePage({ currentRole = 'superadmin' }) {
   useEffect(() => {
     let isMounted = true;
     setLoadingProfile(true);
-    getUserProfile(currentRole).then(data => {
-      if (isMounted && data) {
-        setProfile(data);
-        setPhotoPreview(data.avatar || '');
-        setFormData({
-          name: data.name || '',
-          phone: data.phone || '',
-          address: data.address || ''
-        });
-        setLoadingProfile(false);
-      }
-    });
+
+    if (currentUser) {
+      setProfile(currentUser);
+      setPhotoPreview(currentUser.avatar || '');
+      setFormData({
+        name: currentUser.name || '',
+        phone: currentUser.phone || '',
+        address: currentUser.address || ''
+      });
+      setLoadingProfile(false);
+    } else {
+      getUserProfile(currentRole).then(data => {
+        if (isMounted && data) {
+          setProfile(data);
+          setPhotoPreview(data.avatar || '');
+          setFormData({
+            name: data.name || '',
+            phone: data.phone || '',
+            address: data.address || ''
+          });
+          setLoadingProfile(false);
+        }
+      });
+    }
     return () => { isMounted = false; };
-  }, [currentRole]);
+  }, [currentRole, currentUser]);
 
   const showToast = (msg) => {
     setToastMessage(msg);
@@ -78,7 +92,9 @@ export function ProfilePage({ currentRole = 'superadmin' }) {
       reader.onloadend = async () => {
         const base64Photo = reader.result;
         setPhotoPreview(base64Photo);
-        await updateProfilePhoto(currentRole, base64Photo);
+        if (updateAuthPhoto) {
+          updateAuthPhoto(base64Photo);
+        }
         setProfile(prev => prev ? { ...prev, avatar: base64Photo } : prev);
         showToast(t('photoSuccessToast'));
       };
@@ -89,7 +105,9 @@ export function ProfilePage({ currentRole = 'superadmin' }) {
   const handleRemovePhoto = async () => {
     const defaultAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(formData.name || profile?.name || 'User')}&background=0D9488&color=fff&size=250`;
     setPhotoPreview(defaultAvatar);
-    await updateProfilePhoto(currentRole, defaultAvatar);
+    if (updateAuthPhoto) {
+      updateAuthPhoto(defaultAvatar);
+    }
     setProfile(prev => prev ? { ...prev, avatar: defaultAvatar } : prev);
     showToast(t('photoRemovedToast'));
   };

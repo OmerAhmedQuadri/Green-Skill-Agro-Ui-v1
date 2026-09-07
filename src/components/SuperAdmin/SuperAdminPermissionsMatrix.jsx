@@ -63,7 +63,7 @@ export const SuperAdminPermissionsMatrix = () => {
           {t('strictDelegation')}
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px' }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
           <div style={{ backgroundColor: 'rgba(255,255,255,0.1)', padding: '12px', borderRadius: '6px', borderLeft: language === 'ar' ? 'none' : '4px solid #4ade80', borderRight: language === 'ar' ? '4px solid #4ade80' : 'none' }}>
             <div style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.5px', color: '#4ade80', fontWeight: 700 }}>Tier 1 &bull; Executive</div>
             <div style={{ fontSize: '14px', fontWeight: 800, marginTop: '2px', display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -109,7 +109,8 @@ export const SuperAdminPermissionsMatrix = () => {
           </div>
         </div>
 
-        <table className="erp-table">
+        <div className="erp-table-wrapper">
+          <table className="erp-table">
           <thead>
             <tr>
               <th style={{ width: '35%' }}>{language === 'ar' ? 'مجموعة الصلاحيات والإمكانيات' : 'Functional Permission Set'}</th>
@@ -153,5 +154,6 @@ export const SuperAdminPermissionsMatrix = () => {
         </table>
       </div>
     </div>
-  );
+  </div>
+);
 };
