@@ -70,7 +70,7 @@ export function LoginPage() {
           className="auth-lang-btn"
           title={language === 'en' ? 'Switch to Saudi Arabic' : 'التغيير إلى الإنجليزية'}
         >
-          <Globe size={15} className="text-emerald-400" />
+          <Globe size={15} className="text-emerald-600" />
           <span>{t('langName')}</span>
         </button>
       </header>
